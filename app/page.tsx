@@ -1,16 +1,33 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { Smartphone, Users, MessageCircle, TrendingUp } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Smartphone, Users, MessageCircle, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { PageLayout } from '@/components/layouts/page-layout';
 
 export default function HomePage() {
+  const { user, isAuthenticated, isLoading, login } = useAuth();
+
+  const handleStartButton = () => {
+    if (isAuthenticated) {
+      // 이미 로그인된 경우 채팅 페이지로 이동
+      window.location.href = '/chat';
+    } else {
+      // 로그인되지 않은 경우 카카오 로그인 시작
+      login();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 max-w-md mx-auto flex flex-col">
+    <PageLayout variant="gradient" padding="none">
       {/* Header */}
       <div className="text-center pt-20 pb-12">
-        <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
           <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-blue-500 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg">
             <span className="text-3xl font-bold text-white">M</span>
           </div>
@@ -24,8 +41,24 @@ export default function HomePage() {
         >
           가족과 함께하는
           <br />
-          <span className="text-green-600 dark:text-green-400 font-semibold">스마트한 요금제 관리</span>
+          <span className="text-green-600 dark:text-green-400 font-semibold">
+            스마트한 요금제 관리
+          </span>
         </motion.p>
+
+        {/* 로그인 상태 표시 (디버깅용) */}
+        {isAuthenticated && user && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="mt-4 px-4 py-2 bg-green-100 dark:bg-green-800 rounded-lg mx-8"
+          >
+            <p className="text-sm text-green-700 dark:text-green-200">
+              안녕하세요, {user.nickname}님! 👋
+            </p>
+          </motion.div>
+        )}
       </div>
 
       {/* Features */}
@@ -74,19 +107,44 @@ export default function HomePage() {
 
       {/* CTA Button */}
       <div className="px-8 pb-12">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <Link href="/basic-info">
-            <Button className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-4 rounded-2xl text-lg mb-4 shadow-xl">
-              시작하기
-            </Button>
-          </Link>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Button
+            onClick={handleStartButton}
+            disabled={isLoading}
+            className="w-full bg-gradient-to-r from-green-500 to-blue-500 hover:from-gray-600 hover:to-gray-700 text-white font-bold py-4 rounded-2xl text-lg mb-4 shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full mr-2"></div>
+                로딩 중...
+              </div>
+            ) : isAuthenticated ? (
+              '서비스 시작하기'
+            ) : (
+              '카카오로 시작하기'
+            )}
+          </Button>
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-            로그인하면 서비스 약관 및 개인정보처리방침에
-            <br />
-            동의하는 것으로 간주됩니다
+            {isAuthenticated ? (
+              <>
+                서비스를 이용하시면 서비스 약관 및 개인정보처리방침에
+                <br />
+                동의하는 것으로 간주됩니다
+              </>
+            ) : (
+              <>
+                카카오 로그인으로 서비스 약관 및 개인정보처리방침에
+                <br />
+                동의하는 것으로 간주됩니다
+              </>
+            )}
           </p>
         </motion.div>
       </div>
-    </div>
-  )
+    </PageLayout>
+  );
 }
