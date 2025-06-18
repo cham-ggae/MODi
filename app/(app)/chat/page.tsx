@@ -83,6 +83,8 @@ export default function ChatPage() {
     { text: '🏠 가족 스페이스 보기', action: 'family' },
   ];
 
+  const quickSuggestions = ['추천 요금제', '가족 결합', '데이터 무제한', '5G 요금제', '할인 혜택'];
+
   useEffect(() => {
     setMessages([initialBotMessage]);
   }, [familyMode]);
@@ -216,20 +218,10 @@ export default function ChatPage() {
     }
   };
 
-  const handleFamilyNavigation = () => {
-    if (isLoading) return;
-
-    if (hasFamilySpace) {
-      router.push('/family-space');
-    } else {
-      router.push('/family-space-tutorial');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 max-w-md mx-auto flex flex-col">
+    <div className="flex flex-col flex-1 overflow-hidden w-full max-w-md mx-auto bg-white dark:bg-gray-900">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+      <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
         <Link href="/">
           <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
         </Link>
@@ -240,7 +232,7 @@ export default function ChatPage() {
       </div>
 
       {/* Family Mode Toggle */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+      <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <Users className="w-5 h-5 text-green-500" />
@@ -262,162 +254,169 @@ export default function ChatPage() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-        {messages.map((msg) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
-          >
-            {!msg.isUser && (
-              <div className="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-                <span className="text-green-600 dark:text-green-300 text-lg">🤖</span>
-              </div>
-            )}
-            <div
-              className={`max-w-xs px-4 py-3 rounded-2xl ${
-                msg.isUser
-                  ? 'bg-green-500 text-white rounded-br-md'
-                  : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-bl-md'
-              }`}
+      <div className="flex-1 overflow-y-auto pb-28">
+        <div className="p-4 space-y-4">
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
             >
-              <p className="text-sm">{msg.text}</p>
-              <div className="flex items-center justify-between mt-2">
-                <p
-                  className={`text-xs ${
-                    msg.isUser ? 'text-green-100' : 'text-gray-500 dark:text-gray-400'
-                  }`}
-                >
-                  {msg.timestamp}
-                </p>
-                {!msg.isUser && ttsSupported && (
-                  <Button
-                    onClick={() => handleSpeakMessage(msg.text)}
-                    variant="ghost"
-                    size="sm"
-                    className="p-1 h-auto ml-2 hover:bg-gray-100 dark:hover:bg-gray-600"
-                  >
-                    {isSpeaking ? (
-                      <VolumeX className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                    ) : (
-                      <Volume2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                    )}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        ))}
-
-        {/* Quick Action Buttons */}
-        {showInitialButtons && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="space-y-3 mt-6"
-          >
-            {quickButtons.map((button, index) => (
-              <motion.div
-                key={button.action}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.7 + index * 0.1 }}
+              {!msg.isUser && (
+                <div className="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                  <span className="text-green-600 dark:text-green-300 text-lg">🤖</span>
+                </div>
+              )}
+              <div
+                className={`max-w-xs px-4 py-3 rounded-2xl ${
+                  msg.isUser
+                    ? 'bg-green-500 text-white rounded-br-md'
+                    : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-bl-md'
+                }`}
               >
-                <Button
-                  onClick={() => handleQuickButton(button.text, button.action)}
-                  variant="outline"
-                  className="w-full justify-start text-left h-auto py-4 px-4 bg-white dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600 rounded-2xl"
+                <p className="text-sm">{msg.text}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p
+                    className={`text-xs ${
+                      msg.isUser ? 'text-green-100' : 'text-gray-500 dark:text-gray-400'
+                    }`}
+                  >
+                    {msg.timestamp}
+                  </p>
+                  {!msg.isUser && ttsSupported && (
+                    <Button
+                      onClick={() => handleSpeakMessage(msg.text)}
+                      variant="ghost"
+                      size="sm"
+                      className="p-1 h-auto ml-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+                    >
+                      {isSpeaking ? (
+                        <VolumeX className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      ) : (
+                        <Volume2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+
+          {/* Quick Action Buttons - 컨테이너 안에 */}
+          {showInitialButtons && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-4 border border-gray-200 dark:border-gray-700 space-y-3"
+            >
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                추천 메뉴
+              </h3>
+              {quickButtons.map((button, index) => (
+                <motion.div
+                  key={button.action}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.7 + index * 0.1 }}
                 >
-                  <span className="text-sm text-gray-700 dark:text-gray-300">{button.text}</span>
-                </Button>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-
-        {/* Bottom Quick Buttons */}
-        {!showInitialButtons && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            <Button
-              onClick={() => handleQuickButton('추천 요금제', 'recommend')}
-              size="sm"
-              className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-            >
-              추천 요금제
-            </Button>
-            <Button
-              onClick={() => handleQuickButton('가족 결합', 'family')}
-              size="sm"
-              className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-            >
-              가족 결합
-            </Button>
-            <Button
-              onClick={() => handleQuickButton('데이터 무제한', 'data')}
-              size="sm"
-              className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-            >
-              데이터 무제한
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* Message Input */}
-      <div className="p-4 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
-        <div className="flex items-center space-x-3">
-          {sttSupported && (
-            <Button
-              onClick={handleVoiceInput}
-              variant="outline"
-              size="icon"
-              className={`rounded-full w-12 h-12 transition-all duration-200 ${
-                isListening
-                  ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 animate-pulse'
-                  : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </Button>
+                  <Button
+                    onClick={() => handleQuickButton(button.text, button.action)}
+                    variant="outline"
+                    className="w-full justify-start text-left h-auto py-3 px-4 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border-gray-200 dark:border-gray-600 rounded-xl"
+                  >
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{button.text}</span>
+                  </Button>
+                </motion.div>
+              ))}
+            </motion.div>
           )}
-          <Input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-            placeholder={isListening ? '음성을 인식하고 있습니다...' : '메시지를 입력하세요...'}
-            className="flex-1 rounded-full border-gray-300 dark:border-gray-600 px-4 py-3 focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
-            disabled={isListening}
-          />
-          <Button
-            onClick={sendMessage}
-            size="icon"
-            className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
+
+          {/* Bottom Quick Buttons */}
+          {!showInitialButtons && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              <Button
+                onClick={() => handleQuickButton('추천 요금제', 'recommend')}
+                size="sm"
+                className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+              >
+                추천 요금제
+              </Button>
+              <Button
+                onClick={() => handleQuickButton('가족 결합', 'family')}
+                size="sm"
+                className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+              >
+                가족 결합
+              </Button>
+              <Button
+                onClick={() => handleQuickButton('데이터 무제한', 'data')}
+                size="sm"
+                className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
+              >
+                데이터 무제한
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="flex justify-around py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-        <button
-          onClick={handleFamilyNavigation}
-          disabled={isLoading}
-          className="flex flex-col items-center space-y-1 disabled:opacity-50"
-        >
-          <User className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-          <span className="text-xs text-gray-400 dark:text-gray-500">가족</span>
-        </button>
-        <Link href="/chat" className="flex flex-col items-center space-y-1">
-          <MessageSquare className="w-6 h-6 text-green-500" />
-          <span className="text-xs text-green-500">챗봇</span>
-        </Link>
-        <Link href="/my-page" className="flex flex-col items-center space-y-1">
-          <User className="w-6 h-6 text-gray-400 dark:text-gray-500" />
-          <span className="text-xs text-gray-400 dark:text-gray-500">마이페이지</span>
-        </Link>
+      {/* 입력창 */}
+      <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 z-20">
+        {/* Quick Suggestions - 메시지 입력창 바로 위에 고정 */}
+        {!showInitialButtons && (
+          <div className="px-4 py-2">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {quickSuggestions.map((suggestion) => (
+                <Button
+                  key={suggestion}
+                  onClick={() => setMessage(suggestion)}
+                  size="sm"
+                  variant="outline"
+                  className="flex-shrink-0 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full text-xs px-3 py-1"
+                >
+                  {suggestion}
+                </Button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Message Input */}
+        <div className="p-4">
+          <div className="flex items-center space-x-3">
+            {sttSupported && (
+              <Button
+                onClick={handleVoiceInput}
+                variant="outline"
+                size="icon"
+                className={`rounded-full w-12 h-12 transition-all duration-200 ${
+                  isListening
+                    ? 'bg-red-100 dark:bg-red-900 border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 animate-pulse'
+                    : 'border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                }`}
+              >
+                {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </Button>
+            )}
+            <Input
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+              placeholder={isListening ? '음성을 인식하고 있습니다...' : '메시지를 입력하세요...'}
+              className="flex-1 rounded-full border-gray-300 dark:border-gray-600 px-4 py-3 focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+              disabled={isListening}
+            />
+            <Button
+              onClick={sendMessage}
+              size="icon"
+              className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
+            >
+              <Send className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
