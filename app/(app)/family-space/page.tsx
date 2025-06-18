@@ -170,8 +170,8 @@ export default function FamilySpacePage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
+    <div className="h-full flex flex-col">
+      {/* Header - 고정 */}
       <div className="flex items-center justify-between p-4 flex-shrink-0">
         <Link href="/chat">
           <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
@@ -179,7 +179,7 @@ export default function FamilySpacePage() {
         <ThemeToggle />
       </div>
 
-      {/* Plant Section */}
+      {/* Plant Section - 고정 */}
       <div className="text-center py-8 flex-shrink-0">
         <motion.div
           animate={{ y: [0, -10, 0] }}
@@ -237,7 +237,7 @@ export default function FamilySpacePage() {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="px-6 space-y-6 pb-20">
+        <div className="px-6 space-y-6 pb-6">
           {/* Family Section with Invite */}
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">
             <CardContent className="p-6">

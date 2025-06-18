@@ -26,10 +26,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isMyPageActive = pathname === '/my-page';
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 max-w-md mx-auto flex flex-col overflow-hidden">
-      <div className="flex-1 overflow-y-auto flex flex-col">{children}</div>
+    <div className="h-full w-full bg-gray-50 dark:bg-gray-900 max-w-md mx-auto flex flex-col overflow-hidden">
+      {/* 메인 콘텐츠 영역 - 스크롤 가능 */}
+      <div className="flex-1 overflow-y-auto">{children}</div>
 
-      {/* Bottom Navigation */}
+      {/* Bottom Navigation - 고정 */}
       <div className="flex justify-around py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 w-full max-w-md mx-auto">
         <button
           onClick={handleFamilyNavigation}

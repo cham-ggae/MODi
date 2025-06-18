@@ -63,8 +63,8 @@ export default function MyPage() {
   ]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      {/* Header */}
+    <div className="h-full flex flex-col">
+      {/* Header - 고정 */}
       <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">마이페이지</h1>
         <ThemeToggle />
@@ -72,7 +72,7 @@ export default function MyPage() {
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-6 space-y-6 pb-20">
+        <div className="p-6 space-y-6 pb-6">
           {/* User Profile Card */}
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
             <CardContent className="p-6">

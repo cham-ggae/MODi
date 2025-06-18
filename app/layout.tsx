@@ -23,7 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="ko" className="h-full">
       <head>
         {/* 파비콘 및 아이콘 설정 */}
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
@@ -42,14 +42,22 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
 
-      <body className={inter.className}>
+      <body className={`${inter.className} h-full overflow-hidden`}>
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
               <FamilySpaceProvider>
                 <PlantProvider>
-                  <MobileHeader leftAction={<MobileNav />} title="MODi" />
-                  <div className="md:pt-0 pt-16">{children}</div>
+                  {/* 전체 화면을 차지하는 컨테이너 */}
+                  <div className="h-full w-full flex flex-col overflow-hidden">
+                    {/* 헤더는 앱 그룹에만 표시 */}
+                    <div className="md:hidden flex-shrink-0">
+                      <MobileHeader leftAction={<MobileNav />} title="MODi" />
+                    </div>
+
+                    {/* 메인 콘텐츠 영역 - 헤더 제외한 나머지 공간 */}
+                    <div className="flex-1 overflow-hidden md:pt-0 pt-16">{children}</div>
+                  </div>
                 </PlantProvider>
               </FamilySpaceProvider>
             </AuthProvider>
