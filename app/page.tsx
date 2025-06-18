@@ -5,19 +5,43 @@ import { motion } from 'framer-motion';
 import { Smartphone, Users, MessageCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLayout } from '@/components/layouts/page-layout';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading, login } = useAuth();
+  const router = useRouter();
+
+  // 로그인된 사용자가 루트 페이지에 접근하면 자동으로 /chat으로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.push('/chat');
+    }
+  }, [isAuthenticated, isLoading, router]);
 
   const handleStartButton = () => {
     if (isAuthenticated) {
       // 이미 로그인된 경우 채팅 페이지로 이동
-      window.location.href = '/chat';
+      router.push('/chat');
     } else {
       // 로그인되지 않은 경우 카카오 로그인 시작
       login();
     }
   };
+
+  // 로딩 중이거나 인증된 사용자인 경우 로딩 화면 표시
+  if (isLoading || isAuthenticated) {
+    return (
+      <PageLayout variant="gradient" padding="none">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-[#81C784] border-t-transparent animate-spin rounded-full mx-auto mb-4"></div>
+            <p className="text-sm text-gray-600 dark:text-gray-300">페이지로 이동하는 중...</p>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout variant="gradient" padding="none">
@@ -122,26 +146,14 @@ export default function HomePage() {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent animate-spin rounded-full mr-2"></div>
                 로딩 중...
               </div>
-            ) : isAuthenticated ? (
-              '서비스 시작하기'
             ) : (
               '카카오로 시작하기'
             )}
           </Button>
           <p className="text-center text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-            {isAuthenticated ? (
-              <>
-                서비스를 이용하시면 서비스 약관 및 개인정보처리방침에
-                <br />
-                동의하는 것으로 간주됩니다
-              </>
-            ) : (
-              <>
-                카카오 로그인으로 서비스 약관 및 개인정보처리방침에
-                <br />
-                동의하는 것으로 간주됩니다
-              </>
-            )}
+            카카오 로그인으로 서비스 약관 및 개인정보처리방침에
+            <br />
+            동의하는 것으로 간주됩니다
           </p>
         </motion.div>
       </div>
