@@ -24,11 +24,11 @@ export const useAuth = () => {
     setLoading(true);
     try {
       await apiLogout();
-      router.push('/login');
+      router.push('/');
     } catch (error) {
       console.error('로그아웃 실패:', error);
       // 서버 로그아웃 실패해도 로컬 로그아웃은 진행
-      router.push('/login');
+      router.push('/');
     } finally {
       setLoading(false);
     }

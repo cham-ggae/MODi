@@ -1,18 +1,26 @@
-"use client"
+'use client';
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Users, Plus, ArrowRight } from "lucide-react"
-import { useTheme } from "@/contexts/theme-context"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Users, Plus, ArrowRight } from 'lucide-react';
+import { useTheme } from '@/contexts/theme-context';
+import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 export function FamilySpaceRequired() {
-  const { isDarkMode } = useTheme()
+  const { isDarkMode } = useTheme();
 
   return (
-    <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
-      <Card className={`border-2 border-dashed border-[#81C784] ${isDarkMode ? "bg-gray-800" : "bg-[#F1F8E9]"}`}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      <Card
+        className={`border-2 border-dashed border-[#81C784] ${
+          isDarkMode ? 'bg-gray-800' : 'bg-[#F1F8E9]'
+        }`}
+      >
         <CardContent className="p-8 text-center">
           <motion.div
             animate={{
@@ -37,7 +45,7 @@ export function FamilySpaceRequired() {
             transition={{ duration: 0.6, delay: 0.2 }}
           >
             <h2 className="text-2xl font-bold text-[#388E3C] mb-3">가족 스페이스가 필요해요! 🌱</h2>
-            <p className={`${isDarkMode ? "text-gray-300" : "text-[#4E342E]"} mb-6 text-lg`}>
+            <p className={`${isDarkMode ? 'text-gray-300' : 'text-[#4E342E]'} mb-6 text-lg`}>
               새싹 키우기는 가족과 함께하는 특별한 기능입니다
             </p>
           </motion.div>
@@ -56,7 +64,7 @@ export function FamilySpaceRequired() {
               </Button>
             </Link>
 
-            <p className={`text-sm ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+            <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               또는 가족으로부터 받은 초대 코드로 참여하세요
             </p>
           </motion.div>
@@ -94,5 +102,5 @@ export function FamilySpaceRequired() {
         </CardContent>
       </Card>
     </motion.div>
-  )
+  );
 }

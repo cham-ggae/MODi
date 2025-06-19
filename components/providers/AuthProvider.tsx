@@ -70,7 +70,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
  */
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
-  redirectTo: string = '/login'
+  redirectTo: string = '/'
 ) {
   return function AuthenticatedComponent(props: P) {
     const { isAuthenticated, isLoading } = useAuthStore();
@@ -79,7 +79,7 @@ export function withAuth<P extends object>(
     useEffect(() => {
       if (!isLoading && !isAuthenticated) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('🔄 인증되지 않은 사용자 - 로그인 페이지로 리다이렉트');
+          console.log('인증되지 않은 사용자 - 루트 페이지로 리다이렉트');
         }
         router.push(redirectTo);
       }

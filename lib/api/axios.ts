@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_ADDR || "http://localhost:8090";
 /**
  * 토큰 가져오기 함수 - SSR 안전
  */
-export const getAccessToken = (): string | null => {
+const getAccessToken = (): string | null => {
   if (typeof window === "undefined") {
     return null;
   }
@@ -201,7 +201,7 @@ authenticatedApiClient.interceptors.response.use(
         // 로그인 페이지로 리다이렉트 (브라우저 환경에서만)
         if (typeof window !== "undefined") {
           console.log("🔄 로그인 페이지로 리다이렉트");
-          window.location.href = "/login";
+          window.location.href = "/";
         }
 
         return Promise.reject(refreshError);
