@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePlantStatus } from '@/hooks/use-plant-status';
 import { useToast } from '@/hooks/use-toast';
+import { useFamily } from '@/hooks/family';
+import { useAuth } from '@/hooks/useAuth';
 import { FamilySpaceHeader } from '@/components/family-space/FamilySpaceHeader';
 import { PlantSection } from '@/components/family-space/PlantSection';
 import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSection';
@@ -12,66 +14,40 @@ import { MessageCardSection } from '@/components/family-space/MessageCardSection
 import { FamilyMember } from '@/types/family-space.type';
 
 export default function FamilySpacePage() {
-  // ==========================================
-  // 🌍 전역/공유 상태 - 상위 컴포넌트에서 관리
-  // ==========================================
+  const {
+    // 데이터
+    family,
+    dashboard,
+    hasFamily,
+    familyId,
+    memberCount,
+    canInvite,
 
-  // 가족 관련 상태 (여러 컴포넌트에서 공유)
-  const [inviteCode, setInviteCode] = useState('');
-  const [familyName, setFamilyName] = useState('');
+    // 로딩 상태
+    isLoading,
+    isCreating,
+    isJoining,
+    isLeaving,
+    isGeneratingCode,
+
+    // 에러
+    error,
+
+    // 액션
+    createFamily,
+    joinFamily,
+    leaveFamily,
+    generateNewCode,
+
+    // 유틸리티
+    refetch,
+  } = useFamily();
+
   const [copied, setCopied] = useState(false);
-
-  // TODO: API 연동 시 추가할 훅들
-  // const { data: familyData, isLoading } = useFamilyQuery();
-  // const { mutate: generateInviteCode } = useGenerateInviteCodeMutation();
-  // const { mutate: updateFamilyName } = useUpdateFamilyNameMutation();
-
-  // ==========================================
-  // 🔧 개별 기능 - 각 컴포넌트에서 관리 예정
-  // ==========================================
-  // PlantSection: usePlantQuery, useWaterPlantMutation
-  // MessageCardSection: useMessageCardsQuery, useCreateMessageCardMutation
-  // FamilyRecommendationCard: useRecommendationQuery
-
   const { hasPlant, plantType } = usePlantStatus();
   const router = useRouter();
   const { toast } = useToast();
-
-  // 임시 가족 데이터 (추후 API로 대체)
-  const familyData: FamilyMember[] = [
-    {
-      id: 1,
-      name: '엄마',
-      avatar: '🐛',
-      plan: 'LTE 무제한 요금제',
-      hasRecommendation: false,
-    },
-    {
-      id: 2,
-      name: '아빠',
-      avatar: '👤',
-      plan: '5G 프리미엄 요금제',
-      hasRecommendation: true,
-    },
-    {
-      id: 3,
-      name: '나',
-      avatar: '🐞',
-      plan: '5G 슈퍼 요금제',
-      hasRecommendation: false,
-    },
-  ];
-
-  useEffect(() => {
-    const savedInviteCode = localStorage.getItem('familyInviteCode');
-    const savedFamilyName = localStorage.getItem('familyName');
-    if (savedInviteCode) setInviteCode(savedInviteCode);
-    if (savedFamilyName) setFamilyName(savedFamilyName);
-  }, []);
-
-  // ==========================================
-  // 🎯 전역 상태 관련 핸들러들
-  // ==========================================
+  const { user } = useAuth();
 
   const handlePlantAction = () => {
     if (hasPlant) {
@@ -82,10 +58,10 @@ export default function FamilySpacePage() {
   };
 
   const handleCopyCode = async () => {
-    if (!inviteCode) return;
+    if (!family?.family?.inviteCode) return;
 
     try {
-      await navigator.clipboard.writeText(inviteCode);
+      await navigator.clipboard.writeText(family.family.inviteCode);
       setCopied(true);
       toast({
         title: '초대 코드가 복사되었습니다!',
@@ -101,9 +77,9 @@ export default function FamilySpacePage() {
   };
 
   const handleShareKakao = () => {
-    if (!inviteCode || !familyName) return;
+    if (!family?.family?.inviteCode || !family?.family?.name) return;
 
-    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${familyName}\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
+    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${family.family.name}\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
 
     if (navigator.share) {
       navigator
@@ -127,65 +103,163 @@ export default function FamilySpacePage() {
     }
   };
 
-  const generateNewInviteCode = () => {
-    // TODO: API 연동 시 generateInviteCode() 뮤테이션 호출
-    const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-    const defaultFamilyName = '우리 가족';
+  const handleGenerateNewInviteCode = () => {
+    if (!familyId) return;
 
-    setInviteCode(newCode);
-    setFamilyName(defaultFamilyName);
-
-    localStorage.setItem('familyInviteCode', newCode);
-    localStorage.setItem('familyName', defaultFamilyName);
-
-    toast({
-      title: '초대 코드가 생성되었습니다! 🎉',
-      description: '이제 가족들을 초대할 수 있어요.',
-    });
+    generateNewCode(familyId);
   };
 
   const handleSaveFamilyName = (name: string) => {
-    // TODO: API 연동 시 updateFamilyName() 뮤테이션 호출
-    setFamilyName(name);
-    localStorage.setItem('familyName', name);
+    // TODO: 가족명 변경 API 연동 필요
     toast({
       title: '가족명이 변경되었습니다! ✨',
       description: `새로운 가족명: ${name}`,
     });
   };
 
+  // 가족 생성 핸들러 - 사용자 닉네임을 가족명으로 사용
+  const handleCreateFamily = () => {
+    if (!user?.nickname) {
+      toast({
+        title: '사용자 정보를 불러올 수 없습니다',
+        description: '로그인 상태를 확인해주세요.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // 사용자 닉네임을 가족명으로 사용
+    const familyName = user.nickname;
+
+    createFamily({
+      name: familyName,
+      combiType: '투게더 결합',
+    });
+  };
+
+  // ==========================================
+  // 📊 데이터 변환 및 준비
+  // ==========================================
+
+  // API 데이터를 컴포넌트에서 사용할 형태로 변환
+  const transformedMembers: FamilyMember[] =
+    dashboard?.members?.map((member) => ({
+      id: member.uid,
+      name: member.name,
+      avatar: member.profileImage ? '👤' : '🐛', // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
+      profileImage: member.profileImage, // 카카오톡 프로필 이미지
+      plan: member.planSummary || '요금제 없음',
+      hasRecommendation: false, // TODO: 추천 시스템 연동 필요
+    })) || [];
+
+  // ==========================================
+  // 🚨 에러 처리
+  // ==========================================
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: '가족 정보를 불러오는데 실패했습니다',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
+      });
+    }
+  }, [error, toast]);
+
+  // ==========================================
+  // 🎨 로딩 상태 처리
+  // ==========================================
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">가족 정보를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 가족이 없는 경우 처리
+  if (!hasFamily) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🏠</div>
+          <h2 className="text-xl font-bold mb-2">가족 스페이스가 없습니다</h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            가족을 생성하거나 초대 코드로 참여해주세요
+          </p>
+          <div className="space-x-4">
+            <button
+              onClick={handleCreateFamily}
+              disabled={isCreating}
+              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
+            >
+              {isCreating ? '생성 중...' : `${user?.nickname || '내'} 가족 생성하기`}
+            </button>
+          </div>
+          {user?.nickname && (
+            <p className="text-sm text-gray-500 mt-2">
+              가족명: <span className="font-medium">{user.nickname}</span>
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-full flex flex-col">
       {/* Header */}
       <FamilySpaceHeader />
 
-      {/* Plant Section - 독립적으로 API 관리 */}
+      {/* Plant Section */}
       <PlantSection
         hasPlant={hasPlant}
         plantType={plantType || undefined}
         onPlantAction={handlePlantAction}
+        familyNutrial={family?.family?.nutrial}
+        familyDaysAfterCreation={family?.family?.daysAfterCreation}
       />
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 space-y-6 pb-6">
-          {/* Family Section - 공유 데이터 사용 */}
+          {/* Family Section */}
           <FamilyMemberSection
-            members={familyData}
-            inviteCode={inviteCode}
-            familyName={familyName}
-            onGenerateCode={generateNewInviteCode}
+            members={transformedMembers}
+            inviteCode={family?.family?.inviteCode || ''}
+            familyName={family?.family?.name || ''}
+            onGenerateCode={handleGenerateNewInviteCode}
             onCopyCode={handleCopyCode}
             onShareKakao={handleShareKakao}
             onSaveFamilyName={handleSaveFamilyName}
             copied={copied}
+            isLoading={isGeneratingCode}
+            canInvite={canInvite}
+            memberCount={memberCount}
           />
 
-          {/* Recommendation Section - 독립적으로 API 관리 */}
-          <FamilyRecommendationCard />
+          {/* Recommendation Section */}
+          <FamilyRecommendationCard
+            combiType={family?.family?.combiType}
+            memberCount={dashboard?.totalMembers}
+            membersWithPlan={dashboard?.membersWithPlan}
+            onViewRecommendation={() => {
+              // TODO: 추천 페이지로 이동
+              toast({
+                title: '추천 페이지로 이동합니다',
+                description: '곧 구현될 예정입니다.',
+              });
+            }}
+          />
 
-          {/* Message Card Section - 독립적으로 API 관리 */}
-          <MessageCardSection />
+          {/* Message Card Section */}
+          <MessageCardSection
+            familyId={familyId}
+            members={transformedMembers}
+            memberCount={memberCount}
+          />
         </div>
       </div>
     </div>

@@ -19,6 +19,8 @@ interface InviteCodeModalProps {
   onShareKakao: () => void;
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
+  isLoading?: boolean;
+  canInvite?: boolean;
 }
 
 export function InviteCodeModal({
@@ -29,6 +31,8 @@ export function InviteCodeModal({
   onShareKakao,
   onSaveFamilyName,
   copied,
+  isLoading = false,
+  canInvite = true,
 }: InviteCodeModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);

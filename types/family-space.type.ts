@@ -2,6 +2,7 @@ export interface FamilyMember {
   id: number;
   name: string;
   avatar: string;
+  profileImage?: string;
   plan: string;
   hasRecommendation: boolean;
 }

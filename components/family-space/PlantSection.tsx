@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sprout, TreePine, Flower } from 'lucide-react';
+import { Sprout, TreePine, Flower, Leaf } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { PlantType } from '@/types/family-space.type';
@@ -9,9 +9,17 @@ interface PlantSectionProps {
   hasPlant: boolean;
   plantType?: PlantType;
   onPlantAction: () => void;
+  familyNutrial?: number;
+  familyDaysAfterCreation?: number;
 }
 
-export function PlantSection({ hasPlant, plantType, onPlantAction }: PlantSectionProps) {
+export function PlantSection({
+  hasPlant,
+  plantType,
+  onPlantAction,
+  familyNutrial = 0,
+  familyDaysAfterCreation = 0,
+}: PlantSectionProps) {
   return (
     <div className="text-center py-8 flex-shrink-0">
       <motion.div
@@ -50,6 +58,22 @@ export function PlantSection({ hasPlant, plantType, onPlantAction }: PlantSectio
           </>
         )}
       </Button>
+
+      {(familyNutrial > 0 || familyDaysAfterCreation > 0) && (
+        <div className="flex justify-center gap-4 mt-4">
+          {familyNutrial > 0 && (
+            <Badge className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-300">
+              <Leaf className="w-3 h-3 mr-1" />
+              영양제 {familyNutrial}개
+            </Badge>
+          )}
+          {familyDaysAfterCreation > 0 && (
+            <Badge className="bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-300">
+              {familyDaysAfterCreation}일째 함께
+            </Badge>
+          )}
+        </div>
+      )}
 
       {hasPlant && plantType && (
         <div className="text-center mt-3">
