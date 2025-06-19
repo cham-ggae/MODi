@@ -1,5 +1,5 @@
 import { authenticatedApiClient } from "./axios";
-import type { SurveyResultRequest, SurveyResultResponse } from "@/types/survey.type";
+import type { SurveyResultResponse } from "@/types/survey.type";
 
 export const surveyApi = {
   /**

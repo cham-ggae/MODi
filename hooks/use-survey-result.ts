@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { surveyApi } from "@/lib/api/survey-result";
-import type { SurveyResultRequest, SurveyResultResponse } from "@/types/survey.type";
+import type { SurveyResultResponse } from "@/types/survey.type";
 
 // 설문 결과 저장 (POST)
 export function usePostSurveyResult() {
