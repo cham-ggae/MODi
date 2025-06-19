@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { withAuth } from '@/components/providers/AuthProvider';
+import { withTokenGuard } from '@/components/providers/TokenGuard';
 import { submitAdditionalInfo, type AdditionalInfoRequest } from '@/lib/api/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLayout } from '@/components/layouts/page-layout';
@@ -173,4 +173,4 @@ function BasicInfoPage() {
   );
 }
 
-export default withAuth(BasicInfoPage);
+export default withTokenGuard(BasicInfoPage);
