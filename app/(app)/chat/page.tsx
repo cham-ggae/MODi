@@ -1,30 +1,28 @@
 'use client';
 
-import { useState, useEffect, Fragment } from 'react';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import {
-  ArrowLeft,
-  Send,
-  User,
-  MessageSquare,
-  Mic,
-  Volume2,
-  VolumeX,
-  MicOff,
-  Users,
-} from 'lucide-react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useSpeechRecognition, useTextToSpeech } from '@/hooks/use-speech';
-import { useToast } from '@/hooks/use-toast';
-import { useFamilySpaceStatus } from '@/hooks/use-family-space';
-import { ThemeToggle } from '@/components/theme-toggle';
+import { useState, Fragment } from 'react';
 import FamilyModeToggle from '@/components/chat/FamilyModeToggle';
 import ChatMessages from '@/components/chat/ChatMessages';
 import ChatInput from '@/components/chat/ChatInput';
+import { ClientMessage } from '@/types/chat.type';
 
 export default function ChatPage() {
+  const [sessionId] = useState(() =>
+    window.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2)}`
+  )
+  const [messages, setMessages] = useState<ClientMessage[]>([
+    {
+      id: "welcome",
+      content:
+        /*isFamilyMode && familyMembers.length > 0
+          ? `안녕하세요! 가족 맞춤형 요금제 추천 챗봇 MODi입니다. 현재 ${familyMembers.length}명 가족 정보를 바탕으로 도와드릴게요! 💕`
+          : */'"안녕하세요! 개인 맞춤형 요금제 추천을 위한 MODi 챗봇입니다. 당신의 통신 상황에 맞는 최적의 요금제를 찾아드릴게요!"',
+      role: "bot",
+      timestamp: new Date(),
+      sessionId: sessionId
+    },
+  ]);
   // const [message, setMessage] = useState('');
   // const [showInitialButtons, setShowInitialButtons] = useState(true);
   // const [familyMode, setFamilyMode] = useState(false);
@@ -179,8 +177,8 @@ export default function ChatPage() {
   return (
     <Fragment>
       <FamilyModeToggle />
-      <ChatMessages />
-      <ChatInput />
+      <ChatMessages messages={messages} />
+      <ChatInput setMessages={setMessages} sessionId={sessionId} />
     </Fragment>
   );
 }
