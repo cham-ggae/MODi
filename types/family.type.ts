@@ -158,6 +158,12 @@ export interface FamilyDashboardResponse {
   /** 가족 구성원 목록 (요금제 정보 포함) */
   members: FamilyMember[];
 
+  /** 할인 정보 */
+  discount: DiscountInfo;
+
+  /** 식물 정보 */
+  plant: PlantInfo;
+
   /**
    * 총 가족 구성원 수
    * members.length와 동일하지만 편의성을 위해 제공
@@ -381,3 +387,28 @@ export interface UIFamilyMember {
   /** 추천 시스템 사용 여부 */
   hasRecommendation: boolean;
 }
+
+/**
+ * 식물 정보
+ */
+export interface PlantInfo {
+  /** 식물 보유 여부 */
+  hasPlant: boolean;
+
+  /** 식물 레벨 (선택적) */
+  level?: number;
+
+  /** 식물 타입 (선택적) */
+  plantType?: PlantType;
+
+  /** 새 식물 생성 가능 여부 */
+  canCreateNew: boolean;
+
+  /** 생성 차단 사유 (선택적) */
+  createBlockReason?: string;
+}
+
+/**
+ * 식물 타입
+ */
+export type PlantType = 'flower' | 'tree';

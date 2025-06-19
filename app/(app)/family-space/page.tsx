@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { usePlantStatus } from '@/hooks/use-plant-status';
 import { useToast } from '@/hooks/use-toast';
 import { useFamily } from '@/hooks/family';
 import { useAuth } from '@/hooks/useAuth';
@@ -47,16 +46,22 @@ export default function FamilySpacePage() {
   } = useFamily();
 
   const [copied, setCopied] = useState(false);
-  const { hasPlant, plantType } = usePlantStatus();
   const router = useRouter();
   const { toast } = useToast();
   const { user } = useAuth();
 
   const handlePlantAction = () => {
-    if (hasPlant) {
+    const plant = family?.plant;
+    if (plant?.hasPlant) {
       router.push('/plant-game');
-    } else {
+    } else if (plant?.canCreateNew) {
       router.push('/plant-selection');
+    } else {
+      toast({
+        title: '새싹을 만들 수 없습니다',
+        description: plant?.createBlockReason || '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -228,8 +233,7 @@ export default function FamilySpacePage() {
 
       {/* Plant Section */}
       <PlantSection
-        hasPlant={hasPlant}
-        plantType={plantType || undefined}
+        plant={family?.plant || { hasPlant: false, canCreateNew: false }}
         onPlantAction={handlePlantAction}
         familyNutrial={family?.family?.nutrial}
         familyDaysAfterCreation={family?.family?.daysAfterCreation}

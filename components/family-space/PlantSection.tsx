@@ -1,25 +1,31 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sprout, TreePine, Flower, Leaf } from 'lucide-react';
+import { Sprout, TreePine, Flower, Leaf, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import { PlantType } from '@/types/family-space.type';
+import { PlantType } from '@/types/family.type';
 
 interface PlantSectionProps {
-  hasPlant: boolean;
-  plantType?: PlantType;
+  plant: {
+    hasPlant: boolean;
+    level?: number;
+    plantType?: PlantType;
+    canCreateNew: boolean;
+    createBlockReason?: string;
+  };
   onPlantAction: () => void;
   familyNutrial?: number;
   familyDaysAfterCreation?: number;
 }
 
 export function PlantSection({
-  hasPlant,
-  plantType,
+  plant,
   onPlantAction,
   familyNutrial = 0,
   familyDaysAfterCreation = 0,
 }: PlantSectionProps) {
+  const { hasPlant, plantType, canCreateNew, createBlockReason } = plant;
+
   return (
     <div className="text-center py-8 flex-shrink-0">
       <motion.div
@@ -44,7 +50,8 @@ export function PlantSection({
 
       <Button
         onClick={onPlantAction}
-        className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm"
+        disabled={!canCreateNew && !hasPlant}
+        className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {hasPlant ? (
           <>
@@ -58,6 +65,19 @@ export function PlantSection({
           </>
         )}
       </Button>
+
+      {/* 생성 차단 사유 표시 */}
+      {!canCreateNew && !hasPlant && createBlockReason && (
+        <div className="mt-3 text-center">
+          <Badge
+            variant="destructive"
+            className="bg-red-100 dark:bg-red-800 text-red-800 dark:text-red-300"
+          >
+            <AlertCircle className="w-3 h-3 mr-1" />
+            {createBlockReason}
+          </Badge>
+        </div>
+      )}
 
       {(familyNutrial > 0 || familyDaysAfterCreation > 0) && (
         <div className="flex justify-center gap-4 mt-4">
