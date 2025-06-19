@@ -70,7 +70,7 @@ export default function AuthProvider({ children }: AuthProviderProps) {
  */
 export function withAuth<P extends object>(
   Component: React.ComponentType<P>,
-  redirectTo: string = '/login'
+  redirectTo: string = '/'
 ) {
   return function AuthenticatedComponent(props: P) {
     const { isAuthenticated, isLoading } = useAuthStore();

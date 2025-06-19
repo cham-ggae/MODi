@@ -1,7 +1,7 @@
 // src/app/login/callback/kakao/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { handleKakaoCallback } from '@/lib/api/auth';
 
@@ -18,8 +18,12 @@ export default function KakaoCallbackPage() {
   const searchParams = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
+  const hasProcessed = useRef(false);
 
   useEffect(() => {
+    if (hasProcessed.current) return;
+    hasProcessed.current = true;
+
     const processCallback = async () => {
       try {
         // URL에서 인가 코드 추출
@@ -60,10 +64,10 @@ export default function KakaoCallbackPage() {
         setStatus('error');
         setErrorMessage(error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.');
 
-        // 3초 후 로그인 페이지로 이동
+        // 2초 후
         setTimeout(() => {
-          router.push('/login?error=callback_failed');
-        }, 3000);
+          router.push('/');
+        }, 2000);
       }
     };
 
