@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
-import { MessageCardCreator } from '@/components/message-card-creator';
-import { MessageCardList } from '@/components/message-card-list';
+import { MessageCardCreator } from './MessageCardCreator';
+import { MessageCardList } from './MessageCardList';
 import { FamilyMember } from '@/types/family-space.type';
 
 interface MessageCardSectionProps {
