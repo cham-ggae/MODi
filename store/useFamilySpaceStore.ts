@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { FamilyMember } from '@/types/family-space.type';
+import { UIFamilyMember } from '@/types/family.type';
 
 // 가족 스페이스 UI 상태 관리 (실제 필요한 상태만)
 
@@ -9,7 +9,7 @@ interface FamilySpaceUIState {
   animationsEnabled: boolean;
 
   // 선택된 가족 구성원 (페이지 간 공유)
-  selectedMember: FamilyMember | null;
+  selectedMember: UIFamilyMember | null;
 
   // 실시간 상호작용 상태 (페이지 간 공유)
   interactions: {
@@ -24,7 +24,7 @@ interface FamilySpaceUIActions {
   toggleAnimations: () => void;
 
   // 가족 구성원 선택
-  selectMember: (member: FamilyMember | null) => void;
+  selectMember: (member: UIFamilyMember | null) => void;
 
   // 상호작용 액션
   startWatering: (memberId: string) => void;

@@ -11,13 +11,14 @@ import { PlantSection } from '@/components/family-space/PlantSection';
 import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSection';
 import { FamilyRecommendationCard } from '@/components/family-space/FamilyRecommendationCard';
 import { MessageCardSection } from '@/components/family-space/MessageCardSection';
-import { FamilyMember } from '@/types/family-space.type';
+import { UIFamilyMember } from '@/types/family.type';
 
 export default function FamilySpacePage() {
   const {
     // 데이터
     family,
     dashboard,
+    messageCards,
     hasFamily,
     familyId,
     memberCount,
@@ -29,9 +30,11 @@ export default function FamilySpacePage() {
     isJoining,
     isLeaving,
     isGeneratingCode,
+    isLoadingMessageCards,
 
     // 에러
     error,
+    messageCardsError,
 
     // 액션
     createFamily,
@@ -142,7 +145,7 @@ export default function FamilySpacePage() {
   // ==========================================
 
   // API 데이터를 컴포넌트에서 사용할 형태로 변환
-  const transformedMembers: FamilyMember[] =
+  const transformedMembers: UIFamilyMember[] =
     dashboard?.members?.map((member) => ({
       id: member.uid,
       name: member.name,
@@ -164,6 +167,16 @@ export default function FamilySpacePage() {
       });
     }
   }, [error, toast]);
+
+  useEffect(() => {
+    if (messageCardsError) {
+      toast({
+        title: '메시지 카드를 불러오는데 실패했습니다',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
+      });
+    }
+  }, [messageCardsError, toast]);
 
   // ==========================================
   // 🎨 로딩 상태 처리
@@ -259,6 +272,9 @@ export default function FamilySpacePage() {
             familyId={familyId}
             members={transformedMembers}
             memberCount={memberCount}
+            messageCards={messageCards?.cards || []}
+            totalCount={messageCards?.totalCount || 0}
+            isLoading={isLoadingMessageCards}
           />
         </div>
       </div>

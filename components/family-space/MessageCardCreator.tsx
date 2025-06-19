@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -14,73 +13,46 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Heart, Star, Gift, Coffee, Sun } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useMessageCardsManager } from '@/hooks/family';
 
 const cardTemplates = [
-  { id: 'love', icon: Heart, color: 'bg-pink-100 text-pink-600', name: '사랑' },
+  { id: 'heart', icon: Heart, color: 'bg-pink-100 text-pink-600', name: '사랑' },
   { id: 'star', icon: Star, color: 'bg-yellow-100 text-yellow-600', name: '응원' },
   { id: 'gift', icon: Gift, color: 'bg-purple-100 text-purple-600', name: '선물' },
   { id: 'coffee', icon: Coffee, color: 'bg-brown-100 text-brown-600', name: '일상' },
   { id: 'sun', icon: Sun, color: 'bg-orange-100 text-orange-600', name: '기분' },
 ];
 
-interface MessageCard {
-  id: string;
-  title: string;
-  content: string;
-  template: string;
-  author: string;
-  createdAt: string;
-  comments: Comment[];
-}
-
-interface Comment {
-  id: string;
-  author: string;
-  content: string;
-  createdAt: string;
-}
-
 export function MessageCardCreator() {
   const [isOpen, setIsOpen] = useState(false);
-  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [selectedTemplate, setSelectedTemplate] = useState('love');
+  const [selectedTemplate, setSelectedTemplate] = useState('heart');
   const { toast } = useToast();
 
+  const { createMessageCard, isCreating } = useMessageCardsManager();
+
   const handleSubmit = () => {
-    if (!title.trim() || !content.trim()) {
+    if (!content.trim()) {
       toast({
-        title: '모든 필드를 입력해주세요',
+        title: '내용을 입력해주세요',
         variant: 'destructive',
       });
       return;
     }
 
-    const newCard: MessageCard = {
-      id: Date.now().toString(),
-      title: title.trim(),
+    const cardData = {
+      imageType: selectedTemplate,
       content: content.trim(),
-      template: selectedTemplate,
-      author: '나',
-      createdAt: new Date().toLocaleDateString('ko-KR'),
-      comments: [],
     };
 
-    // localStorage에 저장
-    const existingCards = JSON.parse(localStorage.getItem('messageCards') || '[]');
-    existingCards.push(newCard);
-    localStorage.setItem('messageCards', JSON.stringify(existingCards));
-
-    toast({
-      title: '메시지 카드가 생성되었습니다! 💌',
-      description: '가족들이 확인할 수 있어요.',
+    createMessageCard(cardData, {
+      onSuccess: () => {
+        // 폼 초기화
+        setContent('');
+        setSelectedTemplate('heart');
+        setIsOpen(false);
+      },
     });
-
-    // 폼 초기화
-    setTitle('');
-    setContent('');
-    setSelectedTemplate('love');
-    setIsOpen(false);
   };
 
   return (
@@ -123,19 +95,6 @@ export function MessageCardCreator() {
             </div>
           </div>
 
-          {/* 제목 입력 */}
-          <div>
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
-              제목
-            </label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="메시지 카드 제목을 입력하세요"
-              className="dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-
           {/* 내용 입력 */}
           <div>
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
@@ -168,7 +127,7 @@ export function MessageCardCreator() {
                     );
                   })()}
                   <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {title || '제목을 입력하세요'}
+                    {cardTemplates.find((t) => t.id === selectedTemplate)?.name || '템플릿'}
                   </h3>
                 </div>
                 <p className="text-gray-600 dark:text-gray-300 text-sm">
@@ -184,14 +143,16 @@ export function MessageCardCreator() {
               onClick={() => setIsOpen(false)}
               variant="outline"
               className="flex-1 hover:bg-gray-100 dark:hover:bg-gray-600"
+              disabled={isCreating}
             >
               취소
             </Button>
             <Button
               onClick={handleSubmit}
               className="flex-1 bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"
+              disabled={isCreating}
             >
-              생성하기
+              {isCreating ? '생성 중...' : '생성하기'}
             </Button>
           </div>
         </div>

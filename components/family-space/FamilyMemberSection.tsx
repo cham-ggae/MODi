@@ -1,10 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { FamilyMemberCard } from './FamilyMemberCard';
 import { InviteCodeModal } from './InviteCodeModal';
-import { FamilyMember } from '@/types/family-space.type';
+import { UIFamilyMember } from '@/types/family.type';
 
 interface FamilyMemberSectionProps {
-  members: FamilyMember[];
+  members: UIFamilyMember[];
   inviteCode: string;
   familyName: string;
   onGenerateCode: () => void;
@@ -12,9 +12,9 @@ interface FamilyMemberSectionProps {
   onShareKakao: () => void;
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
-  isLoading?: boolean;
-  canInvite?: boolean;
-  memberCount?: number;
+  isLoading: boolean;
+  canInvite: boolean;
+  memberCount: number;
 }
 
 export function FamilyMemberSection({

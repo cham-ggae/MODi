@@ -1,19 +1,27 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { MessageCardCreator } from './MessageCardCreator';
 import { MessageCardList } from './MessageCardList';
-import { FamilyMember } from '@/types/family-space.type';
+import { UIFamilyMember } from '@/types/family.type';
+import { MessageCard } from '@/types/message-card.type';
 
 interface MessageCardSectionProps {
   // 가족 API 연동을 위한 props
   familyId?: number;
-  members?: FamilyMember[];
+  members?: UIFamilyMember[];
   memberCount?: number;
+  // 메시지 카드 관련 props
+  messageCards?: MessageCard[];
+  totalCount?: number;
+  isLoading?: boolean;
 }
 
 export function MessageCardSection({
   familyId,
   members = [],
   memberCount = 0,
+  messageCards = [],
+  totalCount = 0,
+  isLoading = false,
 }: MessageCardSectionProps) {
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">

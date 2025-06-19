@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
-import { FamilyMember } from '@/types/family-space.type';
+import { UIFamilyMember } from '@/types/family.type';
 import Image from 'next/image';
 
 interface FamilyMemberCardProps {
-  member: FamilyMember;
+  member: UIFamilyMember;
 }
 
 export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
