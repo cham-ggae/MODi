@@ -8,49 +8,53 @@
     transform: translateY(0px) rotate(0deg);
   }
   25% {
-    transform: translateY(-12px) rotate(2deg);
+    transform: translateY(-8px) rotate(1deg);
   }
   50% {
-    transform: translateY(-8px) rotate(0deg);
+    transform: translateY(-4px) rotate(0deg);
   }
   75% {
-    transform: translateY(-15px) rotate(-2deg);
+    transform: translateY(-12px) rotate(-1deg);
   }
 }
 
-@keyframes gentle-bounce {
+@keyframes gentle-wiggle {
   0%,
   100% {
-    transform: translateY(0px);
+    transform: rotate(0deg);
   }
-  50% {
-    transform: translateY(-8px);
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
   }
 }
 
-@keyframes wing-flutter {
-  0%,
-  100% {
-    transform: scaleX(1);
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
   }
-  50% {
-    transform: scaleX(1.05);
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 .animate-float {
-  animation: float 3.5s ease-in-out infinite;
+  animation: float 4s ease-in-out infinite;
 }
 
-.animate-gentle-bounce {
-  animation: gentle-bounce 2s ease-in-out infinite;
+.animate-gentle-wiggle {
+  animation: gentle-wiggle 2s ease-in-out infinite;
 }
 
-.animate-wing-flutter {
-  animation: wing-flutter 1.5s ease-in-out infinite;
+.animate-slide-up {
+  animation: slide-up 0.8s ease-out forwards;
 }
 
-/* Custom scrollbar for mobile */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -64,39 +68,52 @@
   border-radius: 2px;
 }
 
-/* Smooth transitions for all elements */
+/* Smooth transitions */
 * {
-  transition-property: transform, opacity;
+  transition-property: transform, opacity, background-color, border-color;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Enhanced floating animation for butterfly */
-.animate-float:hover {
-  animation-duration: 2s;
+/* Enhanced hover effects */
+.hover\:scale-105:hover {
+  transform: scale(1.05);
 }
 
-html,
-body {
-  height: 100%;
-  overflow: hidden;
+/* Bounce animation for arrow */
+@keyframes bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40%,
+  43% {
+    transform: translateY(-8px);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+  90% {
+    transform: translateY(-2px);
+  }
 }
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
-  color: var(--text);
-  background-color: var(--background);
+.animate-bounce {
+  animation: bounce 2s infinite;
 }
 
-/* 스크롤바 스타일링 */
-.overflow-y-auto::-webkit-scrollbar {
+/* Custom scrollbar for mobile */
+::-webkit-scrollbar {
   width: 4px;
 }
 
-.overflow-y-auto::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.overflow-y-auto::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.2);
   border-radius: 2px;
 }
