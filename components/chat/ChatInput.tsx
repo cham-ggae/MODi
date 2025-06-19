@@ -89,13 +89,19 @@ const ChatInput = ({ sessionId, setMessages }: ChatInputProps) => {
             className="flex-1 rounded-full border-gray-300 dark:border-gray-600 px-4 py-3 focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
             disabled={isListening}
           />
-          <Button
-            onClick={handleSend} // 메시지 전송은 page에서 props로 내려받아 처리할 수 있음
-            size="icon"
-            className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
-          >
-            <Send className="w-5 h-5" />
-          </Button>
+          {isStreaming ? (
+            <Button onClick={handleStop} size="icon" className="bg-red-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12">
+              중단
+            </Button>
+          ) :
+            <Button
+              onClick={handleSend} // 메시지 전송은 page에서 props로 내려받아 처리할 수 있음
+              size="icon"
+              className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
+            >
+              <Send className="w-5 h-5" />
+            </Button>
+          }
         </div>
       </div>
     </div>
