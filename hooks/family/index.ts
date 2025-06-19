@@ -59,10 +59,10 @@ export const useFamily = () => {
     messageCardsError: messageCardsQuery.error,
 
     // 액션
-    createFamily: createMutation.mutate,
-    joinFamily: joinMutation.mutate,
-    leaveFamily: leaveMutation.mutate,
-    generateNewCode: generateCodeMutation.mutate,
+    createFamily: (data: any) => createMutation.mutateAsync(data),
+    joinFamily: (data: any) => joinMutation.mutateAsync(data),
+    leaveFamily: () => leaveMutation.mutateAsync(),
+    generateNewCode: (fid: number) => generateCodeMutation.mutateAsync(fid),
 
     // 상태
     hasFamily: !!familyQuery.data,

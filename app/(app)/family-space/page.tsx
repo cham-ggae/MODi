@@ -125,26 +125,6 @@ export default function FamilySpacePage() {
     });
   };
 
-  // 가족 생성 핸들러 - 사용자 닉네임을 가족명으로 사용
-  const handleCreateFamily = () => {
-    if (!user?.nickname) {
-      toast({
-        title: '사용자 정보를 불러올 수 없습니다',
-        description: '로그인 상태를 확인해주세요.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // 사용자 닉네임을 가족명으로 사용
-    const familyName = user.nickname;
-
-    createFamily({
-      name: familyName,
-      combiType: '투게더 결합',
-    });
-  };
-
   // ==========================================
   // 📊 데이터 변환 및 준비
   // ==========================================
@@ -184,6 +164,17 @@ export default function FamilySpacePage() {
   }, [messageCardsError, toast]);
 
   // ==========================================
+  // 🔄 가족 스페이스 리다이렉트 처리
+  // ==========================================
+  useEffect(() => {
+    // 로딩이 완료되고 가족이 없는 경우 family-space-intro로 리다이렉트
+    if (!isLoading && !hasFamily) {
+      console.log('🔄 가족 스페이스가 없어서 family-space-intro로 리다이렉트');
+      router.push('/family-space-tutorial');
+    }
+  }, [isLoading, hasFamily, router]);
+
+  // ==========================================
   // 🎨 로딩 상태 처리
   // ==========================================
   if (isLoading) {
@@ -197,30 +188,13 @@ export default function FamilySpacePage() {
     );
   }
 
-  // 가족이 없는 경우 처리
+  // 가족이 없는 경우 로딩 화면 표시 (리다이렉트 중)
   if (!hasFamily) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">🏠</div>
-          <h2 className="text-xl font-bold mb-2">가족 스페이스가 없습니다</h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            가족을 생성하거나 초대 코드로 참여해주세요
-          </p>
-          <div className="space-x-4">
-            <button
-              onClick={handleCreateFamily}
-              disabled={isCreating}
-              className="bg-green-500 text-white px-6 py-2 rounded-lg hover:bg-green-600 disabled:opacity-50"
-            >
-              {isCreating ? '생성 중...' : `${user?.nickname || '내'} 가족 생성하기`}
-            </button>
-          </div>
-          {user?.nickname && (
-            <p className="text-sm text-gray-500 mt-2">
-              가족명: <span className="font-medium">{user.nickname}</span>
-            </p>
-          )}
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">페이지로 이동하는 중...</p>
         </div>
       </div>
     );
