@@ -90,61 +90,38 @@ export function useSpeechRecognition({ onResult, onError }: UseSpeechProps = {})
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [isSupported, setIsSupported] = useState(true)
+  const [isSupported] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
+  // TTS 사용
   const speak = useCallback(async (text: string, cid?: number) => {
+    if (!cid) {
+      console.error("cid가 필요합니다.")
+      setIsSpeaking(false)
+      return
+    }
     try {
       setIsSpeaking(true)
+      // TTS API 사용
+      const audioBlob = await VoiceService.getTtsAudio(cid)
+      const audioUrl = URL.createObjectURL(audioBlob)
       
-      if (cid) {
-        // 백엔드 TTS API 사용
-        const audioBlob = await VoiceService.getTtsAudio(cid)
-        const audioUrl = URL.createObjectURL(audioBlob)
-        
-        if (audioRef.current) {
-          audioRef.current.pause()
-          URL.revokeObjectURL(audioRef.current.src)
-        }
-        
-        audioRef.current = new Audio(audioUrl)
-        audioRef.current.onended = () => {
-          setIsSpeaking(false)
-          URL.revokeObjectURL(audioUrl)
-        }
-        audioRef.current.onerror = () => {
-          setIsSpeaking(false)
-          URL.revokeObjectURL(audioUrl)
-        }
-        
-        await audioRef.current.play()
-      } else {
-        // 브라우저 기본 TTS 사용 (fallback)
-        if (!("speechSynthesis" in window)) {
-          throw new Error("TTS가 지원되지 않는 브라우저입니다.")
-        }
-
-        window.speechSynthesis.cancel()
-
-        const utterance = new SpeechSynthesisUtterance(text)
-        utterance.lang = "ko-KR"
-        utterance.rate = 0.9
-        utterance.pitch = 1
-
-        utterance.onstart = () => {
-          setIsSpeaking(true)
-        }
-
-        utterance.onend = () => {
-          setIsSpeaking(false)
-        }
-
-        utterance.onerror = () => {
-          setIsSpeaking(false)
-        }
-
-        window.speechSynthesis.speak(utterance)
+      if (audioRef.current) {
+        audioRef.current.pause()
+        URL.revokeObjectURL(audioRef.current.src)
       }
+      
+      audioRef.current = new Audio(audioUrl)
+      audioRef.current.onended = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(audioUrl)
+      }
+      audioRef.current.onerror = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(audioUrl)
+      }
+      
+      await audioRef.current.play()
     } catch (error) {
       console.error("TTS 오류:", error)
       setIsSpeaking(false)
@@ -157,11 +134,6 @@ export function useTextToSpeech() {
       URL.revokeObjectURL(audioRef.current.src)
       audioRef.current = null
     }
-    
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel()
-    }
-    
     setIsSpeaking(false)
   }, [])
 
