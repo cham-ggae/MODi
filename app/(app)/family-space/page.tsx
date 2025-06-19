@@ -1,52 +1,44 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import {
-  ArrowLeft,
-  Sprout,
-  TreePine,
-  Flower,
-  Share2,
-  Copy,
-  Check,
-  Edit2,
-  Save,
-  X,
-  UserPlus,
-} from 'lucide-react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { usePlantStatus } from '@/hooks/use-plant-status';
 import { useRouter } from 'next/navigation';
+import { usePlantStatus } from '@/hooks/use-plant-status';
 import { useToast } from '@/hooks/use-toast';
-import { ThemeToggle } from '@/components/theme-toggle';
-import { MessageCardCreator } from '@/components/message-card-creator';
-import { MessageCardList } from '@/components/message-card-list';
-import Image from 'next/image';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { FamilySpaceHeader } from '@/components/family-space/FamilySpaceHeader';
+import { PlantSection } from '@/components/family-space/PlantSection';
+import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSection';
+import { FamilyRecommendationCard } from '@/components/family-space/FamilyRecommendationCard';
+import { MessageCardSection } from '@/components/family-space/MessageCardSection';
+import { FamilyMember } from '@/types/family-space.type';
 
 export default function FamilySpacePage() {
+  // ==========================================
+  // 🌍 전역/공유 상태 - 상위 컴포넌트에서 관리
+  // ==========================================
+
+  // 가족 관련 상태 (여러 컴포넌트에서 공유)
   const [inviteCode, setInviteCode] = useState('');
   const [familyName, setFamilyName] = useState('');
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [tempFamilyName, setTempFamilyName] = useState('');
   const [copied, setCopied] = useState(false);
-  const [showInviteModal, setShowInviteModal] = useState(false);
-  const { hasPlant, plantType, createPlant } = usePlantStatus();
+
+  // TODO: API 연동 시 추가할 훅들
+  // const { data: familyData, isLoading } = useFamilyQuery();
+  // const { mutate: generateInviteCode } = useGenerateInviteCodeMutation();
+  // const { mutate: updateFamilyName } = useUpdateFamilyNameMutation();
+
+  // ==========================================
+  // 🔧 개별 기능 - 각 컴포넌트에서 관리 예정
+  // ==========================================
+  // PlantSection: usePlantQuery, useWaterPlantMutation
+  // MessageCardSection: useMessageCardsQuery, useCreateMessageCardMutation
+  // FamilyRecommendationCard: useRecommendationQuery
+
+  const { hasPlant, plantType } = usePlantStatus();
   const router = useRouter();
   const { toast } = useToast();
 
-  const familyData = [
+  // 임시 가족 데이터 (추후 API로 대체)
+  const familyData: FamilyMember[] = [
     {
       id: 1,
       name: '엄마',
@@ -76,6 +68,10 @@ export default function FamilySpacePage() {
     if (savedInviteCode) setInviteCode(savedInviteCode);
     if (savedFamilyName) setFamilyName(savedFamilyName);
   }, []);
+
+  // ==========================================
+  // 🎯 전역 상태 관련 핸들러들
+  // ==========================================
 
   const handlePlantAction = () => {
     if (hasPlant) {
@@ -132,6 +128,7 @@ export default function FamilySpacePage() {
   };
 
   const generateNewInviteCode = () => {
+    // TODO: API 연동 시 generateInviteCode() 뮤테이션 호출
     const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
     const defaultFamilyName = '우리 가족';
 
@@ -147,287 +144,48 @@ export default function FamilySpacePage() {
     });
   };
 
-  const handleEditFamilyName = () => {
-    setTempFamilyName(familyName);
-    setIsEditingName(true);
-  };
-
-  const handleSaveFamilyName = () => {
-    if (tempFamilyName.trim()) {
-      setFamilyName(tempFamilyName.trim());
-      localStorage.setItem('familyName', tempFamilyName.trim());
-      setIsEditingName(false);
-      toast({
-        title: '가족명이 변경되었습니다! ✨',
-        description: `새로운 가족명: ${tempFamilyName.trim()}`,
-      });
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setTempFamilyName('');
-    setIsEditingName(false);
+  const handleSaveFamilyName = (name: string) => {
+    // TODO: API 연동 시 updateFamilyName() 뮤테이션 호출
+    setFamilyName(name);
+    localStorage.setItem('familyName', name);
+    toast({
+      title: '가족명이 변경되었습니다! ✨',
+      description: `새로운 가족명: ${name}`,
+    });
   };
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header - 고정 */}
-      <div className="flex items-center justify-between p-4 flex-shrink-0">
-        <Link href="/chat">
-          <ArrowLeft className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-        </Link>
-        <ThemeToggle />
-      </div>
+      {/* Header */}
+      <FamilySpaceHeader />
 
-      {/* Plant Section - 고정 */}
-      <div className="text-center py-8 flex-shrink-0">
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
-          className="mb-6"
-        >
-          {hasPlant && plantType ? (
-            <div className="w-24 h-24 mx-auto">
-              <Image
-                src={plantType === 'flower' ? '/images/flower5.png' : '/images/tree5.png'}
-                alt={plantType === 'flower' ? '꽃' : '나무'}
-                width={96}
-                height={96}
-                className="w-full h-full object-contain drop-shadow-lg"
-              />
-            </div>
-          ) : (
-            <div className="text-6xl">🌱</div>
-          )}
-        </motion.div>
-        <Button
-          onClick={handlePlantAction}
-          className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm"
-        >
-          {hasPlant ? (
-            <>
-              <TreePine className="w-4 h-4 mr-2" />
-              새싹 키우기
-            </>
-          ) : (
-            <>
-              <Sprout className="w-4 h-4 mr-2" />
-              새싹 만들기
-            </>
-          )}
-        </Button>
-
-        {hasPlant && plantType && (
-          <div className="text-center mt-3">
-            <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300">
-              {plantType === 'flower' ? (
-                <>
-                  <Flower className="w-3 h-3 mr-1" />꽃 키우는 중
-                </>
-              ) : (
-                <>
-                  <TreePine className="w-3 h-3 mr-1" />
-                  나무 키우는 중
-                </>
-              )}
-            </Badge>
-          </div>
-        )}
-      </div>
+      {/* Plant Section - 독립적으로 API 관리 */}
+      <PlantSection
+        hasPlant={hasPlant}
+        plantType={plantType || undefined}
+        onPlantAction={handlePlantAction}
+      />
 
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="px-6 space-y-6 pb-6">
-          {/* Family Section with Invite */}
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">우리 가족</h2>
-                <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
-                  <DialogTrigger asChild>
-                    <Button
-                      size="sm"
-                      className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
-                    >
-                      <UserPlus className="w-5 h-5" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
-                    <DialogHeader>
-                      <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      {inviteCode ? (
-                        <>
-                          <div className="text-center">
-                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                              초대 코드
-                            </div>
-                            <Badge className="bg-green-500 text-white text-lg px-4 py-2 font-mono mb-3">
-                              {inviteCode}
-                            </Badge>
+          {/* Family Section - 공유 데이터 사용 */}
+          <FamilyMemberSection
+            members={familyData}
+            inviteCode={inviteCode}
+            familyName={familyName}
+            onGenerateCode={generateNewInviteCode}
+            onCopyCode={handleCopyCode}
+            onShareKakao={handleShareKakao}
+            onSaveFamilyName={handleSaveFamilyName}
+            copied={copied}
+          />
 
-                            <div className="mb-4">
-                              {isEditingName ? (
-                                <div className="flex items-center gap-2 justify-center">
-                                  <Input
-                                    value={tempFamilyName}
-                                    onChange={(e) => setTempFamilyName(e.target.value)}
-                                    className="text-center text-sm max-w-32 dark:bg-gray-600 dark:text-white"
-                                    placeholder="가족명 입력"
-                                    onKeyPress={(e) => {
-                                      if (e.key === 'Enter') {
-                                        handleSaveFamilyName();
-                                      }
-                                    }}
-                                  />
-                                  <Button
-                                    onClick={handleSaveFamilyName}
-                                    size="sm"
-                                    variant="ghost"
-                                    className="p-1"
-                                  >
-                                    <Save className="w-3 h-3 text-green-600 dark:text-green-400" />
-                                  </Button>
-                                  <Button
-                                    onClick={handleCancelEdit}
-                                    size="sm"
-                                    variant="ghost"
-                                    className="p-1"
-                                  >
-                                    <X className="w-3 h-3 text-gray-400" />
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2 justify-center">
-                                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                                    가족명: {familyName || '우리 가족'}
-                                  </span>
-                                  <Button
-                                    onClick={handleEditFamilyName}
-                                    size="sm"
-                                    variant="ghost"
-                                    className="p-1"
-                                  >
-                                    <Edit2 className="w-3 h-3 text-gray-400" />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
+          {/* Recommendation Section - 독립적으로 API 관리 */}
+          <FamilyRecommendationCard />
 
-                            <div className="flex gap-2">
-                              <Button
-                                onClick={handleCopyCode}
-                                variant="outline"
-                                size="sm"
-                                className="flex-1 hover:bg-gray-100 dark:hover:bg-gray-600"
-                              >
-                                {copied ? (
-                                  <Check className="w-4 h-4 mr-2" />
-                                ) : (
-                                  <Copy className="w-4 h-4 mr-2" />
-                                )}
-                                {copied ? '복사됨' : '복사'}
-                              </Button>
-                              <Button
-                                onClick={handleShareKakao}
-                                size="sm"
-                                className="flex-1 bg-yellow-400 hover:bg-gray-400 text-black"
-                              >
-                                <Share2 className="w-4 h-4 mr-2" />
-                                카톡 공유
-                              </Button>
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-center">
-                            <div className="text-4xl mb-3">🔗</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                              아직 초대 코드가 없어요
-                            </div>
-                            <Button
-                              onClick={generateNewInviteCode}
-                              className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"
-                            >
-                              초대 코드 생성하기
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <div className="space-y-4">
-                {familyData.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl">
-                        {member.avatar}
-                      </div>
-                      <div>
-                        <div className="font-medium text-gray-900 dark:text-white">
-                          {member.name}
-                        </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {member.plan}
-                        </div>
-                      </div>
-                    </div>
-                    {member.hasRecommendation && (
-                      <Button
-                        size="sm"
-                        className="bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-full"
-                      >
-                        성향검사
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Recommendation Section */}
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">
-            <CardContent className="p-6">
-              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-                추천 받은 결합 하러 가기
-              </h2>
-              <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="text-2xl">💝</div>
-                  <div>
-                    <div className="font-medium text-gray-900 dark:text-white">가족사랑 요금제</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      결합시 인원당 4천원 추가할인
-                    </div>
-                  </div>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-white dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-500 rounded-full"
-                >
-                  이동
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Message Card Section */}
-          <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-                  메시지 카드 공유
-                </h2>
-                <MessageCardCreator />
-              </div>
-              <MessageCardList />
-            </CardContent>
-          </Card>
+          {/* Message Card Section - 독립적으로 API 관리 */}
+          <MessageCardSection />
         </div>
       </div>
     </div>
