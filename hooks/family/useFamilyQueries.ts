@@ -58,12 +58,13 @@ export const useValidateInviteCode = (inviteCode: string) => {
 /**
  * 가족 메시지 카드 목록 조회 훅
  */
-export const useMessageCards = () => {
+export const useMessageCards = (enabled: boolean = true) => {
   return useQuery({
     queryKey: ['family', 'message-cards'],
     queryFn: familyApi.getMessageCards,
     staleTime: 1 * 60 * 1000, // 1분
     gcTime: 3 * 60 * 1000, // 3분
+    enabled, // 가족이 있을 때만 쿼리 활성화
     retry: (failureCount, error: any) => {
       // 403(권한 없음), 404(없음)는 재시도하지 않음
       const noRetryStatuses = [403, 404];

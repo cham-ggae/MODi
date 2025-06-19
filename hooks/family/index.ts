@@ -27,7 +27,8 @@ export const useFamily = () => {
   // 현재 가족 ID 추출
   const currentFamilyId = familyQuery.data?.family?.fid;
   const dashboardQuery = useFamilyDashboard(currentFamilyId);
-  const messageCardsQuery = useMessageCards();
+  const hasFamily = !!familyQuery.data;
+  const messageCardsQuery = useMessageCards(hasFamily);
 
   const derivedState = useMemo(
     () => ({
