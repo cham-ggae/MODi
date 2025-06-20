@@ -25,10 +25,10 @@ export default function ChatPage() {
     },
   ]);
   const { family } = useFamily();
-
+  const [familyMode, setFamilyMode] = useState(false);
   return (
     <Fragment>
-      {family?.members && family.members.length > 1 && <FamilyModeToggle />}
+      {family?.members && family.members.length > 1 && <FamilyModeToggle familyMode={familyMode} setFamilyMode={setFamilyMode} />}
       <ChatMessages messages={messages} />
       <ChatInput setMessages={setMessages} sessionId={sessionId} />
     </Fragment>

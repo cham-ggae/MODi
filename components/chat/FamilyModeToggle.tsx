@@ -1,10 +1,13 @@
 'use client'
 import { Users } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 
-const FamilyModeToggle = () => {
-  const [familyMode, setFamilyMode] = useState(false);
+interface FamilyModeToggleProps {
+  familyMode: boolean;
+  setFamilyMode: Dispatch<SetStateAction<boolean>>;
+}
+const FamilyModeToggle = ({ familyMode, setFamilyMode }: FamilyModeToggleProps) => {
 
   return (
     <div className="p-4 bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
