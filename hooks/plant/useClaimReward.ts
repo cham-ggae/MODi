@@ -13,6 +13,7 @@ export const useClaimReward = () => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["plant"] });
       console.log("보상 내용:", data);
+      toast.success("보상을 성공적으로 수령했습니다! 🎉");
     },
     onError: (error) => {
       const message = handleplantApiError(error);
@@ -20,13 +21,3 @@ export const useClaimReward = () => {
     },
   });
 };
-
-//컴포넌트에서 보상 모달 등에 전달
-// const { mutate: claimReward } = useClaimReward();
-
-// claimReward(undefined, {
-//   onSuccess: (reward) => {
-//     setRewardData(reward); // 보상 모달 등에 전달
-//     setIsRewardModalOpen(true);
-//   },
-// });
