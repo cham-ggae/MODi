@@ -16,6 +16,15 @@ import type {
   MessageCardDetailResponse,
   ImageType,
   MessageCard,
+  MessageCardCommentsResponse,
+  CreateMessageCardCommentRequest,
+  CreateMessageCardCommentResponse,
+  UpdateMessageCardCommentRequest,
+  UpdateMessageCardCommentResponse,
+  MessageCardComment,
+  CommentCountResponse,
+  MemberCommentStatistics,
+  CardCommentStatistics,
 } from '@/types/message-card.type';
 
 export const familyApi = {
@@ -220,6 +229,155 @@ export const familyApi = {
       await authenticatedApiClient.delete(`/family/cards/${fcid}`);
     } catch (error) {
       console.error('메시지 카드 삭제 실패:', error);
+      throw error;
+    }
+  },
+
+  // ==========================================
+  // 메시지 카드 댓글 관련 API
+  // ==========================================
+
+  /**
+   * 메시지 카드 댓글 목록 조회
+   * GET /family/cards/{fcid}/comments
+   */
+  getMessageCardComments: async (fcid: number): Promise<MessageCardCommentsResponse> => {
+    try {
+      const response = await authenticatedApiClient.get(`/family/cards/${fcid}/comments`);
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 댓글 목록 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 댓글 생성
+   * POST /family/cards/{fcid}/comments
+   */
+  createMessageCardComment: async (
+    fcid: number,
+    data: CreateMessageCardCommentRequest
+  ): Promise<CreateMessageCardCommentResponse> => {
+    try {
+      const response = await authenticatedApiClient.post(`/family/cards/${fcid}/comments`, data);
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 댓글 생성 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 댓글 수정
+   * PUT /family/cards/{fcid}/comments/{commentId}
+   */
+  updateMessageCardComment: async (
+    fcid: number,
+    commentId: number,
+    data: UpdateMessageCardCommentRequest
+  ): Promise<UpdateMessageCardCommentResponse> => {
+    try {
+      const response = await authenticatedApiClient.put(
+        `/family/cards/${fcid}/comments/${commentId}`,
+        data
+      );
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 댓글 수정 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 댓글 삭제
+   * DELETE /family/cards/{fcid}/comments/{commentId}
+   */
+  deleteMessageCardComment: async (fcid: number, commentId: number): Promise<void> => {
+    try {
+      await authenticatedApiClient.delete(`/family/cards/${fcid}/comments/${commentId}`);
+    } catch (error) {
+      console.error('메시지 카드 댓글 삭제 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 댓글 상세 조회
+   * GET /family/cards/{fcid}/comments/{commentId}
+   */
+  getMessageCardCommentDetail: async (
+    fcid: number,
+    commentId: number
+  ): Promise<MessageCardComment> => {
+    try {
+      const response = await authenticatedApiClient.get(
+        `/family/cards/${fcid}/comments/${commentId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 댓글 상세 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 최근 댓글 조회
+   * GET /family/cards/{fcid}/comments/recent?limit={limit}
+   */
+  getRecentMessageCardComments: async (
+    fcid: number,
+    limit: number = 3
+  ): Promise<MessageCardComment[]> => {
+    try {
+      const response = await authenticatedApiClient.get(
+        `/family/cards/${fcid}/comments/recent?limit=${limit}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 최근 댓글 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 메시지 카드 댓글 개수 조회
+   * GET /family/cards/{fcid}/comments/count
+   */
+  getMessageCardCommentCount: async (fcid: number): Promise<CommentCountResponse> => {
+    try {
+      const response = await authenticatedApiClient.get(`/family/cards/${fcid}/comments/count`);
+      return response.data;
+    } catch (error) {
+      console.error('메시지 카드 댓글 개수 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 구성원별 댓글 통계 조회
+   * GET /family/comments/statistics/members
+   */
+  getMemberCommentStatistics: async (): Promise<MemberCommentStatistics[]> => {
+    try {
+      const response = await authenticatedApiClient.get('/family/comments/statistics/members');
+      return response.data;
+    } catch (error) {
+      console.error('구성원별 댓글 통계 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * 카드별 댓글 통계 조회
+   * GET /family/comments/statistics/cards
+   */
+  getCardCommentStatistics: async (): Promise<CardCommentStatistics[]> => {
+    try {
+      const response = await authenticatedApiClient.get('/family/comments/statistics/cards');
+      return response.data;
+    } catch (error) {
+      console.error('카드별 댓글 통계 조회 실패:', error);
       throw error;
     }
   },
