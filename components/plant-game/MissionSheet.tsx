@@ -29,7 +29,7 @@ export function MissionSheet({ missions, onClose }: Props) {
         </div>
         <div className="px-6 pb-8">
           <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-            미션하고 영양제 더 받기
+            미션하고 다양한 혜택 챙겨가요!
           </h2>
           <div className="space-y-4">
             {missions.map((m) => (

@@ -45,9 +45,6 @@ export default function PlantGamePage() {
   // 🎮 게임 상태 관리
   // ==========================================
 
-  /** 선택된 식물 타입 (flower | tree) */
-  const [selectedPlantType, setSelectedPlantType] = useState<"flower" | "tree" | null>(null);
-
   /** 미션 시트 표시 여부 */
   const [showMissions, setShowMissions] = useState(false);
 
@@ -327,15 +324,6 @@ export default function PlantGamePage() {
   // 💾 식물 타입 초기화
   // ==========================================
 
-  /**
-   * 로컬 스토리지에서 식물 타입만 복원
-   * 레벨과 경험치는 서버 데이터 사용
-   */
-  useEffect(() => {
-    const plantType = localStorage.getItem("selectedPlantType") as "flower" | "tree" | null;
-    setSelectedPlantType(plantType);
-  }, []);
-
   // ==========================================
   // 💧 물주기 활동 처리
   // ==========================================
@@ -540,7 +528,7 @@ export default function PlantGamePage() {
       {currentLevel === 5 ? (
         <div className="flex-1 flex items-center justify-center px-0 py-0 h-full w-full">
           <PlantImageDisplay
-            selectedPlantType={selectedPlantType}
+            selectedPlantType={plantStatus?.plantType}
             currentLevel={currentLevel}
             isWatering={isWatering}
             isFeeding={isFeeding}
@@ -549,7 +537,7 @@ export default function PlantGamePage() {
       ) : (
         <div className="flex-1 flex items-center justify-center px-4">
           <PlantImageDisplay
-            selectedPlantType={selectedPlantType}
+            selectedPlantType={plantStatus?.plantType}
             currentLevel={currentLevel}
             isWatering={isWatering}
             isFeeding={isFeeding}
@@ -598,7 +586,7 @@ export default function PlantGamePage() {
           <RewardModal
             isOpen={showRewardModal}
             onClose={() => setShowRewardModal(false)}
-            plantType={selectedPlantType!}
+            plantType={plantStatus?.plantType!}
             rewardData={rewardData || undefined}
           />
         )}
