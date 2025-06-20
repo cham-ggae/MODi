@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronDown, Check, Star, Zap } from "lucide-react";
+import { ChevronDown, Check, Star, Zap, Heart } from "lucide-react";
 
 // Intersection Observer Hook
 function useInViewOnce(threshold = 0.1) {
@@ -30,27 +30,42 @@ export default function SurveyResultPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [benefitRef, benefitHasBeenInView] = useInViewOnce(0.2);
   const [planRef, planInView] = useInViewOnce(0.2);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(1), 500); // 2초 후 혜택 섹션
+    const timer1 = setTimeout(() => setCurrentStep(1), 1000); // 2초 후 혜택 섹션
     const timer2 = setTimeout(() => setCurrentStep(2), 4000); // 4초 후 요금제 섹션
+    const timer3 = setTimeout(() => setIsVisible(true), 1000); // 1초 후 카드 표시
 
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
+      clearTimeout(timer3);
     };
   }, []);
+
+  // 개미형 성격 분석 데이터
+  const antTypeData = {
+    description: `💰 혜택 보다는 실속임. 결합할수록 이득 따짐.
+👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
+🤷‍♂️ 누가 요금제 뭐쓰냐하면 "몰라? 아빠가 알걸" 이라고 함.
+📱 데이터 부족하면 가족한테 달라고 함.`,
+    recommendations: ["U+투게더 결합", "참 쉬운 가족 결합", "가족 할인 혜택"],
+    message: `
+이젠 당신도 한 번쯤 챙겨볼 타이밍.
+가족끼리 요금제 공유하고, 새싹도 같이 키워보세요🌱`,
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       {/* Main Result Section */}
-      <div className="relative p-6 max-w-md mx-auto text-center">
+      <div className="relative p-6 max-w-md mx-auto">
         {/* Animated Ant Characters */}
-        <div className="relative mb-8">
+        <div className="relative mb-8 text-center">
           <div className="animate-float">
             <Image
               src="/images/ant.png"
-              alt="귀여운 개미 가족"
+              alt="ant"
               width={250}
               height={250}
               className="mx-auto drop-shadow-lg"
@@ -70,21 +85,55 @@ export default function SurveyResultPage() {
         </div>
 
         {/* Result Title */}
-        <div className="mb-6">
-          <p className="text-gray-600 text-sm mb-2">온 가족통신비 책임지는 혜택 수호자</p>
-          <h1 className="text-4xl font-bold text-emerald-600 mb-4">개미형</h1>
+        <div className="mb-6 text-center">
+          <p className="text-gray-600 text-sm mb-2">내 가족은... 내가 지킨다...</p>
+          <h1 className="text-4xl font-bold text-emerald-600 mb-4"> 개미형</h1>
           <p className="text-gray-700 text-lg leading-relaxed">
-            <br />
             <span className="font-semibold">두명 절약 시 0000원 할인! (최대 0000원 할인)</span>
             <br />
             복잡한 조건 없이 절약의 가능해요
           </p>
         </div>
 
+        {/* Personality Analysis Section - Highlighter Style */}
+        <div className="space-y-8 my-12 text-left">
+          <div className="relative">
+            <span className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-emerald-100 rounded-lg transform -rotate-1"></span>
+            <div className="relative bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-gray-800 mb-2">✨ 주요 특징</h3>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {antTypeData.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="relative">
+            <span className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-yellow-100 rounded-lg transform rotate-1"></span>
+            <div className="relative bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-gray-800 mb-2">💫 장점</h3>
+              <ul className="text-gray-600 text-sm space-y-1">
+                {antTypeData.recommendations.map((rec, idx) => (
+                  <li key={idx}>• {rec}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="relative">
+            <span className="absolute -top-2 -left-2 -right-2 -bottom-2 bg-sky-100 rounded-lg transform -rotate-2"></span>
+            <div className="relative bg-white p-4 rounded-lg shadow-sm">
+              <h3 className="font-semibold text-gray-800 mb-2">🌟 조언</h3>
+              <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">
+                {antTypeData.message}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* Scroll Down Arrow - appears after 1.5 seconds */}
         <div
-          className={`transition-all duration-100 ${
-            currentStep >= 0.1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          className={`transition-all duration-1000 ease-out text-center ${
+            currentStep >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
           <div className="animate-bounce mb-4">
@@ -97,8 +146,8 @@ export default function SurveyResultPage() {
       {/* Benefits Section */}
       <div
         ref={benefitRef}
-        className={`transition-all duration-1000 ease-out delay-500 ${
-          benefitHasBeenInView ? "opacity-100" : "opacity-0 animate-slide-up"
+        className={`transition-all duration-1000 ease-out delay-1000 ${
+          benefitHasBeenInView ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
         <div className="bg-white/80 backdrop-blur-sm p-6">

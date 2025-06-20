@@ -247,7 +247,7 @@ export default function SurveyPage() {
       const bugId = typeToBugId[result.type] || 1;
       try {
         await postSurveyResult.mutateAsync(bugId);
-        setTimeout(() => router.push("/result"), 500);
+        setTimeout(() => router.push("/survey-result"), 500);
       } catch (e) {
         alert("설문 결과 저장에 실패했습니다. 다시 시도해 주세요.");
       }
