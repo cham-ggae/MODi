@@ -7,7 +7,7 @@ export const useCreatPlant = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: plantApi.createplant,
+    mutationFn: (formData: FormData) => plantApi.createplant(formData), // FormData 사용
     onSuccess: () => {
       toast.success("새싹이 생성되었습니다");
       queryClient.invalidateQueries({ queryKey: ["plant"] });

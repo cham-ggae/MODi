@@ -1,16 +1,14 @@
-import {
-  PlantStatus,
-  CreatePlantRequest,
-  RewardHistory,
-  AddPointRequestDto,
-  ActivityType,
-} from "@/types/plants.type";
+import { PlantStatus, RewardHistory, AddPointRequestDto, ActivityType } from "@/types/plants.type";
 import { authenticatedApiClient } from "./axios";
 
-// 1. 식물 생성 요청하기 (flower ,tree)
+// 1. 식물 생성 요청하기 (flower ,tree) // multipart/form-data
 export const plantApi = {
-  createplant: async (data: CreatePlantRequest): Promise<void> => {
-    await authenticatedApiClient.post("/plants", data);
+  createplant: async (formData: FormData): Promise<void> => {
+    await authenticatedApiClient.post("/plants", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
   // 2. 식물 정보 가져오기 fid 전달해서
   getPlantStatus: async (fid: number): Promise<PlantStatus> => {
@@ -29,7 +27,14 @@ export const plantApi = {
   },
   //5.물주기 포인트 적립: POST /points/add - 각 활동 별 가중치
   addPoint: async (data: AddPointRequestDto): Promise<void> => {
-    await authenticatedApiClient.post("/points/add", data);
+    const formData = new FormData();
+    formData.append("activityType", data.activityType);
+
+    await authenticatedApiClient.post("/points/add", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
   //6. 오늘 물 준 사람들 조회: GET /watered-members/{fid} // 소켓 백업용
   getWaterMembers: async (fid: number): Promise<number[]> => {

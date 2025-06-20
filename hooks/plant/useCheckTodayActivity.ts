@@ -6,6 +6,6 @@ export const useCheckTodayActivity = (type: ActivityType) => {
   return useQuery({
     queryKey: ["activity", "check-today", type],
     queryFn: () => plantApi.checkTodayActivity(type),
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
   });
 };
