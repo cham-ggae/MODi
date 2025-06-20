@@ -23,19 +23,15 @@ export function MobileHeader({
   return (
     <div
       className={cn(
-        'md:hidden fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 border-b border-[#81C784] p-4 flex items-center',
+        'md:hidden bg-white dark:bg-gray-800 border-b border-[#81C784] p-4 flex items-center justify-between',
         className
       )}
     >
-      {showNav && (
-        <div className="flex items-center justify-between w-full">
-          {leftAction}
-          <div className="flex-1 flex items-center justify-center">
-            {title && <h1 className="text-xl font-bold text-[#388E3C]">{title}</h1>}
-          </div>
-          {rightAction}
-        </div>
-      )}
+      <div className="w-10">{leftAction}</div>
+      <div className="flex-1 text-center">
+        {title && <h1 className="text-xl font-bold text-[#388E3C]">{title}</h1>}
+      </div>
+      <div className="w-10">{rightAction}</div>
       {children}
     </div>
   );

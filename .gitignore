@@ -34,5 +34,4 @@ next-env.d.ts
 .next/build-manifest.json
 .next/export-marker.json
 .next/prerender-manifest.json
-.next/routes-manifest.json
-pnpm-lock.yaml      
+.next/routes-manifest.json 

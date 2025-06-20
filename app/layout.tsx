@@ -1,15 +1,18 @@
-import type React from "react";
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/contexts/theme-context";
-import { FamilySpaceProvider } from "@/contexts/family-space-context";
-import { PlantProvider } from "@/contexts/plant-context";
-import AuthProvider from "@/components/providers/AuthProvider";
-import { QueryProvider } from "@/components/providers/QueryProvider";
-import { MobileHeader } from "@/components/layouts/mobile-header";
-import { MobileNav } from "@/components/mobile-nav";
+
+import type React from 'react';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { ThemeProvider } from '@/contexts/theme-context';
+import { FamilySpaceProvider } from '@/contexts/family-space-context';
+import { PlantProvider } from '@/contexts/plant-context-v2';
+import AuthProvider from '@/components/providers/AuthProvider';
+import { QueryProvider } from '@/components/providers/QueryProvider';
+import { MobileHeader } from '@/components/layouts/mobile-header';
+import { MobileNav } from '@/components/mobile-nav';
+import { ResponsiveWrapper } from '@/components/responsive-wrapper';
 import { Toaster } from "@/components/ui/sonner";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="h-full">
+    <html lang="ko" suppressHydrationWarning className="h-screen-dvh bg-gray-100 dark:bg-black">
       <head>
         {/* 파비콘 및 아이콘 설정 */}
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
@@ -43,23 +46,14 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
 
-      <body className={`${inter.className} h-full overflow-hidden`}>
+      <body
+        className={`${inter.className} h-full w-full flex items-center justify-center overflow-hidden`}
+      >
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
               <FamilySpaceProvider>
-                <PlantProvider>
-                  {/* 전체 화면을 차지하는 컨테이너 */}
-                  <div className="h-full w-full flex flex-col overflow-hidden">
-                    {/* 헤더는 앱 그룹에만 표시 */}
-                    <div className="md:hidden flex-shrink-0">
-                      <MobileHeader leftAction={<MobileNav />} title="MODi" />
-                    </div>
-
-                    {/* 메인 콘텐츠 영역 - 헤더 제외한 나머지 공간 */}
-                    <div className="flex-1 overflow-hidden md:pt-0 pt-16">{children}</div>
-                  </div>
-                </PlantProvider>
+                <PlantProvider>{children}</PlantProvider>
               </FamilySpaceProvider>
             </AuthProvider>
           </QueryProvider>
