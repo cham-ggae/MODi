@@ -13,7 +13,7 @@ import { MissionSheet } from "@/components/plant-game/MissionSheet";
 import { Mission } from "@/types/plant-game.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useFamily } from "@/hooks/family";
+import { useFamily, useMessageCardsManager } from "@/hooks/family";
 import {
   useAddPoint,
   useCheckTodayActivity,
@@ -24,11 +24,13 @@ import {
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePlantSocket } from "@/hooks/plant/usePlantSocket";
-import { PlantEventData, RewardHistory } from "@/types/plants.type";
+import { ActivityType, PlantEventData, RewardHistory } from "@/types/plants.type";
 import { useAuth } from "@/hooks/useAuth";
 import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
 import { Sprout, TreePine } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { MessageCardModal } from "@/components/message-card-modal";
 
 /**
  * 새싹 키우기 게임 메인 페이지
@@ -40,6 +42,54 @@ import { Sprout, TreePine } from "lucide-react";
  * - 소켓을 통한 실시간 동기화
  * - 미션 시스템 연동
  */
+
+// 선택형 모달 컴포넌트 (간단 예시)
+function ChoiceModal({
+  title,
+  options,
+  onSubmit,
+  onClose,
+  direction = "row",
+}: {
+  title: string;
+  options: string[];
+  onSubmit: (choice: string) => void;
+  onClose: () => void;
+  direction?: "row" | "col";
+}) {
+  const [selected, setSelected] = useState<string | null>(null);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+      <div className="bg-white rounded-xl p-6 w-80 flex flex-col items-center">
+        <div className="text-lg font-bold mb-4">{title}</div>
+        <div className={`flex mb-4 gap-2 ${direction === "row" ? "flex-row" : "flex-col"}`}>
+          {options.map((opt) => (
+            <button
+              key={opt}
+              className={`px-4 py-2 rounded-lg border ${
+                selected === opt ? "bg-blue-500 text-white" : "bg-gray-100"
+              }`}
+              onClick={() => setSelected(opt)}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+        <button
+          className="w-full bg-blue-500 text-white py-2 rounded-lg disabled:bg-gray-300"
+          disabled={!selected}
+          onClick={() => selected && onSubmit(selected)}
+        >
+          확인
+        </button>
+        <button className="mt-2 text-xs text-gray-400" onClick={onClose}>
+          닫기
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PlantGamePage() {
   // ==========================================
   // 🎮 게임 상태 관리
@@ -105,6 +155,7 @@ export default function PlantGamePage() {
       description: "매일 밤 12시에 다시 시작됩니다.",
       icon: "✏️",
       reward: "출석하기",
+      activityType: "attendance",
     },
     {
       id: 2,
@@ -112,6 +163,7 @@ export default function PlantGamePage() {
       description: "사랑하는 가족에게 작은 한마디",
       icon: "💌",
       reward: "메세지 작성",
+      activityType: "emotion",
     },
     {
       id: 3,
@@ -119,6 +171,7 @@ export default function PlantGamePage() {
       description: "더 많은 할인이 기다릴지도?",
       icon: "🎯",
       reward: "퀴즈 풀기",
+      activityType: "quiz",
     },
     {
       id: 4,
@@ -126,6 +179,7 @@ export default function PlantGamePage() {
       description: "여러 선택지 중 하나를 골라봐!!",
       icon: "🎲",
       reward: "오늘 운 확인",
+      activityType: "lastleaf",
     },
     {
       id: 5,
@@ -133,6 +187,7 @@ export default function PlantGamePage() {
       description: "모든 가족들과 함께",
       icon: "👨‍👩‍👧‍👦",
       reward: "초대하기",
+      activityType: "register",
     },
     {
       id: 6,
@@ -140,6 +195,7 @@ export default function PlantGamePage() {
       description: "나에게 맞는 통신 캐릭터는?",
       icon: "💬",
       reward: "검사하기",
+      activityType: "survey",
     },
   ];
 
@@ -249,17 +305,9 @@ export default function PlantGamePage() {
     fid ?? 0,
     useCallback(
       (event: PlantEventData) => {
-        console.log("식물 활동 이벤트 수신:", event);
-
         // 레벨과 경험치 업데이트 (모든 이벤트에서)
         setCurrentLevel(event.level);
         setCurrentProgress(Math.floor((event.experiencePoint / event.expThreshold) * 100));
-        console.log("소켓에서 레벨/경험치 업데이트:", {
-          level: event.level,
-          experiencePoint: event.experiencePoint,
-          expThreshold: event.expThreshold,
-          progress: Math.floor((event.experiencePoint / event.expThreshold) * 100),
-        });
 
         // 레벨업 토스트 표시
         if (event.isLevelUp) {
@@ -313,7 +361,7 @@ export default function PlantGamePage() {
             break;
 
           default:
-            console.log("알 수 없는 활동 타입:", event.type);
+          // console.log("알 수 없는 활동 타입:", event.type);
         }
       },
       [fid, queryClient, user?.nickname, fetchWateredMembers]
@@ -353,9 +401,6 @@ export default function PlantGamePage() {
           queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
           // 물주기 완료된 구성원 목록 업데이트
           fetchWateredMembers();
-
-          // 서버 상태 확인을 위한 로그
-          console.log("💧 물주기 완료 후 서버 상태 확인 예정");
         },
         onError: (error) => {
           setIsWatering(false);
@@ -408,9 +453,6 @@ export default function PlantGamePage() {
           queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
           // 영양제 개수 업데이트를 위해 쿼리 무효화
           queryClient.invalidateQueries({ queryKey: ["nutrient", "stock"] });
-
-          // 서버 상태 확인을 위한 로그
-          console.log("🌱 영양제 주기 완료 후 서버 상태 확인 예정");
         },
         onError: (error) => {
           setIsFeeding(false);
@@ -428,9 +470,7 @@ export default function PlantGamePage() {
    * 하루 갱신 시 정확한 상태 반영
    */
   useEffect(() => {
-    if (checkAlreadyWatered !== undefined) {
-      setAlreadyWatered(checkAlreadyWatered);
-    }
+    setAlreadyWatered(!!checkAlreadyWatered);
   }, [checkAlreadyWatered]);
 
   /**
@@ -438,9 +478,7 @@ export default function PlantGamePage() {
    * 하루 갱신 시 정확한 상태 반영
    */
   useEffect(() => {
-    if (checkAlreadyFed !== undefined) {
-      setAlreadyFed(checkAlreadyFed);
-    }
+    setAlreadyFed(!!checkAlreadyFed);
   }, [checkAlreadyFed]);
 
   // ==========================================
@@ -482,6 +520,53 @@ export default function PlantGamePage() {
     }
   };
 
+  // ✅ 미션별 오늘 완료 여부 (서버에서 확인)
+  const missionTypes: ActivityType[] = [
+    "attendance",
+    "emotion",
+    "quiz",
+    "lastleaf",
+    "register",
+    "survey",
+  ];
+  const missionQueries = missionTypes.map((type) => useCheckTodayActivity(type, { staleTime: 0 }));
+  const missionCompletedMap = Object.fromEntries(
+    missionTypes.map((type, idx) => [type, missionQueries[idx].data])
+  ) as Partial<Record<ActivityType, boolean>>;
+
+  // 미션 시트가 열릴 때마다 refetch
+  useEffect(() => {
+    if (showMissions) {
+      missionQueries.forEach((q) => q.refetch && q.refetch());
+    }
+  }, [showMissions]);
+
+  const handleMissionClick = (activityType: import("@/types/plants.type").ActivityType) => {
+    if (missionCompletedMap[activityType]) {
+      toast("내일 다시");
+      setShowMissions(false);
+      return;
+    }
+    switch (activityType) {
+      case "quiz":
+        setShowMissions(false);
+        setShowQuizModal(true);
+        break;
+      case "lastleaf":
+        setShowMissions(false);
+        setShowFortuneModal(true);
+        break;
+      default:
+        addPoint({ activityType });
+        setShowMissions(false);
+    }
+  };
+
+  const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showFortuneModal, setShowFortuneModal] = useState(false);
+
+  const router = useRouter();
+
   if (isPlantLoading || !plantStatus) {
     return (
       <div className="flex justify-center items-center h-[100dvh] bg-white text-gray-700 text-lg">
@@ -507,7 +592,7 @@ export default function PlantGamePage() {
 
       {/* 👨‍👩‍👧‍👦 가족 구성원 상태 */}
       {currentLevel !== 5 && (
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 mb-4">
           <FamilyWateringStatus members={transformedMembers} />
         </div>
       )}
@@ -576,7 +661,12 @@ export default function PlantGamePage() {
       {/* 📋 미션 시트 모달 */}
       <AnimatePresence>
         {showMissions && (
-          <MissionSheet missions={missions} onClose={() => setShowMissions(false)} />
+          <MissionSheet
+            missions={missions}
+            onClose={() => setShowMissions(false)}
+            onMissionClick={handleMissionClick}
+            completedMap={missionCompletedMap}
+          />
         )}
       </AnimatePresence>
 
@@ -591,6 +681,34 @@ export default function PlantGamePage() {
           />
         )}
       </AnimatePresence>
+
+      {/* 퀴즈 모달 */}
+      {showQuizModal && (
+        <ChoiceModal
+          title="요금제 퀴즈! 정답을 골라주세요"
+          options={["A. 1GB 요금제", "B. 5GB 요금제", "C. 10GB 요금제", "D. 무제한 요금제"]}
+          direction="col"
+          onSubmit={() => {
+            addPoint({ activityType: "quiz" });
+            setShowQuizModal(false);
+            toast.success("퀴즈 완료! 경험치가 적립되었습니다.");
+          }}
+          onClose={() => setShowQuizModal(false)}
+        />
+      )}
+      {/* 운세 모달 */}
+      {showFortuneModal && (
+        <ChoiceModal
+          title="오늘의 운세! 카드를 골라주세요"
+          options={["🍀", "🌟", "💎", "🎁"]}
+          onSubmit={() => {
+            addPoint({ activityType: "lastleaf" });
+            setShowFortuneModal(false);
+            toast.success("운세 완료! 경험치가 적립되었습니다.");
+          }}
+          onClose={() => setShowFortuneModal(false)}
+        />
+      )}
     </div>
   );
 }

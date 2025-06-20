@@ -12,4 +12,5 @@ export interface Mission {
   description: string;
   icon: string;
   reward: string;
+  activityType: import("./plants.type").ActivityType;
 }

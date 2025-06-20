@@ -14,6 +14,8 @@ import { RewardHistorySection } from "@/components/family-space/RewardHistorySec
 import { UIFamilyMember } from "@/types/family.type";
 import { plantApi } from "@/lib/api/plant";
 import { PlantStatus } from "@/types/plants.type";
+import { MessageCardModal } from "@/components/message-card-modal";
+import { useAddPoint } from "@/hooks/plant";
 
 export default function FamilySpacePage() {
   const {
@@ -53,6 +55,8 @@ export default function FamilySpacePage() {
   const { toast } = useToast();
   const { user } = useAuth();
   const [plantStatus, setPlantStatus] = useState<PlantStatus | null>(null);
+  const { mutate: addPoint } = useAddPoint();
+  const [showMessageModal, setShowMessageModal] = useState(false);
 
   // ==========================================
   // 📅 가족스페이스 생성일 계산
@@ -193,6 +197,12 @@ export default function FamilySpacePage() {
     });
   };
 
+  const handleSendCard = (design: string, message: string) => {
+    // 메시지 저장 로직...
+    addPoint({ activityType: "emotion" });
+    setShowMessageModal(false);
+  };
+
   // ==========================================
   // 📊 데이터 변환 및 준비
   // ==========================================
@@ -328,6 +338,12 @@ export default function FamilySpacePage() {
           <RewardHistorySection />
         </div>
       </div>
+
+      {showMessageModal && (
+        <MessageCardModal onSendCard={handleSendCard}>
+          <></>
+        </MessageCardModal>
+      )}
     </div>
   );
 }
