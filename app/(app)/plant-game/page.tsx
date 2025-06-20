@@ -7,6 +7,8 @@ import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStat
 import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
 import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
 import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
+import { ClaimRewardButton } from "@/components/plant-game/ClaimRewardButton";
+import { RewardModal } from "@/components/plant-game/RewardModal";
 import { MissionSheet } from "@/components/plant-game/MissionSheet";
 import { Mission } from "@/types/plant-game.type";
 import { ArrowLeft } from "lucide-react";
@@ -17,11 +19,12 @@ import {
   useCheckTodayActivity,
   usePlantStatus,
   useNutrientStatus,
+  useClaimReward,
 } from "@/hooks/plant";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePlantSocket } from "@/hooks/plant/usePlantSocket";
-import { PlantEventData } from "@/types/plants.type";
+import { PlantEventData, RewardHistory } from "@/types/plants.type";
 import { useAuth } from "@/hooks/useAuth";
 import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
@@ -47,6 +50,12 @@ export default function PlantGamePage() {
 
   /** 미션 시트 표시 여부 */
   const [showMissions, setShowMissions] = useState(false);
+
+  /** 보상 모달 표시 여부 */
+  const [showRewardModal, setShowRewardModal] = useState(false);
+
+  /** 보상 데이터 */
+  const [rewardData, setRewardData] = useState<RewardHistory | null>(null);
 
   /** 현재 식물 레벨 (소켓에서 받은 데이터) */
   const [currentLevel, setCurrentLevel] = useState(1);
@@ -145,7 +154,11 @@ export default function PlantGamePage() {
   const { familyId: fid, family } = useFamily();
 
   /** 식물 상태 정보 */
-  const { data: plantStatus } = usePlantStatus(fid ?? 0);
+  const {
+    data: plantStatus,
+    isLoading: isPlantLoading,
+    error: plantError,
+  } = usePlantStatus(fid ?? 0);
 
   /** 오늘 물주기 완료 여부 (서버 확인) */
   const { data: checkAlreadyWatered } = useCheckTodayActivity("water");
@@ -159,8 +172,40 @@ export default function PlantGamePage() {
   /** 포인트 적립 API */
   const { mutate: addPoint, isPending } = useAddPoint();
 
+  /** 보상 수령 API */
+  const { mutate: claimReward, isPending: isClaiming } = useClaimReward();
+
   /** 쿼리 클라이언트 (캐시 무효화용) */
   const queryClient = useQueryClient();
+
+  // ✅ 상태 관리
+  const [initialized, setInitialized] = useState(false);
+
+  // ✅ 서버 응답으로 최초 상태 세팅 (소켓보다 우선 적용)
+  useEffect(() => {
+    if (plantStatus && !initialized) {
+      setCurrentLevel(plantStatus.level);
+      setCurrentProgress(
+        Math.floor((plantStatus.experiencePoint / plantStatus.expThreshold) * 100)
+      );
+      setInitialized(true);
+    }
+  }, [plantStatus, initialized]);
+
+  // ✅ 실시간 소켓 업데이트
+  usePlantSocket(
+    fid ?? 0,
+    useCallback(
+      (event: PlantEventData) => {
+        setCurrentLevel(event.level);
+        setCurrentProgress(Math.floor((event.experiencePoint / event.expThreshold) * 100));
+        if (event.isLevelUp) {
+          toast.success("🎉 레벨업! 식물이 성장했습니다!");
+        }
+      },
+      [fid]
+    )
+  );
 
   // ==========================================
   // 📊 가족 구성원 데이터 관리
@@ -427,6 +472,37 @@ export default function PlantGamePage() {
   }));
 
   // ==========================================
+  // 🎁 보상 시스템
+  // ==========================================
+
+  /**
+   * 보상 수령 버튼 클릭 핸들러
+   */
+  const handleClaimRewardClick = () => {
+    if (currentLevel === 5) {
+      // useClaimReward 호출
+      claimReward(undefined, {
+        onSuccess: (rewardData) => {
+          setRewardData(rewardData);
+          setShowRewardModal(true);
+          // 토스트는 useClaimReward 훅에서 처리되므로 여기서는 제거
+        },
+        onError: (error) => {
+          // 에러 토스트는 useClaimReward 훅에서 처리됨
+        },
+      });
+    }
+  };
+
+  if (isPlantLoading || !plantStatus) {
+    return (
+      <div className="flex justify-center items-center h-[100dvh] bg-white text-gray-700 text-lg">
+        🌱 식물 상태 불러오는 중...
+      </div>
+    );
+  }
+
+  // ==========================================
   // 🎮 UI 렌더링
   // ==========================================
 
@@ -468,23 +544,48 @@ export default function PlantGamePage() {
 
       {/* 🎮 게임 컨트롤 영역 */}
       <div className="flex-shrink-0 p-3">
-        <PlantProgressBar level={currentLevel} progress={currentProgress} />
-        <PlantActionButtons
-          onWater={handleWatering}
-          onFeed={handleFeeding}
-          nutrientCount={nutrientCount}
-          disabled={isPending}
-          checkingWater={isWatering}
-          alreadyWatered={alreadyWatered}
-          checkingFeed={isFeeding}
-          alreadyFed={alreadyFed}
-        />
+        {currentLevel === 5 ? (
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-xl font-bold text-green-600">5레벨 달성!!!</div>
+            <ClaimRewardButton
+              onClick={handleClaimRewardClick}
+              disabled={isClaiming}
+              isLoading={isClaiming}
+            />
+          </div>
+        ) : (
+          <>
+            <PlantProgressBar level={currentLevel} progress={currentProgress} fid={fid ?? 0} />
+            <PlantActionButtons
+              onWater={handleWatering}
+              onFeed={handleFeeding}
+              nutrientCount={nutrientCount}
+              disabled={isPending}
+              checkingWater={isWatering}
+              alreadyWatered={alreadyWatered}
+              checkingFeed={isFeeding}
+              alreadyFed={alreadyFed}
+            />
+          </>
+        )}
       </div>
 
       {/* 📋 미션 시트 모달 */}
       <AnimatePresence>
         {showMissions && (
           <MissionSheet missions={missions} onClose={() => setShowMissions(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* 🎁 보상 모달 */}
+      <AnimatePresence>
+        {showRewardModal && (
+          <RewardModal
+            isOpen={showRewardModal}
+            onClose={() => setShowRewardModal(false)}
+            plantType={selectedPlantType!}
+            rewardData={rewardData || undefined}
+          />
         )}
       </AnimatePresence>
     </div>

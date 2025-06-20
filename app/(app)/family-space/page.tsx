@@ -10,6 +10,7 @@ import { PlantSection } from "@/components/family-space/PlantSection";
 import { FamilyMemberSection } from "@/components/family-space/FamilyMemberSection";
 import { FamilyRecommendationCard } from "@/components/family-space/FamilyRecommendationCard";
 import { MessageCardSection } from "@/components/family-space/MessageCardSection";
+import { RewardHistorySection } from "@/components/family-space/RewardHistorySection";
 import { UIFamilyMember } from "@/types/family.type";
 import { plantApi } from "@/lib/api/plant";
 import { PlantStatus } from "@/types/plants.type";
@@ -322,6 +323,9 @@ export default function FamilySpacePage() {
             totalCount={messageCards?.totalCount || 0}
             isLoading={isLoadingMessageCards}
           />
+
+          {/* Reward History Section */}
+          <RewardHistorySection />
         </div>
       </div>
     </div>

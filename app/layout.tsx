@@ -1,20 +1,21 @@
-import type React from 'react';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { ThemeProvider } from '@/contexts/theme-context';
-import { FamilySpaceProvider } from '@/contexts/family-space-context';
-import { PlantProvider } from '@/contexts/plant-context';
-import AuthProvider from '@/components/providers/AuthProvider';
-import { QueryProvider } from '@/components/providers/QueryProvider';
-import { MobileHeader } from '@/components/layouts/mobile-header';
-import { MobileNav } from '@/components/mobile-nav';
+import type React from "react";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { ThemeProvider } from "@/contexts/theme-context";
+import { FamilySpaceProvider } from "@/contexts/family-space-context";
+import { PlantProvider } from "@/contexts/plant-context";
+import AuthProvider from "@/components/providers/AuthProvider";
+import { QueryProvider } from "@/components/providers/QueryProvider";
+import { MobileHeader } from "@/components/layouts/mobile-header";
+import { MobileNav } from "@/components/mobile-nav";
+import { Toaster } from "@/components/ui/sonner";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'MODi - 스마트한 통신 생활의 시작',
-  description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
+  title: "MODi - 스마트한 통신 생활의 시작",
+  description: "개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스",
 };
 
 export default function RootLayout({
@@ -63,6 +64,7 @@ export default function RootLayout({
             </AuthProvider>
           </QueryProvider>
         </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );
