@@ -19,12 +19,6 @@ export function MobileNav() {
 
   const menuItems = [
     {
-      href: '/dashboard',
-      icon: Home,
-      label: '메인페이지',
-      disabled: false,
-    },
-    {
       href: '/chat',
       icon: MessageCircle,
       label: '챗봇',

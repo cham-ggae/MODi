@@ -1,135 +1,135 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Copy, Check, Users, CheckCircle, Sparkles, Share2 } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { useFamilySpace } from "@/contexts/family-space-context"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Copy, Check, Users, CheckCircle, Sparkles, Share2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { useFamilySpace } from '@/contexts/family-space-context';
 
 interface FamilySpaceCreationModalProps {
-  isOpen: boolean
-  onClose: () => void
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreationModalProps) {
-  const [step, setStep] = useState<"create" | "creating" | "success">("create")
-  const [familyName, setFamilyName] = useState("")
-  const [inviteCode, setInviteCode] = useState("")
-  const [copied, setCopied] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
-  const { createFamilySpace } = useFamilySpace()
+  const [step, setStep] = useState<'create' | 'creating' | 'success'>('create');
+  const [familyName, setFamilyName] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
+  const [copied, setCopied] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
+  const { createFamilySpace } = useFamilySpace();
 
   const generateInviteCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
-  }
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
+  };
 
   const handleCreateFamily = async () => {
     if (!familyName.trim()) {
       toast({
-        title: "가족 이름을 입력해주세요",
-        variant: "destructive",
-      })
-      return
+        title: '가족 이름을 입력해주세요',
+        variant: 'destructive',
+      });
+      return;
     }
 
     // 생성 중 단계로 전환
-    setStep("creating")
+    setStep('creating');
 
     // 2초 후 성공 단계로 전환
     setTimeout(() => {
-      const code = generateInviteCode()
-      setInviteCode(code)
+      const code = generateInviteCode();
+      setInviteCode(code);
 
       // 기본 가족 구성원으로 생성
       const defaultMembers = [
-        { id: "1", name: "아빠", plan: "5G 시그니처", usage: "45GB", avatar: "👨" },
-        { id: "2", name: "엄마", plan: "5G 스탠다드", usage: "23GB", avatar: "👩" },
-        { id: "3", name: "나", plan: "5G 프리미엄", usage: "67GB", avatar: "🧑" },
-      ]
+        { id: '1', name: '아빠', plan: '5G 시그니처', usage: '45GB', avatar: '👨' },
+        { id: '2', name: '엄마', plan: '5G 스탠다드', usage: '23GB', avatar: '👩' },
+        { id: '3', name: '나', plan: '5G 프리미엄', usage: '67GB', avatar: '🧑' },
+      ];
 
       // FamilySpaceContext를 통해 가족 스페이스 생성
-      createFamilySpace(defaultMembers)
+      createFamilySpace(defaultMembers);
 
       // 초대 코드 저장
-      localStorage.setItem("familyInviteCode", code)
-      localStorage.setItem("familyName", familyName)
+      localStorage.setItem('familyInviteCode', code);
+      localStorage.setItem('familyName', familyName);
 
-      setStep("success")
-    }, 2000)
-  }
+      setStep('success');
+    }, 2000);
+  };
 
   const handleCopyCode = async () => {
     try {
-      await navigator.clipboard.writeText(inviteCode)
-      setCopied(true)
+      await navigator.clipboard.writeText(inviteCode);
+      setCopied(true);
       toast({
-        title: "초대 코드가 복사되었습니다!",
-        description: "가족들에게 공유해보세요.",
-      })
-      setTimeout(() => setCopied(false), 2000)
+        title: '초대 코드가 복사되었습니다!',
+        description: '가족들에게 공유해보세요.',
+      });
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
-        title: "복사에 실패했습니다",
-        variant: "destructive",
-      })
+        title: '복사에 실패했습니다',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const handleShareKakao = () => {
-    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${familyName}\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`
+    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${familyName}\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
 
     if (navigator.share) {
       navigator
         .share({
-          title: "MODi 가족 스페이스 초대",
+          title: 'MODi 가족 스페이스 초대',
           text: shareText,
         })
         .catch(() => {
           // 공유 실패 시 클립보드에 복사
-          navigator.clipboard.writeText(shareText)
+          navigator.clipboard.writeText(shareText);
           toast({
-            title: "공유 링크가 복사되었습니다!",
-            description: "카카오톡에서 붙여넣기 해주세요.",
-          })
-        })
+            title: '공유 링크가 복사되었습니다!',
+            description: '카카오톡에서 붙여넣기 해주세요.',
+          });
+        });
     } else {
       // Web Share API 미지원 시 클립보드에 복사
-      navigator.clipboard.writeText(shareText)
+      navigator.clipboard.writeText(shareText);
       toast({
-        title: "공유 메시지가 복사되었습니다!",
-        description: "카카오톡에서 붙여넣기 해주세요.",
-      })
+        title: '공유 메시지가 복사되었습니다!',
+        description: '카카오톡에서 붙여넣기 해주세요.',
+      });
     }
-  }
+  };
 
   const handleConfirm = () => {
     // 모달 닫기
-    handleClose()
+    handleClose();
     // 가족 스페이스 페이지로 이동
-    router.push("/family-space")
-  }
+    router.push('/family-space');
+  };
 
   const handleClose = () => {
-    setStep("create")
-    setFamilyName("")
-    setInviteCode("")
-    setCopied(false)
-    onClose()
-  }
+    setStep('create');
+    setFamilyName('');
+    setInviteCode('');
+    setCopied(false);
+    onClose();
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <AnimatePresence mode="wait">
-          {step === "create" && (
+          {step === 'create' && (
             <motion.div
               key="create"
               initial={{ opacity: 0, y: 20 }}
@@ -154,14 +154,16 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
                     placeholder="예: 김씨네 가족"
                     className="mt-1"
                     onKeyPress={(e) => {
-                      if (e.key === "Enter") {
-                        handleCreateFamily()
+                      if (e.key === 'Enter') {
+                        handleCreateFamily();
                       }
                     }}
                   />
                 </div>
                 <div className="bg-[#F1F8E9] p-4 rounded-lg">
-                  <h4 className="font-medium text-[#388E3C] mb-2">가족 스페이스에서 할 수 있는 것들</h4>
+                  <h4 className="font-medium text-[#388E3C] mb-2">
+                    가족 스페이스에서 할 수 있는 것들
+                  </h4>
                   <ul className="text-sm text-[#4E342E] space-y-1">
                     <li>• 함께 식물 키우기 🌱</li>
                     <li>• 가족 메시지 카드 주고받기 💌</li>
@@ -169,14 +171,17 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
                     <li>• 가족 결합 할인 받기 💰</li>
                   </ul>
                 </div>
-                <Button onClick={handleCreateFamily} className="w-full bg-[#81C784] hover:bg-[#388E3C]">
+                <Button
+                  onClick={handleCreateFamily}
+                  className="w-full bg-[#81C784] hover:bg-[#388E3C]"
+                >
                   가족 스페이스 만들기
                 </Button>
               </div>
             </motion.div>
           )}
 
-          {step === "creating" && (
+          {step === 'creating' && (
             <motion.div
               key="creating"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -187,7 +192,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
               <motion.div
                 className="w-16 h-16 bg-[#81C784] rounded-full flex items-center justify-center mx-auto mb-6"
                 animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
               >
                 <Sparkles className="w-8 h-8 text-white" />
               </motion.div>
@@ -196,7 +201,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
             </motion.div>
           )}
 
-          {step === "success" && (
+          {step === 'success' && (
             <motion.div
               key="success"
               initial={{ opacity: 0, scale: 0.8 }}
@@ -208,7 +213,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: [0, 1.2, 1] }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
                   >
                     <CheckCircle className="w-5 h-5 mr-2 text-green-500" />
                   </motion.div>
@@ -232,7 +237,9 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
                     <div className="bg-white p-3 rounded-lg border border-[#81C784] mb-4">
                       <Label className="text-xs text-[#4E342E] opacity-70">초대 코드</Label>
                       <div className="flex items-center justify-center mt-1">
-                        <Badge className="bg-[#388E3C] text-white text-lg px-4 py-2 font-mono">{inviteCode}</Badge>
+                        <Badge className="bg-[#388E3C] text-white text-lg px-4 py-2 font-mono">
+                          {inviteCode}
+                        </Badge>
                       </div>
                     </div>
 
@@ -242,10 +249,17 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
                         variant="outline"
                         className="flex-1 border-[#81C784] text-[#388E3C] hover:bg-[#F1F8E9]"
                       >
-                        {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                        {copied ? "복사됨" : "복사"}
+                        {copied ? (
+                          <Check className="w-4 h-4 mr-2" />
+                        ) : (
+                          <Copy className="w-4 h-4 mr-2" />
+                        )}
+                        {copied ? '복사됨' : '복사'}
                       </Button>
-                      <Button onClick={handleShareKakao} className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black">
+                      <Button
+                        onClick={handleShareKakao}
+                        className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
+                      >
                         <Share2 className="w-4 h-4 mr-2" />
                         카톡 공유
                       </Button>
@@ -271,5 +285,5 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
         </AnimatePresence>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
