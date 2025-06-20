@@ -38,9 +38,8 @@ export function PlantActionButtons({
             {alreadyFed && <Lock className="w-5 h-5 text-gray-400" />}
           </div>
           <div className="text-sm font-medium text-gray-900 mb-1">
-            {checkingFeed ? "확인 중..." : alreadyFed ? "오늘 영양제 주기 완료!" : "영양제 주기"}
+            {checkingFeed ? "확인 중..." : alreadyFed ? "영양제 주기 완료!" : "영양제 주기"}
           </div>
-          <div className="text-xs text-gray-500">{nutrientCount}개 보유</div>
         </motion.div>
         <motion.div
           whileHover={checkingWater || alreadyWatered || disabled ? undefined : { scale: 1.05 }}
