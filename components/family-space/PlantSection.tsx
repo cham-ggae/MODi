@@ -56,7 +56,7 @@ export function PlantSection({
         disabled={!canCreateNew && !hasPlant}
         className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {!plantStatus || plantStatus?.completed ? (
+        {!plantStatus || plantStatus.completed ? (
           <>
             <Sprout className="w-4 h-4 mr-2" />
             새싹 만들기

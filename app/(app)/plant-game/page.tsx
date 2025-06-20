@@ -518,29 +518,44 @@ export default function PlantGamePage() {
       </div>
 
       {/* 👨‍👩‍👧‍👦 가족 구성원 상태 */}
-      <div className="flex-shrink-0">
-        <FamilyWateringStatus members={transformedMembers} />
-      </div>
+      {currentLevel !== 5 && (
+        <div className="flex-shrink-0">
+          <FamilyWateringStatus members={transformedMembers} />
+        </div>
+      )}
 
       {/* 🎯 미션하기 버튼 */}
-      <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
-        <Button
-          className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
-          onClick={() => setShowMissions(true)}
-        >
-          미션하기
-        </Button>
-      </div>
+      {currentLevel !== 5 && (
+        <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
+          <Button
+            className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
+            onClick={() => setShowMissions(true)}
+          >
+            미션하기
+          </Button>
+        </div>
+      )}
 
       {/* 🌱 식물 이미지 영역 */}
-      <div className="flex-1 flex items-center justify-center px-4">
-        <PlantImageDisplay
-          selectedPlantType={selectedPlantType}
-          currentLevel={currentLevel}
-          isWatering={isWatering}
-          isFeeding={isFeeding}
-        />
-      </div>
+      {currentLevel === 5 ? (
+        <div className="flex-1 flex items-center justify-center px-0 py-0 h-full w-full">
+          <PlantImageDisplay
+            selectedPlantType={selectedPlantType}
+            currentLevel={currentLevel}
+            isWatering={isWatering}
+            isFeeding={isFeeding}
+          />
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <PlantImageDisplay
+            selectedPlantType={selectedPlantType}
+            currentLevel={currentLevel}
+            isWatering={isWatering}
+            isFeeding={isFeeding}
+          />
+        </div>
+      )}
 
       {/* 🎮 게임 컨트롤 영역 */}
       <div className="flex-shrink-0 p-3">

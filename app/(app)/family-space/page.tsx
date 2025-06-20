@@ -123,14 +123,14 @@ export default function FamilySpacePage() {
       });
       return;
     }
-
-    if (!plantStatus || plantStatus.completed) {
-      // 식물이 없거나 이미 키운 상태
-      router.push("/plant-selection");
-    } else if (plantStatus.level >= 1 && !plantStatus.completed) {
-      // 식물이 자라는 중
+    //레벨 5 && 미완료 시에도 plant-game 으로 이동
+    if (plantStatus && !plantStatus.completed) {
       router.push("/plant-game");
+      return;
     }
+
+    // 완료됐거나 없으면 생성 화면으로
+    router.push("/plant-selection");
   };
 
   const handleCopyCode = async () => {
