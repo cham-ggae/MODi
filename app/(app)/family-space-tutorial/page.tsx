@@ -172,6 +172,8 @@ export default function FamilySpaceTutorialPage() {
 
   return (
     <>
+
+
       <div className="h-full flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
         {/* Header */}
         <div className="flex items-center justify-center p-4 flex-shrink-0 relative">
