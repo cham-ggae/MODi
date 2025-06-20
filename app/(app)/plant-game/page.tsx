@@ -1,119 +1,487 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { AnimatePresence } from "framer-motion";
-import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus"; //
+import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus";
 import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
 import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
 import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
 import { MissionSheet } from "@/components/plant-game/MissionSheet";
-import { FamilyMember, Mission } from "@/types/plant-game.type";
+import { Mission } from "@/types/plant-game.type";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useFamily } from "@/hooks/family";
+import {
+  useAddPoint,
+  useCheckTodayActivity,
+  usePlantStatus,
+  useNutrientStatus,
+} from "@/hooks/plant";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { usePlantSocket } from "@/hooks/plant/usePlantSocket";
+import { PlantEventData } from "@/types/plants.type";
+import { useAuth } from "@/hooks/useAuth";
+import { plantApi } from "@/lib/api/plant";
+import { FamilyMember } from "@/types/family.type";
+import { Sprout, TreePine } from "lucide-react";
 
+/**
+ * 새싹 키우기 게임 메인 페이지
+ *
+ * 주요 기능:
+ * - 실시간 가족 구성원 물주기 상태 표시
+ * - 식물 레벨별 성장 시각화
+ * - 하루 한번 제한된 물주기/영양제 활동
+ * - 소켓을 통한 실시간 동기화
+ * - 미션 시스템 연동
+ */
 export default function PlantGamePage() {
+  // ==========================================
+  // 🎮 게임 상태 관리
+  // ==========================================
+
+  /** 선택된 식물 타입 (flower | tree) */
   const [selectedPlantType, setSelectedPlantType] = useState<"flower" | "tree" | null>(null);
+
+  /** 미션 시트 표시 여부 */
   const [showMissions, setShowMissions] = useState(false);
+
+  /** 현재 식물 레벨 (소켓에서 받은 데이터) */
   const [currentLevel, setCurrentLevel] = useState(1);
-  const [currentProgress, setCurrentProgress] = useState(26);
+
+  /** 현재 경험치 진행률 (소켓에서 받은 데이터) */
+  const [currentProgress, setCurrentProgress] = useState(0);
+
+  // ==========================================
+  // 🌱 활동 상태 관리
+  // ==========================================
+
+  /** 물주기 애니메이션 상태 */
   const [isWatering, setIsWatering] = useState(false);
+
+  /** 영양제 주기 애니메이션 상태 */
   const [isFeeding, setIsFeeding] = useState(false);
 
-  // 예시 데이터: 실제 데이터로 교체 필요
-  const members: FamilyMember[] = [
-    { id: 1, name: "엄마", avatar: "🖼️", hasWatered: true, status: "물주기 완료" },
-    { id: 2, name: "아빠", avatar: "👤", hasWatered: false, status: "" },
-    { id: 3, name: "나", avatar: "👤", hasWatered: true, status: "물주기 완료" },
-  ];
-  const waterCooldownText = "5시간 59분 후";
-  const nutrientCount = 1;
+  /** 오늘 물주기 완료 여부 (현재 사용자) */
+  const [alreadyWatered, setAlreadyWatered] = useState(false);
 
+  /** 오늘 영양제 주기 완료 여부 (현재 사용자) */
+  const [alreadyFed, setAlreadyFed] = useState(false);
+
+  // ==========================================
+  // 👨‍👩‍👧‍👦 가족 구성원 상태 관리
+  // ==========================================
+
+  /** 가족 구성원 목록 */
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
+
+  /** 오늘 물주기 완료한 구성원 ID 목록 */
+  const [wateredMemberIds, setWateredMemberIds] = useState<number[]>([]);
+
+  // ==========================================
+  // 🔐 인증 및 사용자 정보
+  // ==========================================
+
+  /** 현재 로그인한 사용자 정보 */
+  const { user } = useAuth();
+
+  // ==========================================
+  // 🎯 미션 데이터
+  // ==========================================
+
+  /** 사용 가능한 미션 목록 */
   const missions: Mission[] = [
     {
       id: 1,
-      title: "더 받을 수 있는 영양제 2개",
-      description: "미션 매일 밤 12시에 다시 시작됩니다.",
+      title: "1일 1회 출석하기",
+      description: "매일 밤 12시에 다시 시작됩니다.",
       icon: "✏️",
-      reward: "영양제 1개",
+      reward: "출석하기",
     },
     {
       id: 2,
-      title: "매일 응답받기",
-      description: "미션 참여하고 좋은 반응요",
-      icon: "🏆",
-      reward: "영양제 1개",
+      title: "가족에게 메세지 남기기",
+      description: "사랑하는 가족에게 작은 한마디",
+      icon: "💌",
+      reward: "메세지 작성",
     },
     {
       id: 3,
-      title: "신용카드 캐시백",
-      description: "아빠만 최대 77.9만원",
-      icon: "💳",
-      reward: "영양제 1개",
+      title: "요금제 퀴즈 풀기",
+      description: "더 많은 할인이 기다릴지도?",
+      icon: "🎯",
+      reward: "퀴즈 풀기",
+    },
+    {
+      id: 4,
+      title: "나의 오늘 운 확인!",
+      description: "여러 선택지 중 하나를 골라봐!!",
+      icon: "🎲",
+      reward: "오늘 운 확인",
+    },
+    {
+      id: 5,
+      title: "가족 등록",
+      description: "모든 가족들과 함께",
+      icon: "👨‍👩‍👧‍👦",
+      reward: "초대하기",
+    },
+    {
+      id: 6,
+      title: "통신 성향 검사",
+      description: "나에게 맞는 통신 캐릭터는?",
+      icon: "💬",
+      reward: "검사하기",
     },
   ];
 
-  const { familyId } = useFamily();
+  // ==========================================
+  // 🔌 API 훅 및 데이터
+  // ==========================================
 
+  /** 가족 정보 및 ID */
+  const { familyId: fid, family } = useFamily();
+
+  /** 식물 상태 정보 */
+  const { data: plantStatus } = usePlantStatus(fid ?? 0);
+
+  /** 오늘 물주기 완료 여부 (서버 확인) */
+  const { data: checkAlreadyWatered } = useCheckTodayActivity("water");
+
+  /** 오늘 영양제 주기 완료 여부 (서버 확인) */
+  const { data: checkAlreadyFed } = useCheckTodayActivity("nutrient");
+
+  /** 영양제 개수 (서버에서 실시간 조회) */
+  const { data: nutrientCount = 0 } = useNutrientStatus();
+
+  /** 포인트 적립 API */
+  const { mutate: addPoint, isPending } = useAddPoint();
+
+  /** 쿼리 클라이언트 (캐시 무효화용) */
+  const queryClient = useQueryClient();
+
+  // ==========================================
+  // 📊 가족 구성원 데이터 관리
+  // ==========================================
+
+  /**
+   * 가족 구성원 정보 설정
+   * 서버에서 받은 가족 정보를 로컬 상태에 동기화
+   */
   useEffect(() => {
-    // localStorage에서 선택된 식물 타입과 레벨 정보 가져오기
+    if (family?.members) {
+      setFamilyMembers(family.members);
+    }
+  }, [family]);
+
+  /**
+   * 물주기 완료된 구성원 조회
+   * 서버에서 오늘 물주기를 완료한 구성원 ID 목록을 가져옴
+   */
+  const fetchWateredMembers = useCallback(async () => {
+    if (!fid) return;
+    try {
+      const wateredIds = await plantApi.getWaterMembers(fid);
+      setWateredMemberIds(wateredIds);
+    } catch (error) {
+      console.error("물주기 완료 구성원 조회 실패:", error);
+    }
+  }, [fid]);
+
+  /** 초기 로딩 시 물주기 완료 구성원 조회 */
+  useEffect(() => {
+    fetchWateredMembers();
+  }, [fetchWateredMembers]);
+
+  // ==========================================
+  // 🔄 실시간 소켓 연결
+  // ==========================================
+
+  /**
+   * 실시간 식물 활동 소켓 연결
+   * 모든 가족 구성원의 활동을 실시간으로 수신하고 처리
+   */
+  usePlantSocket(
+    fid ?? 0,
+    useCallback(
+      (event: PlantEventData) => {
+        console.log("식물 활동 이벤트 수신:", event);
+
+        // 레벨과 경험치 업데이트 (모든 이벤트에서)
+        setCurrentLevel(event.level);
+        setCurrentProgress(Math.floor((event.experiencePoint / event.expThreshold) * 100));
+        console.log("소켓에서 레벨/경험치 업데이트:", {
+          level: event.level,
+          experiencePoint: event.experiencePoint,
+          expThreshold: event.expThreshold,
+          progress: Math.floor((event.experiencePoint / event.expThreshold) * 100),
+        });
+
+        // 레벨업 토스트 표시
+        if (event.isLevelUp) {
+          toast.success("🎉 레벨업! 식물이 성장했습니다!");
+        }
+
+        // 활동 타입별 처리
+        switch (event.type) {
+          case "water":
+            // 현재 사용자의 활동인 경우에만 상태 변경
+            if (event.name === user?.nickname) {
+              setAlreadyWatered(true);
+            }
+            // 물주기 완료된 구성원 목록 업데이트
+            fetchWateredMembers();
+            toast.success(`${event.name}님이 물을 주었습니다! 💧`);
+            break;
+
+          case "nutrient":
+            // 현재 사용자의 활동인 경우에만 상태 변경
+            if (event.name === user?.nickname) {
+              setAlreadyFed(true);
+            }
+            // 영양제 사용 시 영양제 개수 감소 (서버에서 업데이트된 값으로 동기화)
+            queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+            toast.success(`${event.name}님이 영양제를 주었습니다! 🌱`);
+            break;
+
+          case "quiz":
+            toast.success(`${event.name}님이 퀴즈를 완료했습니다! 🎯`);
+            break;
+
+          case "emotion":
+            toast.success(`${event.name}님이 감정을 기록했습니다! 😊`);
+            break;
+
+          case "attendance":
+            toast.success(`${event.name}님이 출석했습니다! 📅`);
+            break;
+
+          case "survey":
+            toast.success(`${event.name}님이 설문을 완료했습니다! 📝`);
+            break;
+
+          case "lastleaf":
+            toast.success(`${event.name}님이 마지막 잎을 달성했습니다! 🍃`);
+            break;
+
+          case "register":
+            toast.success(`${event.name}님이 가입했습니다! 🎉`);
+            break;
+
+          default:
+            console.log("알 수 없는 활동 타입:", event.type);
+        }
+      },
+      [fid, queryClient, user?.nickname, fetchWateredMembers]
+    )
+  );
+
+  // ==========================================
+  // 💾 식물 타입 초기화
+  // ==========================================
+
+  /**
+   * 로컬 스토리지에서 식물 타입만 복원
+   * 레벨과 경험치는 서버 데이터 사용
+   */
+  useEffect(() => {
     const plantType = localStorage.getItem("selectedPlantType") as "flower" | "tree" | null;
-    const level = Number.parseInt(localStorage.getItem("plantLevel") || "1");
-    const progress = Number.parseInt(localStorage.getItem("plantProgress") || "26");
     setSelectedPlantType(plantType);
-    setCurrentLevel(level);
-    setCurrentProgress(progress);
   }, []);
 
+  // ==========================================
+  // 💧 물주기 활동 처리
+  // ==========================================
+
+  /**
+   * 물주기 처리 (하루에 한번 제한)
+   * 포인트 적립 및 실시간 상태 업데이트
+   */
   const handleWatering = () => {
+    // 중복 요청 방지
+    if (isPending || alreadyWatered) {
+      toast.warning("오늘은 이미 물을 주었어요 💧");
+      return;
+    }
+
     setIsWatering(true);
-    setTimeout(() => setIsWatering(false), 2000);
-  };
-  const handleFeeding = () => {
-    setIsFeeding(true);
-    setTimeout(() => setIsFeeding(false), 2000);
+
+    addPoint(
+      { activityType: "water" },
+      {
+        onSuccess: () => {
+          toast.success("물주기 완료!");
+          setAlreadyWatered(true);
+          setTimeout(() => setIsWatering(false), 2000);
+          queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "water"] });
+          // 식물 상태 업데이트를 위해 쿼리 무효화
+          queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+          // 물주기 완료된 구성원 목록 업데이트
+          fetchWateredMembers();
+
+          // 서버 상태 확인을 위한 로그
+          console.log("💧 물주기 완료 후 서버 상태 확인 예정");
+        },
+        onError: (error) => {
+          setIsWatering(false);
+        },
+      }
+    );
   };
 
+  // ==========================================
+  // 🌱 영양제 주기 활동 처리
+  // ==========================================
+
+  /**
+   * 영양제 주기 처리 (하루에 한번 제한)
+   * 영양제 개수 확인 및 포인트 적립
+   */
+  const handleFeeding = async () => {
+    // 중복 요청 방지
+    if (isPending || alreadyFed) {
+      toast.warning("오늘은 이미 영양제를 주었어요 🌿");
+      return;
+    }
+
+    // 서버에서 최신 영양제 개수 확인
+    try {
+      const serverNutrientCount = await plantApi.getNutrients();
+
+      if (serverNutrientCount <= 0) {
+        toast.warning("영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯");
+        return;
+      }
+    } catch (error) {
+      // 서버 확인 실패 시 로컬 상태로 판단
+      if (nutrientCount <= 0) {
+        toast.warning("영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯");
+        return;
+      }
+    }
+
+    setIsFeeding(true);
+
+    addPoint(
+      { activityType: "nutrient" },
+      {
+        onSuccess: () => {
+          toast.success("영양제 주기 완료! 포인트 적립 ✅");
+          setAlreadyFed(true);
+          setTimeout(() => setIsFeeding(false), 2000);
+          queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "nutrient"] });
+          queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+          // 영양제 개수 업데이트를 위해 쿼리 무효화
+          queryClient.invalidateQueries({ queryKey: ["nutrient", "stock"] });
+
+          // 서버 상태 확인을 위한 로그
+          console.log("🌱 영양제 주기 완료 후 서버 상태 확인 예정");
+        },
+        onError: (error) => {
+          setIsFeeding(false);
+        },
+      }
+    );
+  };
+
+  // ==========================================
+  // 🔄 활동 상태 동기화
+  // ==========================================
+
+  /**
+   * 서버에서 받은 물주기 상태로 로컬 상태 동기화
+   * 하루 갱신 시 정확한 상태 반영
+   */
+  useEffect(() => {
+    if (checkAlreadyWatered !== undefined) {
+      setAlreadyWatered(checkAlreadyWatered);
+    }
+  }, [checkAlreadyWatered]);
+
+  /**
+   * 서버에서 받은 영양제 상태로 로컬 상태 동기화
+   * 하루 갱신 시 정확한 상태 반영
+   */
+  useEffect(() => {
+    if (checkAlreadyFed !== undefined) {
+      setAlreadyFed(checkAlreadyFed);
+    }
+  }, [checkAlreadyFed]);
+
+  // ==========================================
+  // 🎨 UI 데이터 변환
+  // ==========================================
+
+  /**
+   * FamilyWateringStatus 컴포넌트에 전달할 데이터 변환
+   * 서버 데이터를 UI 컴포넌트에 맞는 형태로 변환
+   */
+  const transformedMembers = familyMembers.map((member) => ({
+    id: member.uid,
+    name: member.name,
+    avatar: member.profileImage || "👤", // 카카오 프로필 이미지 또는 기본 이모지
+    hasWatered: wateredMemberIds.includes(member.uid),
+    status: wateredMemberIds.includes(member.uid) ? "물주기 완료" : "",
+  }));
+
+  // ==========================================
+  // 🎮 UI 렌더링
+  // ==========================================
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-blue-50 max-w-md mx-auto relative overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 relative z-10">
+    <div className="h-[100dvh] bg-gradient-to-b from-blue-100 to-blue-50 max-w-md mx-auto flex flex-col overflow-hidden">
+      {/* 📱 헤더 영역 */}
+      <div className="flex items-center justify-between p-3 flex-shrink-0">
         <Link href="/family-space">
           <ArrowLeft className="w-6 h-6 text-gray-600" />
         </Link>
         <h1 className="text-lg font-semibold text-center w-full text-gray-900">새싹 키우기</h1>
+        <div className="w-6 h-6"></div> {/* 헤더 균형을 위한 빈 공간 */}
+      </div>
+
+      {/* 👨‍👩‍👧‍👦 가족 구성원 상태 */}
+      <div className="flex-shrink-0">
+        <FamilyWateringStatus members={transformedMembers} />
+      </div>
+
+      {/* 🎯 미션하기 버튼 */}
+      <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
         <Button
-          className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-4 py-2 text-sm"
+          className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
           onClick={() => setShowMissions(true)}
         >
           미션하기
         </Button>
       </div>
 
-      {/* Family Status */}
-      <FamilyWateringStatus members={members} />
+      {/* 🌱 식물 이미지 영역 */}
+      <div className="flex-1 flex items-center justify-center px-4">
+        <PlantImageDisplay
+          selectedPlantType={selectedPlantType}
+          currentLevel={currentLevel}
+          isWatering={isWatering}
+          isFeeding={isFeeding}
+        />
+      </div>
 
-      {/* Plant Image & Animation */}
-      <PlantImageDisplay
-        selectedPlantType={selectedPlantType}
-        currentLevel={currentLevel}
-        isWatering={isWatering}
-        isFeeding={isFeeding}
-      />
-
-      {/* Bottom Content */}
-      <div className="absolute bottom-4 left-0 right-0 z-10">
+      {/* 🎮 게임 컨트롤 영역 */}
+      <div className="flex-shrink-0 p-3">
         <PlantProgressBar level={currentLevel} progress={currentProgress} />
         <PlantActionButtons
           onWater={handleWatering}
           onFeed={handleFeeding}
-          waterCooldownText={waterCooldownText}
           nutrientCount={nutrientCount}
+          disabled={isPending}
+          checkingWater={isWatering}
+          alreadyWatered={alreadyWatered}
+          checkingFeed={isFeeding}
+          alreadyFed={alreadyFed}
         />
       </div>
 
-      {/* Mission Sheet */}
+      {/* 📋 미션 시트 모달 */}
       <AnimatePresence>
         {showMissions && (
           <MissionSheet missions={missions} onClose={() => setShowMissions(false)} />
