@@ -30,7 +30,7 @@ export default function ChatPage() {
     <Fragment>
       {family?.members && family.members.length > 1 && <FamilyModeToggle familyMode={familyMode} setFamilyMode={setFamilyMode} />}
       <ChatMessages messages={messages} />
-      <ChatInput setMessages={setMessages} sessionId={sessionId} />
+      <ChatInput setMessages={setMessages} sessionId={sessionId} familyMode={familyMode} familySize={family ? family?.members.length : 1} />
     </Fragment>
   );
 }
