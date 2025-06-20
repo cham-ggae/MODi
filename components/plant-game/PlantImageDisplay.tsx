@@ -22,7 +22,7 @@ export function PlantImageDisplay({
   const plantImage = getCurrentPlantImage();
 
   return (
-    <div className="absolute inset-0 flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full">
       {plantImage ? (
         <motion.div
           key={currentLevel}

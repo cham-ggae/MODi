@@ -1,40 +1,62 @@
-import { Sparkles, Droplets } from "lucide-react";
+import { Sparkles, Droplets, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface Props {
   onWater: () => void;
   onFeed: () => void;
-  waterCooldownText: string;
   nutrientCount: number;
+  disabled?: boolean;
+  checkingWater?: boolean;
+  alreadyWatered?: boolean;
+  checkingFeed?: boolean;
+  alreadyFed?: boolean;
 }
 
-export function PlantActionButtons({ onWater, onFeed, waterCooldownText, nutrientCount }: Props) {
+export function PlantActionButtons({
+  onWater,
+  onFeed,
+  nutrientCount,
+  disabled = false,
+  checkingWater = false,
+  alreadyWatered = false,
+  checkingFeed = false,
+  alreadyFed = false,
+}: Props) {
   return (
     <div className="px-6 mb-8">
       <div className="grid grid-cols-2 gap-4">
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-white rounded-2xl p-4 text-center shadow-sm cursor-pointer"
-          onClick={onFeed}
+          whileHover={checkingFeed || alreadyFed || disabled ? undefined : { scale: 1.05 }}
+          whileTap={checkingFeed || alreadyFed || disabled ? undefined : { scale: 0.95 }}
+          className={`bg-white rounded-2xl p-4 text-center shadow-sm cursor-pointer ${
+            checkingFeed || alreadyFed || disabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={checkingFeed || alreadyFed || disabled ? undefined : onFeed}
         >
-          <div className="flex justify-center mb-2">
-            <Sparkles className="w-6 h-6 text-purple-500" />
+          <div className="flex justify-center items-center mb-2">
+            {!alreadyFed && <Sparkles className="w-6 h-6 text-purple-500" />}
+            {alreadyFed && <Lock className="w-5 h-5 text-gray-400" />}
           </div>
-          <div className="text-sm font-medium text-gray-900 mb-1">영양제 주기</div>
+          <div className="text-sm font-medium text-gray-900 mb-1">
+            {checkingFeed ? "확인 중..." : alreadyFed ? "오늘 영양제 주기 완료!" : "영양제 주기"}
+          </div>
           <div className="text-xs text-gray-500">{nutrientCount}개 보유</div>
         </motion.div>
         <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-white rounded-2xl p-4 text-center shadow-sm cursor-pointer"
-          onClick={onWater}
+          whileHover={checkingWater || alreadyWatered || disabled ? undefined : { scale: 1.05 }}
+          whileTap={checkingWater || alreadyWatered || disabled ? undefined : { scale: 0.95 }}
+          className={`bg-white rounded-2xl p-4 text-center shadow-sm cursor-pointer ${
+            checkingWater || alreadyWatered || disabled ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={checkingWater || alreadyWatered || disabled ? undefined : onWater}
         >
-          <div className="flex justify-center mb-2">
-            <Droplets className="w-6 h-6 text-blue-500" />
+          <div className="flex justify-center items-center mb-2">
+            {!alreadyWatered && <Droplets className="w-6 h-6 text-blue-500" />}
+            {alreadyWatered && <Lock className="w-5 h-5 text-gray-400" />}
           </div>
-          <div className="text-sm font-medium text-gray-900 mb-1">물 주기</div>
-          <div className="text-xs text-gray-500">{waterCooldownText}</div>
+          <div className="text-sm font-medium text-gray-900 mb-1">
+            {checkingWater ? "확인 중..." : alreadyWatered ? "오늘 물주기 완료!" : "물 주기"}
+          </div>
         </motion.div>
       </div>
     </div>
