@@ -191,7 +191,7 @@ export interface CreateFamilyRequest {
    * 결합 상품 타입
    * 할인 혜택을 결정하는 중요한 값
    */
-  combiType: '투게더 결합' | '참쉬운 가족 결합' | '가족 무한 사랑';
+  combiType: "투게더 결합" | "참쉬운 가족 결합" | "가족 무한 사랑";
 }
 
 /**
@@ -329,20 +329,20 @@ export interface ApiError {
 /**
  * 가족 구성원 역할 타입 (향후 확장용)
  */
-export type FamilyRole = 'OWNER' | 'MEMBER';
+export type FamilyRole = "OWNER" | "MEMBER";
 
 /**
  * 가족 스페이스 상태 타입 (향후 확장용)
  */
-export type FamilyStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+export type FamilyStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
 /**
  * 결합 상품 타입 상수
  */
 export const COMBI_TYPES = {
-  TOGETHER: '투게더 결합',
-  EASY_FAMILY: '참쉬운 가족 결합',
-  UNLIMITED_LOVE: '가족 무한 사랑',
+  TOGETHER: "투게더 결합",
+  EASY_FAMILY: "참쉬운 가족 결합",
+  UNLIMITED_LOVE: "가족 무한 사랑",
 } as const;
 
 /**
@@ -406,9 +406,12 @@ export interface PlantInfo {
 
   /** 생성 차단 사유 (선택적) */
   createBlockReason?: string;
+
+  /** 식물 완료 여부 */
+  isCompleted?: boolean;
 }
 
 /**
  * 식물 타입
  */
-export type PlantType = 'flower' | 'tree';
+export type PlantType = "flower" | "tree";
