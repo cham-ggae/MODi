@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import SurveyResultContent from "@/components/survey/SurveyResultContent";
 
-// 📍 [수정] useSearchParams를 사용하기 위해 페이지를 Suspense로 감싸는 구조로 변경
+// useSearchParams를 사용하기 위해 페이지를 Suspense로 감싸는 구조
 export default function SurveyResultPage() {
   return (
     <Suspense

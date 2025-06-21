@@ -1,5 +1,32 @@
 "use client";
 
+/**
+
+<설문조사 결과 페이지 컴포넌트>
+
+URL 쿼리에서 bugId를 받아 사용자 유형 결과 조회
+
+bugId에 해당하는 사용자 유형 정보 및 추천 요금제 표시
+
+Intersection Observer를 통해 단계적 애니메이션 출력
+
+추천 요금제 클릭 시 외부 상세 페이지로 이동
+
+사용 Hook:
+
+useGetSurveyResult: 설문 결과 API 조회
+
+useInViewOnce: 컴포넌트 뷰포트 진입 시 1회 렌더 트리거
+
+주요 UI 요소:
+
+사용자 유형 캐릭터 + 설명
+
+추천 혜택 리스트
+
+추천 요금제 카드 리스트
+*/
+
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
@@ -9,200 +36,16 @@ import { ChevronDown, Check, Star, Zap, Heart } from "lucide-react";
 import { useGetSurveyResult } from "@/hooks/use-survey-result";
 import { bugNameUiMap } from "@/types/survey.type";
 import { SurveyResultResponse } from "@/types/survey.type";
-
-// 📍 데이터 구조 정의
-interface UserType {
-  type: string;
-  emoji: string;
-  title: string;
-  description: string;
-  recommendations: string[];
-  savings: number;
-  message: string;
-}
-
-const planDetails: Record<
-  number,
-  {
-    name: string;
-    description: string;
-    price: string;
-    color: string;
-    isRecommended?: boolean;
-    link: string;
-  }
-> = {
-  1: {
-    name: "5G 프리미어 에센셜",
-    description: "데이터와 통화의 필수적인 선택",
-    price: "월 85,000원",
-    color: "emerald",
-    isRecommended: true,
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000409",
-  },
-  4: {
-    name: "5G 프리미어 레귤러",
-    description: "미디어 혜택과 데이터의 균형",
-    price: "월 95,000원",
-    color: "blue",
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000433",
-  },
-  6: {
-    name: "5G 데이터 레귤러",
-    description: "넉넉한 데이터와 무제한 통화",
-    price: "월 63,000원",
-    color: "emerald",
-    isRecommended: true,
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000783",
-  },
-  8: {
-    name: "5G 라이트+",
-    description: "가볍게 시작하는 5G 라이프",
-    price: "월 55,000원",
-    color: "emerald",
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000437",
-  },
-  10: {
-    name: "5G 미니",
-    description: "알뜰하고 컴팩트한 5G",
-    price: "월 37,000원",
-    color: "emerald",
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ1000325",
-  },
-  12: {
-    name: "5G 슬림+",
-    description: "가성비 좋은 슬림한 5G",
-    price: "월 47,000원",
-    color: "emerald",
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000487",
-  },
-  13: {
-    name: "5G 프리미어 플러스",
-    description: "다양한 프리미엄 혜택까지",
-    price: "월 105,000원",
-    color: "blue",
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/Z202205252",
-  },
-  37: {
-    name: "5G 프리미어 슈퍼",
-    description: "최고의 혜택, 슈퍼 프리미엄",
-    price: "월 115,000원",
-    color: "blue",
-    isRecommended: true,
-    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/Z202205251",
-  },
-};
-
-const userTypes: Record<string, UserType> = {
-  호박벌형: {
-    type: "호박벌형",
-    emoji: "🐝",
-    title: "데이터 쓰는 꿀박형",
-    description: "인터넷은 공기 같은 존재, 데이터가 부족하면 진짜 불편해!",
-    recommendations: ["5G 프리미어 에센셜", "5G 프리미어 레귤러"],
-    savings: 25000,
-    message: "꿀벌형인 당신, 멈추지 마세요! 꿀처럼 달콤한 무제한 요금제를 추천해요🍯",
-  },
-  개미형: {
-    type: "개미형",
-    emoji: "🐜",
-    title: "내 가족은 내가 지킨다",
-    description: `💰 혜택 보다는 실속임. 결합할수록 이득 따짐.
-
-👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
-
-🤷‍♂️ 누가 요금제 뭐쓰냐하면 "몰라? 아빠가 알걸" 이라고 함.
-
-📱 데이터 부족하면 가족한테 달라고 함.`,
-    recommendations: ["U+투게더 결합", "참 쉬운 가족 결합"],
-    savings: 45000,
-    message: `이젠 당신도 한 번쯤 챙겨볼 타이밍.
-가족끼리 요금제 공유하고, 새싹도 같이 키워보세요🌱`,
-  },
-  무당벌레형: {
-    type: "무당벌레형",
-    emoji: "🐞",
-    title: "TMI를 주고 받는게 일상!",
-    description: "통화, 문자는 제 삶의 기본값, 연락은 진심이라구요!",
-    recommendations: ["LTE 선택형 요금제", "5G 심플+", "유쓰 5G 스탠다드"],
-    savings: 0,
-    message: "무당벌레형은 통화가 생명! 무제한으로 수다 떨어도 부담 없는 요금제를 추천해요📞",
-  },
-  라바형: {
-    type: "라바형",
-    emoji: "🐛",
-    title: "티끌 모아 태산, 요금도 전략적으로",
-    description: "혜택보다 중요한 건 내 지갑 사정. 꼭 필요한 기능만!",
-    recommendations: ["유쓰 5G 미니", "유쓰 5G 슬림+"],
-    savings: 15000,
-    message: "애벌레는 물 한 방울도 아깝지요! 알뜰한 당신에게 꼭 맞는 요금제가 있어요🍃",
-  },
-  나비형: {
-    type: "나비형",
-    emoji: "🦋",
-    title: "알잘딱깔센 요금 마스터",
-    description: "알아서 잘! 딱! 깔끔하고 센스 있게! 멤버십·제휴 할인 골라쓰는 재미~",
-    recommendations: ["5G 프리미어 플러스", "U+ 멤버십 결합 상품"],
-    savings: 35000,
-    message:
-      "나비형은 아름답게 혜택을 날개처럼 펼치죠🦋 지금 당신에게 가장 유리한 조건으로 안내할게요!",
-  },
-};
-
-const typeImageMap: Record<string, string> = {
-  호박벌형: "/images/bee.png",
-  라바형: "/images/larva.png",
-  무당벌레형: "/images/ladybug.png",
-  개미형: "/images/ant.png",
-  나비형: "/images/butterfly.png",
-};
-
-// Intersection Observer Hook
-function useInViewOnce(threshold = 0.1) {
-  const ref = useRef(null);
-  const [inView, setHasBeenInView] = useState(false);
-
-  useEffect(() => {
-    if (!ref.current) return;
-    const observer = new window.IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setHasBeenInView(true);
-      },
-      { threshold }
-    );
-    observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return [ref, inView] as const;
-}
-
-const parseBenefitString = (benefitString: string): Array<{ title: string; content: string }> => {
-  if (!benefitString) return [];
-  const benefits: Array<{ title: string; content: string }> = [];
-  const regex = /<h3>(.*?)<\/h3>\s*<p>(.*?)<\/p>/g;
-  let match;
-  while ((match = regex.exec(benefitString)) !== null) {
-    benefits.push({ title: match[1].trim(), content: match[2].trim() });
-  }
-  return benefits;
-};
-
-const getBenefitIcon = (title: string) => {
-  const iconMap: Record<string, React.ReactNode> = {
-    음성통화: <Check className="w-3 h-3 text-white" />,
-    문자메시지: <Zap className="w-3 h-3 text-white" />,
-    기본혜택: <Star className="w-3 h-3 text-white" />,
-  };
-  return iconMap[title] || <Check className="w-3 h-3 text-white" />;
-};
+import { planDetails, userTypes, typeImageMap } from "@/lib/survey-result-data";
+import { useInViewOnce } from "@/hooks/useInViewOnce";
+import { parseBenefitString, getBenefitIcon } from "@/lib/survey-utils";
 
 export default function SurveyResultContent() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [benefitRef, benefitHasBeenInView] = useInViewOnce(0.2);
-  const [planRef, planInView] = useInViewOnce(0.2);
+  const [benefitRef, benefitHasBeenInView] = useInViewOnce<HTMLDivElement>(0.2);
+  const [planRef, planInView] = useInViewOnce<HTMLDivElement>(0.2);
 
-  // 📍 [수정] URL에서 bugId 가져오기
+  // URL에서 bugId 가져오기
   const searchParams = useSearchParams();
   const bugId = searchParams.get("bugId") ? parseInt(searchParams.get("bugId")!) : null;
 
