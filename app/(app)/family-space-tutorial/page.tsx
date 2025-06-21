@@ -172,7 +172,7 @@ export default function FamilySpaceTutorialPage() {
 
   return (
     <>
-      <div className="h-full w-full bg-gradient-to-br from-green-50 to-blue-50 max-w-md mx-auto flex flex-col overflow-hidden">
+      <div className="h-full flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
         {/* Header */}
         <div className="flex items-center justify-center p-4 flex-shrink-0 relative">
           <div className="text-center">
