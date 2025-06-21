@@ -123,10 +123,10 @@ const calculateScore = (answers: Record<number, string>) => {
 // 유형별 점수 계산 함수
 const calculateTypeScores = (answers: Record<number, string>) => {
   const scores = {
-    개미형: 0, // 가격 중시
+    라바형: 0, // 가격 중시 (알뜰형)
     무당벌레형: 0, // 통화 중시
     나비형: 0, // 혜택 중시
-    장수풍뎅이형: 0, // 가족 중시
+    개미형: 0, // 가족 중시
     호박벌형: 0, // 데이터 중시
   };
 
@@ -136,47 +136,52 @@ const calculateTypeScores = (answers: Record<number, string>) => {
     // 각 질문별로 유형 점수 부여
     switch (questionNum) {
       case 1: // 스마트폰에서 중요한 것
-        if (selectedValue === "price") scores.개미형 += 2;
+        if (selectedValue === "price") scores.라바형 += 2;
         if (selectedValue === "call") scores.무당벌레형 += 2;
         if (selectedValue === "benefit") scores.나비형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 2;
+        if (selectedValue === "family") scores.개미형 += 2;
         if (selectedValue === "data") scores.호박벌형 += 2;
         break;
       case 2: // 데이터 사용량
-        if (selectedValue === "minimal") scores.개미형 += 2;
+        if (selectedValue === "minimal") scores.라바형 += 2;
         if (selectedValue === "occasional") scores.호박벌형 += 2;
-        if (selectedValue === "frequent") scores.호박벌형 += 3;
+        if (selectedValue === "frequent") scores.개미형 += 2; // 가족 데이터 덕분에 → 가족형
+        if (selectedValue === "normal") scores.호박벌형 += 1;
         if (selectedValue === "business") scores.무당벌레형 += 2;
         break;
       case 3: // 요금제 선택 기준
-        if (selectedValue === "price") scores.개미형 += 2;
+        if (selectedValue === "price") scores.라바형 += 2;
         if (selectedValue === "call") scores.무당벌레형 += 2;
         if (selectedValue === "benefit") scores.나비형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 2;
+        if (selectedValue === "family") scores.개미형 += 2;
         if (selectedValue === "data") scores.호박벌형 += 2;
         break;
       case 4: // 기기/요금제 변경 시점
-        if (selectedValue === "cheap") scores.개미형 += 2;
+        if (selectedValue === "cheap") scores.라바형 += 2;
+        if (selectedValue === "new") scores.나비형 += 1;
         if (selectedValue === "benefit") scores.나비형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 2;
+        if (selectedValue === "family") scores.개미형 += 2;
+        if (selectedValue === "occasional") scores.라바형 += 1; // "상황되면" -> 알뜰 성향
         break;
       case 5: // 통화 패턴
+        if (selectedValue === "family") scores.개미형 += 2; // 가족과 통화 → 가족형
+        if (selectedValue === "business") scores.무당벌레형 += 1;
         if (selectedValue === "call") scores.무당벌레형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 1;
+        if (selectedValue === "text") scores.라바형 += 1; // 문자/카톡 위주 -> 알뜰 성향
         if (selectedValue === "video") scores.호박벌형 += 1;
         break;
       case 6: // 요금제 선택 기준
-        if (selectedValue === "compare") scores.개미형 += 1;
+        if (selectedValue === "compare") scores.라바형 += 1; // 비교 -> 알뜰 성향
         if (selectedValue === "benefit") scores.나비형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 2;
+        if (selectedValue === "family") scores.개미형 += 2;
         if (selectedValue === "call") scores.무당벌레형 += 2;
         if (selectedValue === "data") scores.호박벌형 += 2;
         break;
       case 7: // 공감되는 말
-        if (selectedValue === "price") scores.개미형 += 2;
+        if (selectedValue === "price") scores.라바형 += 2;
         if (selectedValue === "call") scores.무당벌레형 += 2;
         if (selectedValue === "benefit") scores.나비형 += 2;
-        if (selectedValue === "family") scores.장수풍뎅이형 += 2;
+        if (selectedValue === "family") scores.개미형 += 2;
         if (selectedValue === "data") scores.호박벌형 += 2;
         break;
     }
@@ -197,8 +202,8 @@ const analyzeResult = (totalScore: number, answers: Record<number, string>) => {
   let selectedType = maxTypes[0][0];
 
   if (maxTypes.length > 1) {
-    // 동점인 경우 우선순위: 장수풍뎅이형 > 나비형 > 호박벌형 > 무당벌레형 > 개미형
-    const priority = ["장수풍뎅이형", "나비형", "호박벌형", "무당벌레형", "개미형"];
+    // 동점인 경우 우선순위: 개미형(가족) > 나비형(혜택) > 호박벌형(데이터) > 무당벌레형(통화) > 라바형(알뜰)
+    const priority = ["개미형", "나비형", "호박벌형", "무당벌레형", "라바형"];
     for (const priorityType of priority) {
       if (maxTypes.find(([type]) => type === priorityType)) {
         selectedType = priorityType;
@@ -214,11 +219,11 @@ const analyzeResult = (totalScore: number, answers: Record<number, string>) => {
 };
 
 const typeToBugId: Record<string, number> = {
-  개미형: 1,
+  호박벌형: 1,
   무당벌레형: 2,
-  나비형: 3,
-  장수풍뎅이형: 4,
-  호박벌형: 5,
+  라바형: 3,
+  나비형: 4,
+  개미형: 5, // 가족형. DB에서는 '장수풍뎅이'로 처리
 };
 
 export default function SurveyPage() {
@@ -238,16 +243,23 @@ export default function SurveyPage() {
       const totalScore = calculateScore(newAnswers);
       const result = analyzeResult(totalScore, newAnswers);
 
+      // 📍 [디버깅] 점수 계산 결과 출력
+      const typeScores = calculateTypeScores(newAnswers);
+      console.log("🔍 설문 답변:", newAnswers);
+      console.log("🔍 유형별 점수:", typeScores);
+      console.log("🔍 선택된 유형:", result.type);
+      console.log("🔍 매핑된 bugId:", typeToBugId[result.type]);
+
       localStorage.setItem("surveyAnswers", JSON.stringify(newAnswers));
       localStorage.setItem("surveyScore", totalScore.toString());
       localStorage.setItem("surveyResult", JSON.stringify(result));
       localStorage.setItem("surveyCompletedAt", new Date().toISOString());
 
-      // bugId 매핑 및 API 호출
-      const bugId = typeToBugId[result.type] || 1;
+      // API 호출
+      const bugId = typeToBugId[result.type];
       try {
         await postSurveyResult.mutateAsync(bugId);
-        setTimeout(() => router.push("/survey-result"), 500);
+        router.push(`/survey-result?bugId=${bugId}`);
       } catch (e) {
         alert("설문 결과 저장에 실패했습니다. 다시 시도해 주세요.");
       }
