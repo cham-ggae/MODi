@@ -7,8 +7,6 @@ import { FamilySpaceProvider } from "@/contexts/family-space-context";
 import { PlantProvider } from "@/contexts/plant-context";
 import AuthProvider from "@/components/providers/AuthProvider";
 import { QueryProvider } from "@/components/providers/QueryProvider";
-import { MobileHeader } from "@/components/layouts/mobile-header";
-import { MobileNav } from "@/components/mobile-nav";
 import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -51,13 +49,8 @@ export default function RootLayout({
                 <PlantProvider>
                   {/* 전체 화면을 차지하는 컨테이너 */}
                   <div className="h-full w-full flex flex-col overflow-hidden">
-                    {/* 헤더는 앱 그룹에만 표시 */}
-                    <div className="md:hidden flex-shrink-0">
-                      <MobileHeader leftAction={<MobileNav />} title="MODi" />
-                    </div>
-
                     {/* 메인 콘텐츠 영역 - 헤더 제외한 나머지 공간 */}
-                    <div className="flex-1 overflow-hidden md:pt-0 pt-16">{children}</div>
+                    <div className="flex-1 overflow-hidden">{children}</div>
                   </div>
                 </PlantProvider>
               </FamilySpaceProvider>

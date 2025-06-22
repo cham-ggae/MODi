@@ -57,6 +57,7 @@ export default function FamilySpacePage() {
   const [plantStatus, setPlantStatus] = useState<PlantStatus | null>(null);
   const { mutate: addPoint } = useAddPoint();
   const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showMessageCardCreator, setShowMessageCardCreator] = useState(false);
 
   // ==========================================
   // 📅 가족스페이스 생성일 계산
@@ -203,6 +204,16 @@ export default function FamilySpacePage() {
     setShowMessageModal(false);
   };
 
+  const handleMessageCardCreated = () => {
+    // 메시지 카드 생성 후 포인트 적립
+    addPoint({ activityType: "emotion" });
+    toast({
+      title: "메시지 카드를 생성했습니다! 💌",
+      description: "경험치가 적립되었습니다.",
+    });
+    setShowMessageCardCreator(false);
+  };
+
   // ==========================================
   // 📊 데이터 변환 및 준비
   // ==========================================
@@ -332,6 +343,7 @@ export default function FamilySpacePage() {
             messageCards={messageCards?.cards || []}
             totalCount={messageCards?.totalCount || 0}
             isLoading={isLoadingMessageCards}
+            onMessageCardCreated={handleMessageCardCreated}
           />
 
           {/* Reward History Section */}
