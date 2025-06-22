@@ -30,20 +30,85 @@ import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
 import { Sprout, TreePine } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { MessageCardModal } from "@/components/message-card-modal";
+import confetti from "canvas-confetti";
+import { CardMatchingGame } from "@/components/plant-game/CardMatchingGame";
+import { useGenerateInviteCode } from "@/hooks/family/useFamilyMutations";
+import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
+import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
+import { QuizPage } from "@/components/plant-game/QuizPage";
 
+// ==========================================
+// 🎮 새싹 키우기 게임 메인 페이지
+// ==========================================
 /**
  * 새싹 키우기 게임 메인 페이지
  *
  * 주요 기능:
  * - 실시간 가족 구성원 물주기 상태 표시
- * - 식물 레벨별 성장 시각화
+ * - 식물 레벨별 성장 시각화 (1~5레벨)
  * - 하루 한번 제한된 물주기/영양제 활동
  * - 소켓을 통한 실시간 동기화
- * - 미션 시스템 연동
+ * - 미션 시스템 연동 (출석, 메시지, 퀴즈, 카드게임, 가족등록, 설문)
+ * - 5레벨 달성 시 보상 시스템
  */
 
-// 선택형 모달 컴포넌트 (간단 예시)
+// ==========================================
+// 🎯 미션 데이터 정의
+// ==========================================
+const MISSIONS: Mission[] = [
+  {
+    id: 1,
+    title: "1일 1회 출석하기",
+    description: "매일 밤 12시에 다시 시작됩니다.",
+    icon: "✏️",
+    reward: "출석하기",
+    activityType: "attendance",
+  },
+  {
+    id: 2,
+    title: "가족에게 메세지 남기기",
+    description: "사랑하는 가족에게 작은 한마디",
+    icon: "💌",
+    reward: "메세지 작성",
+    activityType: "emotion",
+  },
+  {
+    id: 3,
+    title: "요금제 퀴즈 풀기",
+    description: "더 많은 할인이 기다릴지도?",
+    icon: "🎯",
+    reward: "퀴즈 풀기",
+    activityType: "quiz",
+  },
+  {
+    id: 4,
+    title: "골라 골라 오늘의 요금제",
+    description: "카들르 맞히고 요금제를 알아봐!!",
+    icon: "🎲",
+    reward: "카드 맞히기",
+    activityType: "lastleaf",
+  },
+  {
+    id: 5,
+    title: "가족 등록",
+    description: "모든 가족들과 함께",
+    icon: "👨‍👩‍👧‍👦",
+    reward: "초대하기",
+    activityType: "register",
+  },
+  {
+    id: 6,
+    title: "통신 성향 검사",
+    description: "나에게 맞는 통신 캐릭터는?",
+    icon: "💬",
+    reward: "검사하기",
+    activityType: "survey",
+  },
+];
+
+// ==========================================
+// 🎲 선택형 모달 컴포넌트
+// ==========================================
 function ChoiceModal({
   title,
   options,
@@ -58,6 +123,7 @@ function ChoiceModal({
   direction?: "row" | "col";
 }) {
   const [selected, setSelected] = useState<string | null>(null);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-xl p-6 w-80 flex flex-col items-center">
@@ -90,151 +156,79 @@ function ChoiceModal({
   );
 }
 
+// ==========================================
+// 🌱 새싹 키우기 게임 메인 컴포넌트
+// ==========================================
 export default function PlantGamePage() {
   // ==========================================
   // 🎮 게임 상태 관리
   // ==========================================
-
-  /** 미션 시트 표시 여부 */
-  const [showMissions, setShowMissions] = useState(false);
-
-  /** 보상 모달 표시 여부 */
-  const [showRewardModal, setShowRewardModal] = useState(false);
-
-  /** 보상 데이터 */
-  const [rewardData, setRewardData] = useState<RewardHistory | null>(null);
-
-  /** 현재 식물 레벨 (소켓에서 받은 데이터) */
-  const [currentLevel, setCurrentLevel] = useState(1);
-
-  /** 현재 경험치 진행률 (소켓에서 받은 데이터) */
-  const [currentProgress, setCurrentProgress] = useState(0);
+  const [showMissions, setShowMissions] = useState(false); // 미션 시트 표시 여부
+  const [showRewardModal, setShowRewardModal] = useState(false); // 보상 모달 표시 여부
+  const [rewardData, setRewardData] = useState<RewardHistory | null>(null); // 보상 데이터
+  const [currentLevel, setCurrentLevel] = useState(1); // 현재 식물 레벨
+  const [currentProgress, setCurrentProgress] = useState(0); // 현재 경험치 진행률
 
   // ==========================================
   // 🌱 활동 상태 관리
   // ==========================================
-
-  /** 물주기 애니메이션 상태 */
-  const [isWatering, setIsWatering] = useState(false);
-
-  /** 영양제 주기 애니메이션 상태 */
-  const [isFeeding, setIsFeeding] = useState(false);
-
-  /** 오늘 물주기 완료 여부 (현재 사용자) */
-  const [alreadyWatered, setAlreadyWatered] = useState(false);
-
-  /** 오늘 영양제 주기 완료 여부 (현재 사용자) */
-  const [alreadyFed, setAlreadyFed] = useState(false);
+  const [isWatering, setIsWatering] = useState(false); // 물주기 애니메이션 상태
+  const [isFeeding, setIsFeeding] = useState(false); // 영양제 주기 애니메이션 상태
+  const [alreadyWatered, setAlreadyWatered] = useState(false); // 오늘 물주기 완료 여부
+  const [alreadyFed, setAlreadyFed] = useState(false); // 오늘 영양제 주기 완료 여부
 
   // ==========================================
   // 👨‍👩‍👧‍👦 가족 구성원 상태 관리
   // ==========================================
+  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]); // 가족 구성원 목록
+  const [wateredMemberIds, setWateredMemberIds] = useState<number[]>([]); // 오늘 물주기 완료한 구성원 ID 목록
 
-  /** 가족 구성원 목록 */
-  const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>([]);
-
-  /** 오늘 물주기 완료한 구성원 ID 목록 */
-  const [wateredMemberIds, setWateredMemberIds] = useState<number[]>([]);
+  // ==========================================
+  // 🎯 모달 상태 관리
+  // ==========================================
+  const [showQuizModal, setShowQuizModal] = useState(false); // 퀴즈 모달 표시 여부
+  const [showCardMatchingGame, setShowCardMatchingGame] = useState(false); // 카드 매칭 게임 표시 여부
+  const [showMessageCardCreator, setShowMessageCardCreator] = useState(false); // 메시지 카드 생성기 표시 여부
+  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false); // 초대 코드 모달 표시 여부
+  const [showQuizPage, setShowQuizPage] = useState(false); // 퀴즈 페이지 표시 여부
+  const [copied, setCopied] = useState(false); // 초대 코드 복사 상태
 
   // ==========================================
   // 🔐 인증 및 사용자 정보
   // ==========================================
-
-  /** 현재 로그인한 사용자 정보 */
-  const { user } = useAuth();
-
-  // ==========================================
-  // 🎯 미션 데이터
-  // ==========================================
-
-  /** 사용 가능한 미션 목록 */
-  const missions: Mission[] = [
-    {
-      id: 1,
-      title: "1일 1회 출석하기",
-      description: "매일 밤 12시에 다시 시작됩니다.",
-      icon: "✏️",
-      reward: "출석하기",
-      activityType: "attendance",
-    },
-    {
-      id: 2,
-      title: "가족에게 메세지 남기기",
-      description: "사랑하는 가족에게 작은 한마디",
-      icon: "💌",
-      reward: "메세지 작성",
-      activityType: "emotion",
-    },
-    {
-      id: 3,
-      title: "요금제 퀴즈 풀기",
-      description: "더 많은 할인이 기다릴지도?",
-      icon: "🎯",
-      reward: "퀴즈 풀기",
-      activityType: "quiz",
-    },
-    {
-      id: 4,
-      title: "나의 오늘 운 확인!",
-      description: "여러 선택지 중 하나를 골라봐!!",
-      icon: "🎲",
-      reward: "오늘 운 확인",
-      activityType: "lastleaf",
-    },
-    {
-      id: 5,
-      title: "가족 등록",
-      description: "모든 가족들과 함께",
-      icon: "👨‍👩‍👧‍👦",
-      reward: "초대하기",
-      activityType: "register",
-    },
-    {
-      id: 6,
-      title: "통신 성향 검사",
-      description: "나에게 맞는 통신 캐릭터는?",
-      icon: "💬",
-      reward: "검사하기",
-      activityType: "survey",
-    },
-  ];
+  const { user } = useAuth(); // 현재 로그인한 사용자 정보
 
   // ==========================================
   // 🔌 API 훅 및 데이터
   // ==========================================
+  const { familyId, family } = useFamily(); // 가족 정보 및 ID
+  const { mutate: generateNewCode } = useGenerateInviteCode(); // 초대 코드 생성 API
 
-  /** 가족 정보 및 ID */
-  const { familyId: fid, family } = useFamily();
-
-  /** 식물 상태 정보 */
+  // 식물 상태 정보
   const {
     data: plantStatus,
     isLoading: isPlantLoading,
     error: plantError,
-  } = usePlantStatus(fid ?? 0);
+  } = usePlantStatus(familyId ?? 0);
 
-  /** 오늘 물주기 완료 여부 (서버 확인) */
+  // 오늘 활동 완료 여부 확인
   const { data: checkAlreadyWatered } = useCheckTodayActivity("water");
-
-  /** 오늘 영양제 주기 완료 여부 (서버 확인) */
   const { data: checkAlreadyFed } = useCheckTodayActivity("nutrient");
+  const { data: nutrientCount = 0 } = useNutrientStatus(); // 영양제 개수
 
-  /** 영양제 개수 (서버에서 실시간 조회) */
-  const { data: nutrientCount = 0 } = useNutrientStatus();
-
-  /** 포인트 적립 API */
+  // 포인트 적립 및 보상 수령 API
   const { mutate: addPoint, isPending } = useAddPoint();
-
-  /** 보상 수령 API */
   const { mutate: claimReward, isPending: isClaiming } = useClaimReward();
 
-  /** 쿼리 클라이언트 (캐시 무효화용) */
+  // 쿼리 클라이언트 (캐시 무효화용)
   const queryClient = useQueryClient();
 
-  // ✅ 상태 관리
+  // ==========================================
+  // 🔄 초기화 및 상태 관리
+  // ==========================================
   const [initialized, setInitialized] = useState(false);
 
-  // ✅ 서버 응답으로 최초 상태 세팅 (소켓보다 우선 적용)
+  // 서버 응답으로 최초 상태 세팅 (소켓보다 우선 적용)
   useEffect(() => {
     if (plantStatus && !initialized) {
       setCurrentLevel(plantStatus.level);
@@ -245,64 +239,40 @@ export default function PlantGamePage() {
     }
   }, [plantStatus, initialized]);
 
-  // ✅ 실시간 소켓 업데이트
-  usePlantSocket(
-    fid ?? 0,
-    useCallback(
-      (event: PlantEventData) => {
-        setCurrentLevel(event.level);
-        setCurrentProgress(Math.floor((event.experiencePoint / event.expThreshold) * 100));
-        if (event.isLevelUp) {
-          toast.success("🎉 레벨업! 식물이 성장했습니다!");
-        }
-      },
-      [fid]
-    )
-  );
-
   // ==========================================
   // 📊 가족 구성원 데이터 관리
   // ==========================================
 
-  /**
-   * 가족 구성원 정보 설정
-   * 서버에서 받은 가족 정보를 로컬 상태에 동기화
-   */
+  // 가족 구성원 정보 설정
   useEffect(() => {
     if (family?.members) {
       setFamilyMembers(family.members);
     }
   }, [family]);
 
-  /**
-   * 물주기 완료된 구성원 조회
-   * 서버에서 오늘 물주기를 완료한 구성원 ID 목록을 가져옴
-   */
+  // 물주기 완료된 구성원 조회
   const fetchWateredMembers = useCallback(async () => {
-    if (!fid) return;
+    if (!familyId) return;
     try {
-      const wateredIds = await plantApi.getWaterMembers(fid);
+      const wateredIds = await plantApi.getWaterMembers(familyId);
       setWateredMemberIds(wateredIds);
     } catch (error) {
       console.error("물주기 완료 구성원 조회 실패:", error);
     }
-  }, [fid]);
+  }, [familyId]);
 
-  /** 초기 로딩 시 물주기 완료 구성원 조회 */
+  // 초기 로딩 시 물주기 완료 구성원 조회
   useEffect(() => {
     fetchWateredMembers();
   }, [fetchWateredMembers]);
 
   // ==========================================
-  // 🔄 실시간 소켓 연결
+  // 🔄 실시간 소켓 연결 및 이벤트 처리
   // ==========================================
 
-  /**
-   * 실시간 식물 활동 소켓 연결
-   * 모든 가족 구성원의 활동을 실시간으로 수신하고 처리
-   */
+  // 실시간 식물 활동 소켓 연결
   usePlantSocket(
-    fid ?? 0,
+    familyId ?? 0,
     useCallback(
       (event: PlantEventData) => {
         // 레벨과 경험치 업데이트 (모든 이벤트에서)
@@ -332,7 +302,7 @@ export default function PlantGamePage() {
               setAlreadyFed(true);
             }
             // 영양제 사용 시 영양제 개수 감소 (서버에서 업데이트된 값으로 동기화)
-            queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+            queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
             toast.success(`${event.name}님이 영양제를 주었습니다! 🌱`);
             break;
 
@@ -353,7 +323,7 @@ export default function PlantGamePage() {
             break;
 
           case "lastleaf":
-            toast.success(`${event.name}님이 마지막 잎을 달성했습니다! 🍃`);
+            toast.success(`${event.name}님이 카드 맞히기를 달성했습니다! 🍃`);
             break;
 
           case "register":
@@ -364,13 +334,9 @@ export default function PlantGamePage() {
           // console.log("알 수 없는 활동 타입:", event.type);
         }
       },
-      [fid, queryClient, user?.nickname, fetchWateredMembers]
+      [familyId, queryClient, user?.nickname, fetchWateredMembers]
     )
   );
-
-  // ==========================================
-  // 💾 식물 타입 초기화
-  // ==========================================
 
   // ==========================================
   // 💧 물주기 활동 처리
@@ -398,7 +364,7 @@ export default function PlantGamePage() {
           setTimeout(() => setIsWatering(false), 2000);
           queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "water"] });
           // 식물 상태 업데이트를 위해 쿼리 무효화
-          queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+          queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
           // 물주기 완료된 구성원 목록 업데이트
           fetchWateredMembers();
         },
@@ -450,7 +416,7 @@ export default function PlantGamePage() {
           setAlreadyFed(true);
           setTimeout(() => setIsFeeding(false), 2000);
           queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "nutrient"] });
-          queryClient.invalidateQueries({ queryKey: ["plant-status", fid] });
+          queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
           // 영양제 개수 업데이트를 위해 쿼리 무효화
           queryClient.invalidateQueries({ queryKey: ["nutrient", "stock"] });
         },
@@ -465,37 +431,15 @@ export default function PlantGamePage() {
   // 🔄 활동 상태 동기화
   // ==========================================
 
-  /**
-   * 서버에서 받은 물주기 상태로 로컬 상태 동기화
-   * 하루 갱신 시 정확한 상태 반영
-   */
+  // 서버에서 받은 물주기 상태로 로컬 상태 동기화
   useEffect(() => {
     setAlreadyWatered(!!checkAlreadyWatered);
   }, [checkAlreadyWatered]);
 
-  /**
-   * 서버에서 받은 영양제 상태로 로컬 상태 동기화
-   * 하루 갱신 시 정확한 상태 반영
-   */
+  // 서버에서 받은 영양제 상태로 로컬 상태 동기화
   useEffect(() => {
     setAlreadyFed(!!checkAlreadyFed);
   }, [checkAlreadyFed]);
-
-  // ==========================================
-  // 🎨 UI 데이터 변환
-  // ==========================================
-
-  /**
-   * FamilyWateringStatus 컴포넌트에 전달할 데이터 변환
-   * 서버 데이터를 UI 컴포넌트에 맞는 형태로 변환
-   */
-  const transformedMembers = familyMembers.map((member) => ({
-    id: member.uid,
-    name: member.name,
-    avatar: member.profileImage || "👤", // 카카오 프로필 이미지 또는 기본 이모지
-    hasWatered: wateredMemberIds.includes(member.uid),
-    status: wateredMemberIds.includes(member.uid) ? "물주기 완료" : "",
-  }));
 
   // ==========================================
   // 🎁 보상 시스템
@@ -503,15 +447,20 @@ export default function PlantGamePage() {
 
   /**
    * 보상 수령 버튼 클릭 핸들러
+   * 5레벨 달성 시 보상 수령 및 confetti 효과
    */
   const handleClaimRewardClick = () => {
     if (currentLevel === 5) {
-      // useClaimReward 호출
       claimReward(undefined, {
         onSuccess: (rewardData) => {
           setRewardData(rewardData);
           setShowRewardModal(true);
-          // 토스트는 useClaimReward 훅에서 처리되므로 여기서는 제거
+          // 🎉 confetti 효과 추가
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 }, // 화면 중간쯤에서 터짐
+          });
         },
         onError: (error) => {
           // 에러 토스트는 useClaimReward 훅에서 처리됨
@@ -520,7 +469,11 @@ export default function PlantGamePage() {
     }
   };
 
-  // ✅ 미션별 오늘 완료 여부 (서버에서 확인)
+  // ==========================================
+  // 🎯 미션 시스템
+  // ==========================================
+
+  // 미션별 오늘 완료 여부 (서버에서 확인)
   const missionTypes: ActivityType[] = [
     "attendance",
     "emotion",
@@ -541,20 +494,33 @@ export default function PlantGamePage() {
     }
   }, [showMissions]);
 
-  const handleMissionClick = (activityType: import("@/types/plants.type").ActivityType) => {
+  /**
+   * 미션 클릭 핸들러
+   * 미션 타입에 따라 적절한 모달을 열거나 포인트를 적립
+   */
+  const handleMissionClick = (activityType: ActivityType) => {
     if (missionCompletedMap[activityType]) {
       toast("내일 다시");
       setShowMissions(false);
       return;
     }
+
     switch (activityType) {
       case "quiz":
         setShowMissions(false);
-        setShowQuizModal(true);
+        setShowQuizPage(true);
         break;
       case "lastleaf":
         setShowMissions(false);
-        setShowFortuneModal(true);
+        setShowCardMatchingGame(true);
+        break;
+      case "emotion":
+        setShowMissions(false);
+        setShowMessageCardCreator(true);
+        break;
+      case "register":
+        setShowMissions(false);
+        setShowInviteCodeModal(true);
         break;
       default:
         addPoint({ activityType });
@@ -562,11 +528,77 @@ export default function PlantGamePage() {
     }
   };
 
-  const [showQuizModal, setShowQuizModal] = useState(false);
-  const [showFortuneModal, setShowFortuneModal] = useState(false);
+  // ==========================================
+  // 🎮 게임 콜백 함수들
+  // ==========================================
 
+  // 메시지 카드 생성 완료 핸들러
+  const handleMessageCardCreated = () => {
+    addPoint({ activityType: "emotion" });
+    toast.success("메시지 카드를 생성했습니다! 경험치가 적립되었습니다. 💌");
+  };
+
+  // 카드 게임 완료 핸들러
+  const handleCardGameCompleted = () => {
+    addPoint({ activityType: "lastleaf" });
+    toast.success("마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃");
+  };
+
+  // 카카오톡 공유 핸들러
+  const handleShareKakao = () => {
+    addPoint({ activityType: "register" });
+    toast.success("가족을 초대했습니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦");
+  };
+
+  // 초대 코드 복사 핸들러
+  const handleCopyCode = async () => {
+    if (!family?.family?.inviteCode) return;
+
+    try {
+      await navigator.clipboard.writeText(family.family.inviteCode);
+      setCopied(true);
+      toast.success("초대 코드가 복사되었습니다! 가족들에게 공유해보세요.");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("복사에 실패했습니다");
+    }
+  };
+
+  // 새로운 초대 코드 생성 핸들러
+  const handleGenerateNewInviteCode = () => {
+    if (!familyId) return;
+    generateNewCode(familyId);
+  };
+
+  // 가족명 저장 핸들러
+  const handleSaveFamilyName = (name: string) => {
+    toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+  };
+
+  // ==========================================
+  // 🎨 UI 데이터 변환
+  // ==========================================
+
+  /**
+   * FamilyWateringStatus 컴포넌트에 전달할 데이터 변환
+   * 서버 데이터를 UI 컴포넌트에 맞는 형태로 변환
+   */
+  const transformedMembers = familyMembers.map((member) => ({
+    id: member.uid,
+    name: member.name,
+    avatar: member.profileImage || "👤", // 카카오 프로필 이미지 또는 기본 이모지
+    hasWatered: wateredMemberIds.includes(member.uid),
+    status: wateredMemberIds.includes(member.uid) ? "물주기 완료" : "",
+  }));
+
+  // ==========================================
+  // 🔄 라우터 및 기타
+  // ==========================================
   const router = useRouter();
 
+  // ==========================================
+  // 🚀 로딩 상태 처리
+  // ==========================================
   if (isPlantLoading || !plantStatus) {
     return (
       <div className="flex justify-center items-center h-[100dvh] bg-white text-gray-700 text-lg">
@@ -578,9 +610,8 @@ export default function PlantGamePage() {
   // ==========================================
   // 🎮 UI 렌더링
   // ==========================================
-
   return (
-    <div className="h-[100dvh] bg-gradient-to-b from-blue-100 to-blue-50 max-w-md mx-auto flex flex-col overflow-hidden">
+    <div className="h-full bg-gradient-to-b from-blue-100 to-blue-50 max-w-md mx-auto flex flex-col overflow-hidden">
       {/* 📱 헤더 영역 */}
       <div className="flex items-center justify-between p-3 flex-shrink-0">
         <Link href="/family-space">
@@ -620,7 +651,7 @@ export default function PlantGamePage() {
           />
         </div>
       ) : (
-        <div className="flex-1 flex items-center justify-center px-4">
+        <div className="flex-1 flex items-center justify-center px-4 h-full w-full">
           <PlantImageDisplay
             selectedPlantType={plantStatus?.plantType}
             currentLevel={currentLevel}
@@ -643,11 +674,10 @@ export default function PlantGamePage() {
           </div>
         ) : (
           <>
-            <PlantProgressBar level={currentLevel} progress={currentProgress} fid={fid ?? 0} />
+            <PlantProgressBar level={currentLevel} progress={currentProgress} fid={familyId ?? 0} />
             <PlantActionButtons
               onWater={handleWatering}
               onFeed={handleFeeding}
-              nutrientCount={nutrientCount}
               disabled={isPending}
               checkingWater={isWatering}
               alreadyWatered={alreadyWatered}
@@ -662,7 +692,7 @@ export default function PlantGamePage() {
       <AnimatePresence>
         {showMissions && (
           <MissionSheet
-            missions={missions}
+            missions={MISSIONS}
             onClose={() => setShowMissions(false)}
             onMissionClick={handleMissionClick}
             completedMap={missionCompletedMap}
@@ -682,32 +712,47 @@ export default function PlantGamePage() {
         )}
       </AnimatePresence>
 
-      {/* 퀴즈 모달 */}
-      {showQuizModal && (
-        <ChoiceModal
-          title="요금제 퀴즈! 정답을 골라주세요"
-          options={["A. 1GB 요금제", "B. 5GB 요금제", "C. 10GB 요금제", "D. 무제한 요금제"]}
-          direction="col"
-          onSubmit={() => {
-            addPoint({ activityType: "quiz" });
-            setShowQuizModal(false);
-            toast.success("퀴즈 완료! 경험치가 적립되었습니다.");
-          }}
-          onClose={() => setShowQuizModal(false)}
-        />
-      )}
-      {/* 운세 모달 */}
-      {showFortuneModal && (
-        <ChoiceModal
-          title="오늘의 운세! 카드를 골라주세요"
-          options={["🍀", "🌟", "💎", "🎁"]}
-          onSubmit={() => {
-            addPoint({ activityType: "lastleaf" });
-            setShowFortuneModal(false);
-            toast.success("운세 완료! 경험치가 적립되었습니다.");
-          }}
-          onClose={() => setShowFortuneModal(false)}
-        />
+      {/* 🎲 카드 매칭 게임 */}
+      <CardMatchingGame
+        isOpen={showCardMatchingGame}
+        onClose={() => setShowCardMatchingGame(false)}
+        onComplete={handleCardGameCompleted}
+      />
+
+      {/* 💌 메시지 카드 생성기 */}
+      <MessageCardCreator
+        isOpen={showMessageCardCreator}
+        onOpenChange={setShowMessageCardCreator}
+        onCardCreated={handleMessageCardCreated}
+        trigger={null}
+      />
+
+      {/* 👨‍👩‍👧‍👦 초대 코드 모달 */}
+      <InviteCodeModal
+        isOpen={showInviteCodeModal}
+        onOpenChange={setShowInviteCodeModal}
+        inviteCode={family?.family?.inviteCode || ""}
+        familyName={family?.family?.name || "우리 가족"}
+        onGenerateCode={handleGenerateNewInviteCode}
+        onCopyCode={handleCopyCode}
+        onShareKakao={handleShareKakao}
+        onSaveFamilyName={handleSaveFamilyName}
+        copied={copied}
+        trigger={null}
+      />
+
+      {/* 🎯 퀴즈 페이지 */}
+      {showQuizPage && (
+        <div className="fixed inset-0 z-50">
+          <QuizPage
+            onBack={() => setShowQuizPage(false)}
+            onQuizComplete={() => {
+              addPoint({ activityType: "quiz" });
+              toast.success("퀴즈 완료! 경험치가 적립되었습니다. 🎯");
+              setShowQuizPage(false);
+            }}
+          />
+        </div>
       )}
     </div>
   );

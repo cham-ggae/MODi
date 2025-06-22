@@ -24,9 +24,11 @@ export interface ErrorResponse {
 
 //히스토리 보상에 대한 타입 정의( 보상이름,설명,날짜)
 export interface RewardHistory {
+  id: number;
   rewardName: string;
   description: string;
   receivedAt: string;
+  used: boolean; // 사용완료 여부
 }
 
 // 물주기 포인트 적립: POST /points/add -

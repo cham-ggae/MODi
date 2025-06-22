@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 
 interface Props {
   selectedPlantType: "flower" | "tree" | null;
@@ -21,32 +22,56 @@ export function PlantImageDisplay({
   };
   const plantImage = getCurrentPlantImage();
 
+  // 이전 레벨 저장용 훅
+  function usePrevious<T>(value: T): T | undefined {
+    const ref = useRef<T>();
+    useEffect(() => {
+      ref.current = value;
+    }, [value]);
+    return ref.current;
+  }
+
   return (
-    <div className="relative flex items-center justify-center w-full">
-      {plantImage ? (
-        <motion.div
-          key={currentLevel}
-          animate={{
-            rotate: [0, 5, -5, 0],
-            scale: isWatering || isFeeding ? [1, 1.1, 1] : 1,
-          }}
-          transition={{
-            rotate: { duration: 3, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" },
-            scale: { duration: 0.5 },
-          }}
-          className="flex justify-center"
-        >
-          <Image
-            src={plantImage || "/placeholder.svg"}
-            alt={`${selectedPlantType} 레벨 ${currentLevel}`}
-            width={300}
-            height={300}
-            className="object-contain"
-          />
-        </motion.div>
-      ) : (
-        <div className="text-8xl">🌱</div>
-      )}
+    <div className="relative w-full max-w-md px-4 pt-4 pb-2 h-full flex items-center justify-center">
+      <AnimatePresence mode="wait">
+        {plantImage ? (
+          <motion.div
+            key={plantImage} // 이미지 변경 시 전환 애니메이션
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{
+              opacity: 1,
+              scale: isWatering || isFeeding ? [1, 1.1, 1] : 1,
+              rotate: [0, 5, -5, 0],
+            }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{
+              opacity: { duration: 0.3 },
+              scale: { duration: 0.5 },
+              rotate: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            }}
+            className="relative w-full h-full"
+          >
+            <Image
+              src={plantImage}
+              alt={`${selectedPlantType} 레벨 ${currentLevel}`}
+              fill
+              priority
+              className="object-contain m-4"
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="seed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-8xl"
+          >
+            🌱
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Water Animation */}
       <AnimatePresence>
         {isWatering && (
@@ -54,9 +79,9 @@ export function PlantImageDisplay({
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 50 }}
             exit={{ opacity: 0 }}
-            className="absolute text-4xl"
+            className="absolute top-8  text-4xl"
           >
-            💧💧💧
+            💧💧💧💧
           </motion.div>
         )}
       </AnimatePresence>
@@ -67,9 +92,9 @@ export function PlantImageDisplay({
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
-            className="absolute text-4xl"
+            className="absolute top-8 text-4xl"
           >
-            ✨⭐✨
+            ✨⭐⭐✨
           </motion.div>
         )}
       </AnimatePresence>

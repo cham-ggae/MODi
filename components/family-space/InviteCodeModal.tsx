@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
+} from "@/components/ui/dialog";
+import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from "lucide-react";
 
 interface InviteCodeModalProps {
   inviteCode: string;
@@ -21,6 +21,9 @@ interface InviteCodeModalProps {
   copied: boolean;
   isLoading?: boolean;
   canInvite?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 export function InviteCodeModal({
@@ -33,10 +36,17 @@ export function InviteCodeModal({
   copied,
   isLoading = false,
   canInvite = true,
+  isOpen,
+  onOpenChange,
+  trigger,
 }: InviteCodeModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [tempFamilyName, setTempFamilyName] = useState('');
+  const [tempFamilyName, setTempFamilyName] = useState("");
+
+  const isControlled = isOpen !== undefined;
+  const open = isControlled ? isOpen : internalIsOpen;
+  const setOpen = isControlled ? onOpenChange : setIsOpen;
 
   const handleEditFamilyName = () => {
     setTempFamilyName(familyName);
@@ -51,20 +61,31 @@ export function InviteCodeModal({
   };
 
   const handleCancelEdit = () => {
-    setTempFamilyName('');
+    setTempFamilyName("");
     setIsEditingName(false);
   };
 
+  const handleShareKakao = () => {
+    onShareKakao();
+    if (isControlled) {
+      setOpen?.(false);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          size="sm"
-          className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
-        >
-          <UserPlus className="w-5 h-5" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {!isControlled && trigger !== null && (
+        <DialogTrigger asChild>
+          {trigger || (
+            <Button
+              size="sm"
+              className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
+            >
+              <UserPlus className="w-5 h-5" />
+            </Button>
+          )}
+        </DialogTrigger>
+      )}
       <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
         <DialogHeader>
           <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
@@ -87,7 +108,7 @@ export function InviteCodeModal({
                         className="text-center text-sm max-w-32 dark:bg-gray-600 dark:text-white"
                         placeholder="가족명 입력"
                         onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
+                          if (e.key === "Enter") {
                             handleSaveFamilyName();
                           }
                         }}
@@ -107,7 +128,7 @@ export function InviteCodeModal({
                   ) : (
                     <div className="flex items-center gap-2 justify-center">
                       <span className="text-xs text-gray-400 dark:text-gray-500">
-                        가족명: {familyName || '우리 가족'}
+                        가족명: {familyName || "우리 가족"}
                       </span>
                       <Button
                         onClick={handleEditFamilyName}
@@ -133,10 +154,10 @@ export function InviteCodeModal({
                     ) : (
                       <Copy className="w-4 h-4 mr-2" />
                     )}
-                    {copied ? '복사됨' : '복사'}
+                    {copied ? "복사됨" : "복사"}
                   </Button>
                   <Button
-                    onClick={onShareKakao}
+                    onClick={handleShareKakao}
                     size="sm"
                     className="flex-1 bg-yellow-400 hover:bg-gray-400 text-black"
                   >
