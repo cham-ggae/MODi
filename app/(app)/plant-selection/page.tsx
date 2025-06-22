@@ -72,7 +72,7 @@ export default function PlantSelectionPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 max-w-md mx-auto">
+    <div className="h-full bg-white dark:bg-gray-900 max-w-md mx-auto">
       <PlantSelectionHeader />
       <div className="p-6">
         <PlantSelectionIntro />

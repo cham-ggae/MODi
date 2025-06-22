@@ -14,7 +14,7 @@ export function PlantOptionCard({ plant, selected, onSelect }: PlantOptionCardPr
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className={`
-        cursor-pointer transition-all duration-200 rounded-2xl p-6 border-2
+        relative cursor-pointer transition-all duration-200 rounded-2xl p-6 border-2 flex flex-col items-center h-full
         ${
           selected
             ? "border-green-500 bg-green-50 dark:bg-green-900/20 shadow-lg"
@@ -23,30 +23,18 @@ export function PlantOptionCard({ plant, selected, onSelect }: PlantOptionCardPr
       `}
       onClick={() => onSelect(plant.id as "flower" | "tree")}
     >
-      <div className="flex items-center space-x-4">
-        <div className="relative">
-          <Image
-            src={plant.image || "/placeholder.svg"}
-            alt={plant.name}
-            width={80}
-            height={80}
-            className="drop-shadow-sm"
-          />
-          {selected && (
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg"
-            >
-              <div className="w-2 h-2 bg-white rounded-full" />
-            </motion.div>
-          )}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{plant.name}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">{plant.description}</p>
-        </div>
+      <div className="relative w-[96px] h-[96px] mb-4">
+        <Image
+          src={plant.image || "/placeholder.svg"}
+          alt={plant.name}
+          fill
+          priority
+          className="object-contain drop-shadow-sm"
+        />
       </div>
+
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{plant.name}</h3>
+      <p className="text-sm text-center text-gray-600 dark:text-gray-400">{plant.description}</p>
     </motion.div>
   );
 }
