@@ -31,19 +31,37 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDown, Check, Star, Zap, Heart } from "lucide-react";
 import { useGetSurveyResult } from "@/hooks/use-survey-result";
 import { bugNameUiMap } from "@/types/survey.type";
 import { SurveyResultResponse } from "@/types/survey.type";
 import { planDetails, userTypes, typeImageMap } from "@/lib/survey-result-data";
-import { useInViewOnce } from "@/hooks/useInViewOnce";
-import { parseBenefitString, getBenefitIcon } from "@/lib/survey-utils";
+import { useInView } from "react-intersection-observer";
+import { parseBenefitString, getBenefitIcon, transformBenefitTextToHtml } from "@/lib/survey-utils";
+
+// bugId에 따른 추천 이유 매핑
+const getRecommendationReason = (bugId: number): string => {
+  switch (bugId) {
+    case 1: // 호박벌형
+      return "출퇴근길 유튜브·릴스 루틴이 필수라면?<br/>무제한 데이터에 유튜브/디즈니+ 혜택까지!<br/>스트리밍족을 위한 완벽한 조합이에요🍯";
+    case 2: // 무당벌레형
+      return "하루 통화량이 많다면 무제한 음성통화는 기본!<br/>50GB/14GB 데이터로 메시지도 걱정 없이.<br/>통화가 일상인 당신에게 꼭 맞는 요금제예요☎️";
+    case 3: // 라바형 (기존 개미형)
+      return "매달 요금 걱정된다면?<br/>데이터·통화 기본은 챙기고,<br/>월 4~5만 원대 실속형 요금제 조합이에요💸";
+    case 4: // 나비형
+      return "유튜브, 넷플릭스, 디즈니+까지?!<br/>최대 4개 OTT 중 택1 무료 제공!<br/>혜택 다 챙기고 싶은 당신을 위한 프리미엄 선택🦋";
+    case 5: // 장수풍뎅이형 (가족형)
+      return "가족 전체의 통신비를 챙겨야 한다면?<br/>무제한 통화·데이터에 넷플릭스·디즈니 혜택까지!<br/>든든하게 챙길 수 있는 대표 요금제 조합이에요🛡️";
+    default:
+      return "당신에게 최적화된 요금제를 추천해드려요!";
+  }
+};
 
 export default function SurveyResultContent() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [benefitRef, benefitHasBeenInView] = useInViewOnce<HTMLDivElement>(0.2);
-  const [planRef, planInView] = useInViewOnce<HTMLDivElement>(0.2);
+  const [hasAnimatedBenefit, setHasAnimatedBenefit] = useState(false);
+  const [hasAnimatedPlan, setHasAnimatedPlan] = useState(false);
 
   // URL에서 bugId 가져오기
   const searchParams = useSearchParams();
@@ -54,6 +72,38 @@ export default function SurveyResultContent() {
     isLoading,
     isError,
   } = useGetSurveyResult(bugId!, { enabled: !!bugId });
+
+  // react-intersection-observer 사용
+  const { ref: benefitRef, inView: benefitInView } = useInView({
+    threshold: 0.2,
+    triggerOnce: false,
+  });
+
+  const { ref: planRef, inView: planInView } = useInView({
+    threshold: 0.2,
+    triggerOnce: false,
+  });
+
+  // 📍 [디버깅] API 응답 데이터 확인용 console.log 추가
+  useEffect(() => {
+    if (surveyResult) {
+      console.log("🔍 API 응답(surveyResult):", surveyResult);
+      console.log("🔍 혜택 정보(benefit):", surveyResult.benefit);
+    }
+  }, [surveyResult]);
+
+  // 애니메이션 상태 관리
+  useEffect(() => {
+    if (benefitInView && !hasAnimatedBenefit) {
+      setHasAnimatedBenefit(true);
+    }
+  }, [benefitInView, hasAnimatedBenefit]);
+
+  useEffect(() => {
+    if (planInView && !hasAnimatedPlan) {
+      setHasAnimatedPlan(true);
+    }
+  }, [planInView, hasAnimatedPlan]);
 
   useEffect(() => {
     const timer1 = setTimeout(() => setCurrentStep(1), 1000);
@@ -92,15 +142,16 @@ export default function SurveyResultContent() {
 
   const finalUserType = {
     ...userType,
-    description: surveyResult.feature || userType.description,
-    message: surveyResult.personality || userType.message,
+    description: userType.description,
+    message: userType.message,
     recommendations: [
       planDetails[surveyResult.suggest1]?.name,
       planDetails[surveyResult.suggest2]?.name,
     ].filter(Boolean) as string[],
   };
 
-  const parsedBenefits = parseBenefitString(surveyResult.benefit || "");
+  // bugId에 따른 추천 이유 가져오기
+  const recommendationReason = getRecommendationReason(bugId);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
@@ -119,15 +170,26 @@ export default function SurveyResultContent() {
         </div>
 
         <div className="mb-6 text-center">
-          <p className="text-gray-600 text-sm mb-2">{finalUserType.title}</p>
           <h1 className="text-4xl font-bold text-emerald-600 mb-4">{finalUserType.type}</h1>
-          {finalUserType.savings > 0 && (
-            <p className="text-gray-700 text-lg leading-relaxed">
-              <span className="font-semibold">
-                월 최대 {finalUserType.savings.toLocaleString()}원 절약 가능!
-              </span>
+        </div>
+
+        <Card className="mb-20 bg-white/80 backdrop-blur-sm border-emerald-100 shadow-lg rounded-2xl">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-emerald-700 text-center">
+              {finalUserType.title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-700 text-left whitespace-pre-wrap leading-relaxed font-medium px-2">
+              {finalUserType.description}
             </p>
-          )}
+          </CardContent>
+        </Card>
+
+        <div className="text-center mb-20 px-4">
+          <p className="text-gray-700 text-lg leading-relaxed font-medium">
+            "{finalUserType.message}"
+          </p>
         </div>
 
         <div
@@ -138,53 +200,42 @@ export default function SurveyResultContent() {
           <div className="animate-bounce mb-4">
             <ChevronDown className="w-8 h-8 text-emerald-500 mx-auto" />
           </div>
-          <p className="text-emerald-600 font-medium mb-6">혜택확인하기</p>
+          <p className="text-emerald-600 font-medium mb-6">나에게 맞는 요금제는?</p>
         </div>
       </div>
 
       <div
         ref={benefitRef}
-        className={`transition-all duration-1000 ease-out delay-2000 opacity-100 translate-y-0`}
+        className={`transition-all duration-700 ease-out max-w-md mx-auto ${
+          hasAnimatedBenefit ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+        }`}
       >
-        <div className="bg-white/80 backdrop-blur-sm p-6">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-              이런 혜택이 있어요!
-            </h2>
-            <Card className="mb-6 shadow-lg border-0 bg-gray-50">
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  {parsedBenefits.length > 0 ? (
-                    parsedBenefits.map((benefit, idx) => (
-                      <div key={idx} className="flex items-start gap-3">
-                        <div className="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          {getBenefitIcon(benefit.title)}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-gray-800 mb-1">{benefit.title}</h3>
-                          <p className="text-gray-600 text-sm">{benefit.content}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-gray-600 text-center">추천 혜택을 준비 중입니다.</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+        <div className="bg-white/80 backdrop-blur-sm p-6 shadow-md mb-10">
+          <h2 className="text-xl font-bold text-center text-gray-800 mb-6">
+            ✨ 이런 이유로 이 요금제를 추천했어요!
+          </h2>
+          <div className="text-center">
+            <p
+              className="text-gray-700 text-lg leading-relaxed font-medium"
+              dangerouslySetInnerHTML={{ __html: recommendationReason }}
+            />
           </div>
         </div>
       </div>
 
       <div
         ref={planRef}
-        className="transition-all duration-1000 ease-out delay-300 opacity-100 translate-y-0"
+        className={`transition-all duration-700 ease-out ${
+          hasAnimatedPlan ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+        }`}
       >
         <div className="bg-white p-6 pb-12">
           <div className="max-w-md mx-auto space-y-4">
-            {[surveyResult.suggest1, surveyResult.suggest2].map((planId) => {
+            {[surveyResult.suggest1, surveyResult.suggest2].map((planId, index) => {
               if (!planId || !planDetails[planId]) return null;
               const plan = planDetails[planId];
+              const isFirstPlan = index === 0;
+
               return (
                 <Card
                   key={plan.name}
@@ -212,7 +263,11 @@ export default function SurveyResultContent() {
                       </div>
                     </div>
                     <Button
-                      className="w-full bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white font-semibold py-3 rounded-xl shadow-lg"
+                      className={`w-full font-semibold py-3 rounded-xl shadow-lg ${
+                        isFirstPlan
+                          ? "bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white"
+                          : "bg-white border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                      }`}
                       onClick={() => window.open(plan.link, "_blank")}
                     >
                       요금제 자세히 보기

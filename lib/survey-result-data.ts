@@ -23,6 +23,7 @@ export const planDetails: Record<
     color: string; // 카드 색상 테마
     isRecommended?: boolean; // 추천 여부
     link: string; // 외부 링크
+    benefit: string; // 📍 [추가] 요금제별 혜택 상세 (텍스트)
   }
 > = {
   1: {
@@ -32,6 +33,8 @@ export const planDetails: Record<
     color: "emerald",
     isRecommended: true,
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000409",
+    benefit:
+      "음성통화: 집/이동전화 무제한(+부가통화 300분) 문자메시지: 기본제공 기본혜택: U+모바일tv 기본 월정액 무료",
   },
   4: {
     name: "5G 프리미어 레귤러",
@@ -39,6 +42,8 @@ export const planDetails: Record<
     price: "월 95,000원",
     color: "blue",
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000433",
+    benefit:
+      "미디어 혜택: 유튜브 프리미엄 또는 디즈니+ 무료 음성통화: 집/이동전화 무제한 문자메시지: 기본제공",
   },
   6: {
     name: "5G 데이터 레귤러",
@@ -47,6 +52,8 @@ export const planDetails: Record<
     color: "emerald",
     isRecommended: true,
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000783",
+    benefit:
+      "음성통화: 집/이동전화 무제한(+부가통화 300분) 문자메시지: 기본제공 데이터: 50GB 소진 후 1Mbps 속도제어",
   },
   8: {
     name: "5G 라이트+",
@@ -54,6 +61,8 @@ export const planDetails: Record<
     price: "월 55,000원",
     color: "emerald",
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000437",
+    benefit:
+      "음성통화: 집/이동전화 무제한(+부가통화 300분) 문자메시지: 기본제공 데이터: 14GB 소진 후 1Mbps 속도제어",
   },
   10: {
     name: "5G 미니",
@@ -61,6 +70,7 @@ export const planDetails: Record<
     price: "월 37,000원",
     color: "emerald",
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ1000325",
+    benefit: "음성통화: 집/이동전화 무제한 문자메시지: 기본제공 데이터: 6GB",
   },
   12: {
     name: "5G 슬림+",
@@ -68,6 +78,8 @@ export const planDetails: Record<
     price: "월 47,000원",
     color: "emerald",
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000487",
+    benefit:
+      "음성통화: 집/이동전화 무제한(+부가통화 300분) 문자메시지: 기본제공 데이터: 9GB 소진 후 400kbps 속도제어",
   },
   13: {
     name: "5G 프리미어 플러스",
@@ -75,6 +87,8 @@ export const planDetails: Record<
     price: "월 105,000원",
     color: "blue",
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/Z202205252",
+    benefit:
+      "미디어 혜택: 유튜브 프리미엄, 디즈니+, 넷플릭스 중 택 1 무료 음성통화: 집/이동전화 무제한 문자메시지: 기본제공",
   },
   37: {
     name: "5G 프리미어 슈퍼",
@@ -83,6 +97,8 @@ export const planDetails: Record<
     color: "blue",
     isRecommended: true,
     link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/Z202205251",
+    benefit:
+      "미디어 혜택: 유튜브 프리미엄, 디즈니+, 넷플릭스, 티빙 중 택 1 무료 음성통화: 집/이동전화 무제한 문자메시지: 기본제공",
   },
 };
 
@@ -92,22 +108,21 @@ export const userTypes: Record<string, UserType> = {
   호박벌형: {
     type: "호박벌형",
     emoji: "🐝",
-    title: "데이터 쓰는 꿀박형",
-    description: "인터넷은 공기 같은 존재, 데이터가 부족하면 진짜 불편해!",
+    title: "데이터 없으면 그냥 벽돌폰 아닌가요?",
+    description: `📶와이파이? 느려서 못 씀. LTE로 바로 튐.
+🚆출퇴근길엔 무조건 유튜브, 인스타 릴스 루틴 있음.
+📱데이터 소진 알림 뜨면 약간 식은땀 남. 
+        `,
     recommendations: ["5G 프리미어 에센셜", "5G 프리미어 레귤러"],
     savings: 25000,
-    message: "꿀벌형인 당신, 멈추지 마세요! 꿀처럼 달콤한 무제한 요금제를 추천해요🍯",
+    message: "꿀벌형인 당신, 꿀처럼 달콤한 무제한 데이터 요금제를 추천해요🍯",
   },
   개미형: {
     type: "개미형",
     emoji: "🐜",
     title: "내 가족은 내가 지킨다",
-    description: `💰 혜택 보다는 실속임. 결합할수록 이득 따짐.
-
-👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
-
+    description: `👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
 🤷‍♂️ 누가 요금제 뭐쓰냐하면 "몰라? 아빠가 알걸" 이라고 함.
-
 📱 데이터 부족하면 가족한테 달라고 함.`,
     recommendations: ["U+투게더 결합", "참 쉬운 가족 결합"],
     savings: 45000,
@@ -117,8 +132,10 @@ export const userTypes: Record<string, UserType> = {
   무당벌레형: {
     type: "무당벌레형",
     emoji: "🐞",
-    title: "TMI를 주고 받는게 일상!",
-    description: "통화, 문자는 제 삶의 기본값, 연락은 진심이라구요!",
+    title: "카톡보단 전화로 해줘..",
+    description: `📞 전화는 3초 안에 받는 게 예의.
+💬 카톡으로 톡하느니 전화로 확실하게 말함.
+📱 하루 통화 시간 통계 보면 내가 봐도 깜짝 놀람.`,
     recommendations: ["LTE 선택형 요금제", "5G 심플+", "유쓰 5G 스탠다드"],
     savings: 0,
     message: "무당벌레형은 통화가 생명! 무제한으로 수다 떨어도 부담 없는 요금제를 추천해요📞",
@@ -126,17 +143,22 @@ export const userTypes: Record<string, UserType> = {
   라바형: {
     type: "라바형",
     emoji: "🐛",
-    title: "티끌 모아 태산, 요금도 전략적으로",
-    description: "혜택보다 중요한 건 내 지갑 사정. 꼭 필요한 기능만!",
+    title: "혜택도 좋지만.. 요금부터 봅시다",
+    description: `🪙 이벤트, 할인, 결합 쓸 수 있는 건 다 써봄.
+💸 가격 먼저 보고 혜택은 보너스로 생각함.
+🧾 청구서 보고 '이번달도 잘 막았다'는 뿌듯함 느끼는 타입
+                    `,
     recommendations: ["유쓰 5G 미니", "유쓰 5G 슬림+"],
     savings: 15000,
-    message: "애벌레는 물 한 방울도 아깝지요! 알뜰한 당신에게 꼭 맞는 요금제가 있어요🍃",
+    message: "라바는 물 한 방울도 아깝다! 알뜰한 당신에게 꼭 맞는 요금제가 있어요🍃",
   },
   나비형: {
     type: "나비형",
     emoji: "🦋",
-    title: "알잘딱깔센 요금 마스터",
-    description: "알아서 잘! 딱! 깔끔하고 센스 있게! 멤버십·제휴 할인 골라쓰는 재미~",
+    title: "멤버십, 제휴 할인 그래서 뭐가 있죠?",
+    description: `🎁 제휴 혜택, 멤버십 적립 다 외우고 다님.
+💡이거 포인트 적립돼요?” 입에 달고 다님.
+🛍️ 혜택 보자마자 “어머 이건 사야 돼” 모드 돌입`,
     recommendations: ["5G 프리미어 플러스", "U+ 멤버십 결합 상품"],
     savings: 35000,
     message:
