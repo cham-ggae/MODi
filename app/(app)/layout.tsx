@@ -22,7 +22,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     // 모바일 뷰: flexbox 기반 레이아웃으로 안정화, 헤더 제거
     return (
       <div className="h-full w-full flex flex-col bg-background">
-        {showHeader && <header className="flex-shrink-0">{header}</header>}
         <main className="flex-1 overflow-y-auto">{main}</main>
         <footer className="flex-shrink-0">{footer}</footer>
       </div>
