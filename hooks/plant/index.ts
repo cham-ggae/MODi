@@ -5,3 +5,5 @@ export * from "./useRewardHistory";
 export * from "./useAddPoint";
 export * from "./useNutrientStock";
 export * from "./useCheckTodayActivity";
+export * from "./useFamilyRewardHistory";
+export * from "./useMarkRewardAsUsed";
