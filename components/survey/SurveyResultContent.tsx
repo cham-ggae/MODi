@@ -27,19 +27,20 @@ useInViewOnce: 컴포넌트 뷰포트 진입 시 1회 렌더 트리거
 추천 요금제 카드 리스트
 */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, Check, Star, Zap, Heart } from "lucide-react";
+import { ChevronDown, X, ArrowLeft } from "lucide-react";
 import { useGetSurveyResult } from "@/hooks/use-survey-result";
 import { bugNameUiMap } from "@/types/survey.type";
-import { SurveyResultResponse } from "@/types/survey.type";
-import { planDetails, userTypes, typeImageMap } from "@/lib/survey-result-data";
+import { planDetails, userTypes, typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
 import { useInView } from "react-intersection-observer";
-import { parseBenefitString, getBenefitIcon, transformBenefitTextToHtml } from "@/lib/survey-utils";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import { useFamily } from "@/hooks/family";
 
 // bugId에 따른 추천 이유 매핑
 const getRecommendationReason = (bugId: number): string => {
@@ -60,15 +61,17 @@ const getRecommendationReason = (bugId: number): string => {
 };
 
 export default function SurveyResultContent() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const router = useRouter();
+  const { hasFamily } = useFamily();
   const [hasAnimatedBenefit, setHasAnimatedBenefit] = useState(false);
-  const [hasAnimatedPlan, setHasAnimatedPlan] = useState(false);
   const [isFamilyBenefitOpen, setIsFamilyBenefitOpen] = useState(false);
   const [isAdditionalDiscountOpen, setIsAdditionalDiscountOpen] = useState(false);
+  const [isSproutInfoOpen, setIsSproutInfoOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // URL에서 bugId 가져오기
   const searchParams = useSearchParams();
-  const bugId = searchParams.get("bugId") ? parseInt(searchParams.get("bugId")!) : null;
+  const bugId = searchParams.get("bugId") ? Number.parseInt(searchParams.get("bugId")!) : null;
 
   const {
     data: surveyResult,
@@ -79,21 +82,8 @@ export default function SurveyResultContent() {
   // react-intersection-observer 사용
   const { ref: benefitRef, inView: benefitInView } = useInView({
     threshold: 0.2,
-    triggerOnce: false,
+    triggerOnce: true,
   });
-
-  const { ref: planRef, inView: planInView } = useInView({
-    threshold: 0.2,
-    triggerOnce: false,
-  });
-
-  // 📍 [디버깅] API 응답 데이터 확인용 console.log 추가
-  useEffect(() => {
-    if (surveyResult) {
-      console.log("🔍 API 응답(surveyResult):", surveyResult);
-      console.log("🔍 혜택 정보(benefit):", surveyResult.benefit);
-    }
-  }, [surveyResult]);
 
   // 애니메이션 상태 관리
   useEffect(() => {
@@ -101,21 +91,6 @@ export default function SurveyResultContent() {
       setHasAnimatedBenefit(true);
     }
   }, [benefitInView, hasAnimatedBenefit]);
-
-  useEffect(() => {
-    if (planInView && !hasAnimatedPlan) {
-      setHasAnimatedPlan(true);
-    }
-  }, [planInView, hasAnimatedPlan]);
-
-  useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(1), 1000);
-    const timer2 = setTimeout(() => setCurrentStep(2), 4000);
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
 
   if (isError || !bugId) {
     return (
@@ -139,9 +114,9 @@ export default function SurveyResultContent() {
     );
   }
 
-  const displayName = bugNameUiMap[surveyResult.bugName] || "개미형";
+  const displayName = bugIdToNameMap[bugId] || "개미형";
   const userType = userTypes[displayName];
-  const imageSrc = typeImageMap[displayName] || "/images/butterfly.png";
+  const imageSrc = typeImageMap[displayName] || "/images/ant.png";
 
   const finalUserType = {
     ...userType,
@@ -153,205 +128,335 @@ export default function SurveyResultContent() {
     ].filter(Boolean) as string[],
   };
 
-  // bugId에 따른 추천 이유 가져오기
   const recommendationReason = getRecommendationReason(bugId);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-      <div className="relative p-6 max-w-md mx-auto">
-        <div className="relative mb-8 text-center">
-          <div className="animate-float">
-            <Image
-              src={imageSrc}
-              alt={finalUserType.type}
-              width={250}
-              height={250}
-              className="mx-auto drop-shadow-lg"
-              priority
-            />
+    <div className="bg-gradient-to-b from-blue-100 to-blue-50 min-h-screen w-full">
+      <div className="max-w-md mx-auto">
+        <div className="p-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            aria-label="이전으로 가기"
+            className="hover:bg-transparent focus:bg-transparent"
+          >
+            <ArrowLeft className="w-6 h-6" style={{ color: "#000" }} />
+          </Button>
+        </div>
+        <div className="p-6 pt-0 space-y-6">
+          {/* 설문조사 결과 */}
+          <div className="space-y-4">
+            {/* 캐릭터 이미지 */}
+            <div className="text-center mb-6">
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+              >
+                <Image
+                  src={imageSrc || "/placeholder.svg"}
+                  alt={finalUserType.type}
+                  width={150}
+                  height={150}
+                  className="mx-auto mb-4"
+                  priority
+                />
+              </motion.div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: "rgb(62 73 68)" }}>
+                {finalUserType.type}
+              </h2>
+            </div>
+
+            {/* 특성 카드 */}
+            <Card className="bg-white rounded-2xl shadow-sm border-0">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-bold text-gray-800 text-center">
+                  {finalUserType.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {finalUserType.description.split("\n").map((line, index) => (
+                  <p key={index} className="text-gray-700 text-sm leading-relaxed">
+                    {line.trim()}
+                  </p>
+                ))}
+              </CardContent>
+            </Card>
+
+            {/* 메시지 */}
+            <div className="text-center py-2 m-8">
+              <p className="text-[#6e6e6e] text-m italic m-8">"{finalUserType.message}"</p>
+            </div>
           </div>
-        </div>
 
-        <div className="mb-6 text-center">
-          <h1 className="text-4xl font-bold text-emerald-600 mb-4">{finalUserType.type}</h1>
-        </div>
-
-        <Card className="mb-20 bg-white/80 backdrop-blur-sm border-emerald-100 shadow-lg rounded-2xl">
-          <CardHeader>
-            <CardTitle className="text-lg font-bold text-emerald-700 text-center">
-              {finalUserType.title}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-700 text-left whitespace-pre-wrap leading-relaxed font-medium px-2">
-              {finalUserType.description}
-            </p>
-          </CardContent>
-        </Card>
-
-        <div className="text-center mb-20 px-4">
-          <p className="text-gray-700 text-lg leading-relaxed font-medium">
-            "{finalUserType.message}"
-          </p>
-        </div>
-
-        <div
-          className={`transition-all duration-1000 ease-out text-center ${
-            currentStep >= 1 ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-          }`}
-        >
-          <div className="animate-bounce mb-4">
-            <ChevronDown className="w-8 h-8 text-emerald-500 mx-auto" />
+          {/* 추천 이유 */}
+          <div
+            ref={benefitRef}
+            className={`transition-all duration-700 ease-out ${
+              hasAnimatedBenefit ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+            }`}
+          >
+            <Card className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      {/* <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                        <span className="text-white text-sm font-bold">✨</span>
+                     </div> */}
+                      <h3 className="text-base font-bold text-gray-800">이 요금제를 추천해요!</h3>
+                    </div>
+                    <p
+                      className="text-gray-600 text-sm leading-relaxed pl-1"
+                      dangerouslySetInnerHTML={{ __html: recommendationReason }}
+                    />
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center flex-shrink-0">
+                    <span className="text-black text-xl">😊</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
-          <p className="text-emerald-600 font-medium mb-6">나에게 맞는 요금제는?</p>
-        </div>
-      </div>
 
-      <div
-        ref={benefitRef}
-        className={`transition-all duration-700 ease-out max-w-md mx-auto ${
-          hasAnimatedBenefit ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-        }`}
-      >
-        <div className="bg-white/80 backdrop-blur-sm p-6 shadow-md mb-10">
-          <h2 className="text-xl font-bold text-center text-gray-800 mb-6">
-            ✨ 이런 이유로 이 요금제를 추천했어요!
-          </h2>
-          <div className="text-center">
-            <p
-              className="text-gray-700 text-lg leading-relaxed font-medium"
-              dangerouslySetInnerHTML={{ __html: recommendationReason }}
-            />
-          </div>
-        </div>
-      </div>
+          {/* 가족 결합 혜택 섹션 (bugId === 5일 때만) */}
+          {bugId === 5 && (
+            <div className="space-y-4">
+              <Collapsible
+                open={isSproutInfoOpen}
+                onOpenChange={setIsSproutInfoOpen}
+                className="bg-white rounded-2xl shadow-sm border-0 overflow-hidden"
+              >
+                <CollapsibleTrigger className="w-full flex justify-between items-center p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-emerald-600 text-lg">🌱</span>
+                    <span className="font-semibold text-gray-800">새싹 키우기가 뭔가요?</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+                      isSproutInfoOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 border-t border-gray-100 space-y-3">
+                    <div className="bg-emerald-50 rounded-xl p-4">
+                      <h4 className="font-bold text-gray-800 mb-2">함께 키우는 우리 가족 나무🌳</h4>
+                      <p className="text-sm text-gray-700 mb-4">
+                        가족 스페이스에서 함께 미션을 수행하고 메시지를 나누면 우리만의 특별한
+                        나무가 자라나요. 가족과 데이터를 나누고, 함께 소통하며 특별한 보상도
+                        얻어보세요!
+                      </p>
+                      <Button
+                        onClick={() => {
+                          if (hasFamily) {
+                            router.push("/family-space");
+                          } else {
+                            router.push("/family-space-tutorial");
+                          }
+                        }}
+                        className="w-full mt-4 bg-emerald-500 hover:bg-emerald-600 text-white"
+                      >
+                        {hasFamily ? "가족 스페이스로 이동" : "새싹 키우러 가기"}
+                      </Button>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
 
-      <div
-        ref={planRef}
-        className={`transition-all duration-700 ease-out ${
-          hasAnimatedPlan ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
-        }`}
-      >
-        <div className="bg-white p-6 pb-12">
-          <div className="max-w-md mx-auto space-y-4">
-            {[surveyResult.suggest1, surveyResult.suggest2].map((planId, index) => {
-              if (!planId || !planDetails[planId]) return null;
-              const plan = planDetails[planId];
-              const isFirstPlan = index === 0;
-
-              return (
-                <Card
-                  key={plan.name}
-                  className="shadow-lg border-2 border-emerald-200 hover:border-emerald-300 transition-all duration-300 hover:scale-105"
-                >
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <div
-                          className={`text-xs ${
-                            plan.color === "emerald" ? "text-emerald-600" : "text-blue-600"
-                          } font-medium mb-1`}
-                        >
-                          {plan.description}
+              <Collapsible
+                open={isFamilyBenefitOpen}
+                onOpenChange={setIsFamilyBenefitOpen}
+                className="bg-white rounded-2xl shadow-sm border-0 overflow-hidden"
+              >
+                <CollapsibleTrigger className="w-full flex justify-between items-center p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-emerald-600 text-lg">👨‍👩‍👧‍👦</span>
+                    <span className="font-semibold text-gray-800">가족 결합 혜택 안내</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+                      isFamilyBenefitOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 border-t border-gray-100 space-y-3">
+                    <div className="bg-emerald-50 rounded-xl p-4">
+                      <p className="text-sm text-gray-700 mb-2">
+                        📌 1인당 <strong className="text-emerald-600">최대 20,000원</strong> 아낄 수
+                        있어요!
+                      </p>
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex justify-between">
+                          <span>• 2명</span>
+                          <strong>1인당 10,000원 할인</strong>
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800">{plan.name}</h3>
-                        {plan.isRecommended && (
-                          <div className="inline-block bg-emerald-100 text-emerald-700 text-xs px-2 py-1 rounded-full mt-2">
-                            추천
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-gray-800">{plan.price}</div>
+                        <div className="flex justify-between">
+                          <span>• 3명</span>
+                          <strong>1인당 14,000원 할인</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>• 4~5명</span>
+                          <strong>1인당 20,000원 할인</strong>
+                        </div>
                       </div>
                     </div>
-                    <Button
-                      className={`w-full font-semibold py-3 rounded-xl shadow-lg ${
-                        isFirstPlan
-                          ? "bg-gradient-to-r from-emerald-500 to-green-500 hover:from-emerald-600 hover:to-green-600 text-white"
-                          : "bg-white border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50"
-                      }`}
-                      onClick={() => window.open(plan.link, "_blank")}
-                    >
-                      요금제 자세히 보기
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible
+                open={isAdditionalDiscountOpen}
+                onOpenChange={setIsAdditionalDiscountOpen}
+                className="bg-white rounded-2xl shadow-sm border-0 overflow-hidden"
+              >
+                <CollapsibleTrigger className="w-full flex justify-between items-center p-4 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-orange-500 text-lg">🎁</span>
+                    <span className="font-semibold text-gray-800">추가 할인도 있어요</span>
+                  </div>
+                  <ChevronDown
+                    className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+                      isAdditionalDiscountOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </CollapsibleTrigger>
+                <CollapsibleContent>
+                  <div className="p-4 border-t border-gray-100 space-y-3">
+                    <div className="bg-orange-50 rounded-xl p-4 space-y-2 text-sm text-gray-700">
+                      <div>
+                        <span>• 청소년 할인: 만 18세 이하 구성원 </span>
+                        <strong>월 10,000원 추가 할인</strong>
+                      </div>
+                      <div>
+                        <span>• 시그니처 가족 할인: </span>
+                        <strong>최대 33,000원 할인</strong>
+                        <span className="text-gray-500"> (5G 시그니처 이용 시)</span>
+                      </div>
+                    </div>
+                  </div>
+                </CollapsibleContent>
+              </Collapsible>
+            </div>
+          )}
+
+          {/* 하단 안내 텍스트 */}
+          <div className="text-center pt-4">
+            <motion.div
+              animate={{ y: [0, -4, 0] }}
+              transition={{
+                duration: 1.5,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            >
+              <p className="text-[#6e6e6e] text-sm">추천 요금제 보고 포인트 쌓을 수 있어요 ↓</p>
+            </motion.div>
+          </div>
+
+          {/* 요금제 추천 보고 포인트 받기 버튼 */}
+          <div className="pb-8 mt-0">
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+            >
+              요금제 추천 보고 포인트 받기
+            </Button>
           </div>
         </div>
       </div>
 
-      {bugId === 5 && (
-        <div className="bg-white pb-12">
-          {/* 가족 결합 혜택 안내 토글 */}
-          <Collapsible
-            open={isFamilyBenefitOpen}
-            onOpenChange={setIsFamilyBenefitOpen}
-            className="border-t border-[#eaeaea]"
-          >
-            <div className="max-w-md mx-auto px-6">
-              <CollapsibleTrigger className="w-full flex justify-between items-center py-5">
-                <h3 className="text-sm font-semibold text-gray-500">가족 결합 혜택 안내</h3>
-                <ChevronDown
-                  className={`transition-transform duration-300 ${
-                    isFamilyBenefitOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </CollapsibleTrigger>
+      {/* 모달 */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full max-h-[80vh] overflow-y-auto">
+            {/* 모달 헤더 */}
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h3 className="text-l font-bold text-gray-800">추천 요금제</h3>
+              <Button
+                onClick={() => setIsModalOpen(false)}
+                variant="ghost"
+                size="sm"
+                className="w-8 h-8 p-0 rounded-full hover:bg-gray-100"
+              >
+                <X className="w-5 h-5" />
+              </Button>
             </div>
-            <CollapsibleContent className="bg-[#f8f8f8]">
-              <div className="max-w-md mx-auto px-6 py-6 text-left">
-                <div className="space-y-2 text-sm text-gray-800">
-                  <p>
-                    📌 1인당 <strong> 최대 20,000원 </strong> 아낄 수 있어요!
-                  </p>
-                  <ul className="list-disc space-y-1 pl-5">
-                    <li>
-                      2명: <strong>1인당 10,000원 할인</strong>
-                    </li>
-                    <li>
-                      3명: <strong>1인당 14,000원 할인</strong>
-                    </li>
-                    <li>
-                      4~5명: <strong>1인당 20,000원 할인</strong>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
 
-          {/* 추가 할인도 있어요 토글 */}
-          <Collapsible
-            open={isAdditionalDiscountOpen}
-            onOpenChange={setIsAdditionalDiscountOpen}
-            className="border-t border-b border-[#eaeaea]"
-          >
-            <div className="max-w-md mx-auto px-6">
-              <CollapsibleTrigger className="w-full flex justify-between items-center py-5">
-                <h4 className="text-sm font-semibold text-gray-500">🎁 추가 할인도 있어요</h4>
-                <ChevronDown
-                  className={`transition-transform duration-300 ${
-                    isAdditionalDiscountOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </CollapsibleTrigger>
+            {/* 모달 내용 */}
+            <div className="p-6 space-y-4">
+              {/* eslint-disable-next-line no-console */}
+              {(() => {
+                console.log(
+                  "[디버그] suggest1:",
+                  surveyResult.suggest1,
+                  "suggest2:",
+                  surveyResult.suggest2,
+                  "planDetails1:",
+                  planDetails[surveyResult.suggest1],
+                  "planDetails2:",
+                  planDetails[surveyResult.suggest2]
+                );
+                return null;
+              })()}
+              {[surveyResult.suggest1, surveyResult.suggest2].map((planId, index) => {
+                if (!planId || !planDetails[planId]) return null;
+                const plan = planDetails[planId];
+                const isFirstPlan = index === 0;
+
+                return (
+                  <Card
+                    key={plan.name}
+                    className={`relative bg-white rounded-2xl border-[1px] shadow-sm border-[#cccccc]`}
+                  >
+                    <CardContent className="p-6">
+                      {/* 추천 배지 */}
+                      {isFirstPlan && (
+                        <div className="absolute top-4 right-4">
+                          <span className="bg-[#53a2f5] text-white text-xs px-3 py-1 rounded-full font-semibold">
+                            추천
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="space-y-4">
+                        {/* 헤더 영역 */}
+                        <div className="pr-16">
+                          <p className="text-xs mb-2 uppercase tracking-wide text-[#5b85b1] font-semibold">
+                            {plan.description}
+                          </p>
+                          <h3 className="text-l font-bold text-gray-900 leading-tight">
+                            {plan.name}
+                          </h3>
+                        </div>
+
+                        {/* 가격 영역 */}
+                        <div className="flex justify-between items-end">
+                          <div></div>
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-gray-900">{plan.price}</div>
+                          </div>
+                        </div>
+
+                        {/* 버튼 영역 */}
+                        <Button
+                          className={`w-full py-3 rounded-xl transition-all duration-300 ${
+                            isFirstPlan
+                              ? "!bg-[#53a2f5] hover:!bg-[#3069a6] text-white"
+                              : "bg-white border-2 border-[#53a2f5] text-[#53a2f5] hover:bg-[#eaf4fd]"
+                          }`}
+                          onClick={() => window.open(plan.link, "_blank")}
+                        >
+                          요금제 자세히 보기
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
-            <CollapsibleContent className="bg-[#f8f8f8]">
-              <div className="max-w-md mx-auto px-6 py-6 text-left">
-                <ul className="list-disc space-y-1 pl-5 text-sm text-gray-800">
-                  <li>
-                    청소년 할인: 만 18세 이하 구성원 <strong>월 10,000원 추가 할인</strong>
-                  </li>
-                  <li>
-                    시그니처 가족 할인: <strong>최대 33,000원 할인</strong> (5G 시그니처 이용 시)
-                  </li>
-                </ul>
-              </div>
-            </CollapsibleContent>
-          </Collapsible>
+          </div>
         </div>
       )}
     </div>

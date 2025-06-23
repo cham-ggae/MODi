@@ -36,6 +36,15 @@ export const planDetails: Record<
     benefit:
       "음성통화: 집/이동전화 무제한(+부가통화 300분) 문자메시지: 기본제공 기본혜택: U+모바일tv 기본 월정액 무료",
   },
+  2: {
+    name: "5G 시그니처",
+    description: "가장 완벽한 5G 경험",
+    price: "월 130,000원",
+    color: "blue",
+    link: "https://www.lguplus.com/mobile/plan/mplan/5g-all/5g-unlimited/LPZ0000406",
+    benefit:
+      "미디어 혜택: 유튜브 프리미엄, 디즈니+, 넷플릭스, 티빙 중 택 2 무료 음성통화: 집/이동전화 무제한 문자메시지: 기본제공",
+  },
   4: {
     name: "5G 프리미어 레귤러",
     description: "미디어 혜택과 데이터의 균형",
@@ -120,7 +129,7 @@ export const userTypes: Record<string, UserType> = {
   개미형: {
     type: "개미형",
     emoji: "🐜",
-    title: "내 가족은 내가 지킨다",
+    title: "가족 요금제? 아빠만 아는 비밀",
     description: `👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
 🤷‍♂️ 누가 요금제 뭐쓰냐하면 "몰라? 아빠가 알걸" 이라고 함.
 📱 데이터 부족하면 가족한테 달라고 함.`,
@@ -173,4 +182,13 @@ export const typeImageMap: Record<string, string> = {
   무당벌레형: "/images/ladybug.png",
   개미형: "/images/ant.png",
   나비형: "/images/butterfly.png",
+};
+
+// bugId를 bugName으로 변환하기 위한 맵
+export const bugIdToNameMap: Record<number, string> = {
+  1: "호박벌형",
+  2: "무당벌레형",
+  3: "라바형",
+  4: "나비형",
+  5: "개미형", // 장수풍뎅이형이 아닌 개미형으로 API가 응답하는 경우가 있어 개미형으로 유지
 };

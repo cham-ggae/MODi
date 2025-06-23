@@ -1,19 +1,49 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { surveyApi } from "@/lib/api/survey-result";
-import type { SurveyResultResponse } from "@/types/survey.type";
+"use client";
 
-// 설문 결과 저장 (POST)
-export function usePostSurveyResult() {
-  return useMutation<SurveyResultResponse, Error, number>({
-    mutationFn: (bugId: number) => surveyApi.postSurveyResult(bugId),
-  });
+import { useEffect, useState } from "react";
+
+/**
+ * 실제 API 호출 버전
+ */
+export interface SurveyResult {
+  bugId: number;
+  bugName: string;
+  suggest1: number;
+  suggest2: number;
+  benefit?: string[];
+  feature?: string;
+  personality?: string;
 }
 
-// 설문 결과 조회 (GET)
-export function useGetSurveyResult(bugId: number, options?: { enabled?: boolean }) {
-  return useQuery<SurveyResultResponse, Error>({
-    queryKey: ["surveyResult", bugId],
-    queryFn: () => surveyApi.getSurveyResult(bugId),
-    enabled: options?.enabled !== false,
-  });
+interface Options {
+  enabled?: boolean;
+}
+
+export function useGetSurveyResult(bugId: number, { enabled = true }: Options = {}) {
+  const [data, setData] = useState<SurveyResult | null>(null);
+  const [isLoading, setIsLoading] = useState(enabled);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    if (!enabled) return;
+
+    setIsLoading(true);
+
+    fetch(`http://localhost:8090/surveyResult/${bugId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("API error");
+        return res.json();
+      })
+      .then((result) => {
+        setData(result);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsError(true);
+        setIsLoading(false);
+      });
+  }, [bugId, enabled]);
+
+  return { data, isLoading, isError };
 }
