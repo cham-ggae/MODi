@@ -36,6 +36,13 @@ import { useGenerateInviteCode } from '@/hooks/family/useFamilyMutations';
 import { MessageCardCreator } from '@/components/family-space/MessageCardCreator';
 import { InviteCodeModal } from '@/components/family-space/InviteCodeModal';
 import { QuizPage } from '@/components/plant-game/QuizPage';
+import { useKakaoInit } from '@/hooks/useKakaoShare';
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 // ==========================================
 // 🎮 새싹 키우기 게임 메인 페이지
@@ -160,6 +167,7 @@ function ChoiceModal({
 // 🌱 새싹 키우기 게임 메인 컴포넌트
 // ==========================================
 export default function PlantGamePage() {
+  useKakaoInit();
   // ==========================================
   // 🎮 게임 상태 관리
   // ==========================================
@@ -544,12 +552,6 @@ export default function PlantGamePage() {
     toast.success('마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃');
   };
 
-  // 카카오톡 공유 핸들러
-  const handleShareKakao = () => {
-    addPoint({ activityType: 'register' });
-    toast.success('가족을 초대했습니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦');
-  };
-
   // 초대 코드 복사 핸들러
   const handleCopyCode = async () => {
     if (!family?.family?.inviteCode) return;
@@ -735,10 +737,8 @@ export default function PlantGamePage() {
         familyName={family?.family?.name || '우리 가족'}
         onGenerateCode={handleGenerateNewInviteCode}
         onCopyCode={handleCopyCode}
-        onShareKakao={handleShareKakao}
         onSaveFamilyName={handleSaveFamilyName}
         copied={copied}
-        trigger={null}
       />
 
       {/* 🎯 퀴즈 페이지 */}
