@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { plantApi } from "@/lib/api/plant";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useMarkRewardAsUsed = () => {
   const queryClient = useQueryClient();

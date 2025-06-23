@@ -24,7 +24,8 @@ export interface ErrorResponse {
 
 //히스토리 보상에 대한 타입 정의( 보상이름,설명,날짜)
 export interface RewardHistory {
-  id: number;
+  rewardLogId: number;
+  rewardId: number;
   rewardName: string;
   description: string;
   receivedAt: string;

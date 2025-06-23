@@ -24,7 +24,7 @@ export function RewardHistorySection() {
 
   const handleUseReward = () => {
     if (selectedReward && !selectedReward.used) {
-      markRewardAsUsed(selectedReward.id, {
+      markRewardAsUsed(selectedReward.rewardLogId, {
         onSuccess: () => {
           setShowDetailModal(false);
           toast.success(`${selectedReward.rewardName} 보상을 사용완료 처리했습니다! 🎉`);
@@ -108,7 +108,7 @@ export function RewardHistorySection() {
               const isUsed = reward.used;
               return (
                 <motion.div
-                  key={reward.id}
+                  key={reward.rewardLogId}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
