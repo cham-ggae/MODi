@@ -1,23 +1,22 @@
+'use client';
 
-"use client";
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { useFamily } from '@/hooks/family';
+import { useAuth } from '@/hooks/useAuth';
+import { FamilySpaceHeader } from '@/components/family-space/FamilySpaceHeader';
+import { PlantSection } from '@/components/family-space/PlantSection';
+import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSection';
+import { FamilyRecommendationCard } from '@/components/family-space/FamilyRecommendationCard';
+import { MessageCardSection } from '@/components/family-space/MessageCardSection';
+import { UIFamilyMember } from '@/types/family.type';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-import { useFamily } from "@/hooks/family";
-import { useAuth } from "@/hooks/useAuth";
-import { FamilySpaceHeader } from "@/components/family-space/FamilySpaceHeader";
-import { PlantSection } from "@/components/family-space/PlantSection";
-import { FamilyMemberSection } from "@/components/family-space/FamilyMemberSection";
-import { FamilyRecommendationCard } from "@/components/family-space/FamilyRecommendationCard";
-import { MessageCardSection } from "@/components/family-space/MessageCardSection";
-import { RewardHistorySection } from "@/components/family-space/RewardHistorySection";
-import { UIFamilyMember } from "@/types/family.type";
-import { plantApi } from "@/lib/api/plant";
-import { PlantStatus } from "@/types/plants.type";
-import { MessageCardModal } from "@/components/message-card-modal";
-import { useAddPoint } from "@/hooks/plant";
-
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 export default function FamilySpacePage() {
   const {
@@ -57,89 +56,91 @@ export default function FamilySpacePage() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const [plantStatus, setPlantStatus] = useState<PlantStatus | null>(null);
-  const { mutate: addPoint } = useAddPoint();
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [showMessageCardCreator, setShowMessageCardCreator] = useState(false);
-
-  // ==========================================
-  // 📅 가족스페이스 생성일 계산
-  // ==========================================
-
-  /**
-   * 가족스페이스 생성일로부터 오늘까지의 일수 계산
-   * 서버에서 제공하는 daysAfterCreation이 있으면 사용, 없으면 클라이언트에서 계산
-   */
-  const calculateDaysAfterFamilyCreation = (): number => {
-    if (family?.family?.daysAfterCreation !== undefined) {
-      return family.family.daysAfterCreation;
-    }
-
-    if (family?.family?.createdAt) {
-      const createdAt = new Date(family.family.createdAt);
-      const today = new Date();
-
-      // 시간을 제거하고 날짜만 비교
-      const createdDate = new Date(
-        createdAt.getFullYear(),
-        createdAt.getMonth(),
-        createdAt.getDate()
-      );
-      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
-      const diffTime = todayDate.getTime() - createdDate.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      return Math.max(0, diffDays); // 음수가 나오지 않도록 보장
-    }
-
-    return 0;
-  };
-
-  const daysAfterFamilyCreation = calculateDaysAfterFamilyCreation();
-
+  // 카카오톡 SDK 초기화
   useEffect(() => {
-    if (!familyId) return;
+    const loadKakaoSDK = () => {
+      return new Promise<void>((resolve, reject) => {
+        // 이미 로드되어 있는 경우
+        if (window.Kakao) {
+          resolve();
+          return;
+        }
 
-    // 서버에서 plant 상태를 최신으로 받아옴
-    plantApi
-      .getPlantStatus(familyId)
-      .then(setPlantStatus)
-      .catch(() =>
-        toast({
-          title: "식물 상태를 불러오지 못했습니다",
-          description: "잠시 후 다시 시도해주세요.",
-          variant: "destructive",
-        })
-      );
-  }, [familyId]);
+        // 스크립트가 로드 중인지 확인
+        const existingScript = document.querySelector('script[src*="kakao.js"]');
+        if (existingScript) {
+          // 스크립트가 로드될 때까지 대기
+          const checkLoaded = setInterval(() => {
+            if (window.Kakao) {
+              clearInterval(checkLoaded);
+              resolve();
+            }
+          }, 100);
 
-  const plantType = family?.plant?.plantType; // "flower" or "tree"
+          // 10초 후 타임아웃
+          setTimeout(() => {
+            clearInterval(checkLoaded);
+            reject(new Error('카카오 SDK 로드 타임아웃'));
+          }, 10000);
+          return;
+        }
 
-  const plantImage =
-    plantType === "tree" ? "/public/images/tree1.png" : "/public/images/flower1.png";
+        // 스크립트 동적 로드
+        const script = document.createElement('script');
+        script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
+        script.async = true;
+        script.onload = () => {
+          console.log('✅ 카카오 SDK 스크립트 로드 완료');
+          resolve();
+        };
+        script.onerror = () => {
+          console.error('❌ 카카오 SDK 스크립트 로드 실패');
+          reject(new Error('카카오 SDK 스크립트 로드 실패'));
+        };
+        document.head.appendChild(script);
+      });
+    };
 
-  <img src={plantImage} alt="식물 이미지" />;
+    const initKakao = async () => {
+      try {
+        console.log('🔍 카카오 SDK 초기화 시도:', {
+          windowExists: typeof window !== 'undefined',
+          windowKakao: typeof window !== 'undefined' ? !!window.Kakao : false,
+          isInitialized: typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
+          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY
+        });
+
+        // SDK 로드 대기
+        await loadKakaoSDK();
+
+        if (typeof window !== 'undefined' && window.Kakao && !window.Kakao.isInitialized()) {
+          console.log('✅ 카카오 SDK 초기화 실행');
+          window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+          console.log('✅ 카카오 SDK 초기화 완료');
+        }
+      } catch (error) {
+        console.error('❌ 카카오 SDK 초기화 실패:', error);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      initKakao();
+    }
+  }, []);
 
   const handlePlantAction = () => {
-    // 2인 이상 체크
-    if (memberCount < 2) {
+    const plant = family?.plant;
+    if (plant?.hasPlant) {
+      router.push('/plant-game');
+    } else if (plant?.canCreateNew) {
+      router.push('/plant-selection');
+    } else {
       toast({
-        title: "2인 이상부터 새싹을 만들 수 있어요!",
-        description: "가족을 더 초대해보세요.",
-        variant: "destructive",
+        title: '새싹을 만들 수 없습니다',
+        description: plant?.createBlockReason || '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
       });
-      return;
     }
-    //레벨 5 && 미완료 시에도 plant-game 으로 이동
-    if (plantStatus && !plantStatus.completed) {
-      router.push("/plant-game");
-      return;
-
-    }
-
-    // 완료됐거나 없으면 생성 화면으로
-    router.push("/plant-selection");
   };
 
   const handleCopyCode = async () => {
@@ -149,14 +150,14 @@ export default function FamilySpacePage() {
       await navigator.clipboard.writeText(family.family.inviteCode);
       setCopied(true);
       toast({
-        title: "초대 코드가 복사되었습니다!",
-        description: "가족들에게 공유해보세요.",
+        title: '초대 코드가 복사되었습니다!',
+        description: '가족들에게 공유해보세요.',
       });
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       toast({
-        title: "복사에 실패했습니다",
-        variant: "destructive",
+        title: '복사에 실패했습니다',
+        variant: 'destructive',
       });
     }
   };
@@ -164,26 +165,49 @@ export default function FamilySpacePage() {
   const handleShareKakao = () => {
     if (!family?.family?.inviteCode || !family?.family?.name) return;
 
-    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${family.family.name}\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+    const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
 
-    if (navigator.share) {
-      navigator
-        .share({
-          title: "MODi 가족 스페이스 초대",
-          text: shareText,
-        })
-        .catch(() => {
-          navigator.clipboard.writeText(shareText);
-          toast({
-            title: "공유 링크가 복사되었습니다!",
-            description: "카카오톡에서 붙여넣기 해주세요.",
-          });
-        });
+    console.log('🔍 카카오 공유 시도:', {
+      windowKakao: !!window.Kakao,
+      isInitialized: window.Kakao?.isInitialized?.(),
+      familyName: family.family.name,
+      inviteCode: family.family.inviteCode,
+      imageUrl
+    });
+
+    // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      console.log('✅ 카카오 SDK 초기화됨, 공유 실행');
+      window.Kakao.Link.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `🌱 ${family.family.name} 가족 스페이스에 초대합니다!`,
+          description: `함께 식물을 키우고 요금제도 절약해요!\n초대 코드: ${family.family.inviteCode}`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: 'https://modi.app',
+            webUrl: 'https://modi.app',
+          },
+        },
+        buttons: [
+          {
+            title: 'MODi에서 확인',
+            link: {
+              mobileWebUrl: 'https://modi.app',
+              webUrl: 'https://modi.app',
+            },
+          },
+        ],
+      });
     } else {
+      console.log('❌ 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
+      // 카카오톡 SDK가 없는 경우 클립보드에 복사
+      const shareText = `🌱 ${family.family.name} 가족 스페이스에 초대합니다!\n\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
       navigator.clipboard.writeText(shareText);
       toast({
-        title: "공유 메시지가 복사되었습니다!",
-        description: "카카오톡에서 붙여넣기 해주세요.",
+        title: '공유 메시지가 복사되었습니다!',
+        description: '카카오톡에서 붙여넣기 해주세요.',
       });
     }
   };
@@ -197,28 +221,9 @@ export default function FamilySpacePage() {
   const handleSaveFamilyName = (name: string) => {
     // TODO: 가족명 변경 API 연동 필요
     toast({
-
-      title: "가족명이 변경되었습니다! ✨",
-
+      title: '가족명이 변경되었습니다! ✨',
       description: `새로운 가족명: ${name}`,
     });
-  };
-
-
-  const handleSendCard = (design: string, message: string) => {
-    // 메시지 저장 로직...
-    addPoint({ activityType: "emotion" });
-    setShowMessageModal(false);
-  };
-
-  const handleMessageCardCreated = () => {
-    // 메시지 카드 생성 후 포인트 적립
-    addPoint({ activityType: "emotion" });
-    toast({
-      title: "메시지 카드를 생성했습니다! 💌",
-      description: "경험치가 적립되었습니다.",
-    });
-    setShowMessageCardCreator(false);
   };
 
   // ==========================================
@@ -230,9 +235,9 @@ export default function FamilySpacePage() {
     dashboard?.members?.map((member) => ({
       id: member.uid,
       name: member.name,
-      avatar: member.profileImage ? "👤" : "🐛", // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
+      avatar: member.profileImage ? '👤' : '🐛', // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
       profileImage: member.profileImage, // 카카오톡 프로필 이미지
-      plan: member.planSummary || "요금제 없음",
+      plan: member.planSummary || '요금제 없음',
       hasRecommendation: false, // TODO: 추천 시스템 연동 필요
     })) || [];
 
@@ -242,10 +247,9 @@ export default function FamilySpacePage() {
   useEffect(() => {
     if (error) {
       toast({
-        title: "가족 정보를 불러오는데 실패했습니다",
-        description: "잠시 후 다시 시도해주세요.",
-        variant: "destructive",
-
+        title: '가족 정보를 불러오는데 실패했습니다',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
       });
     }
   }, [error, toast]);
@@ -253,11 +257,9 @@ export default function FamilySpacePage() {
   useEffect(() => {
     if (messageCardsError) {
       toast({
-
-        title: "메시지 카드를 불러오는데 실패했습니다",
-        description: "잠시 후 다시 시도해주세요.",
-        variant: "destructive",
-
+        title: '메시지 카드를 불러오는데 실패했습니다',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
       });
     }
   }, [messageCardsError, toast]);
@@ -268,9 +270,8 @@ export default function FamilySpacePage() {
   useEffect(() => {
     // 로딩이 완료되고 가족이 없는 경우 family-space-intro로 리다이렉트
     if (!isLoading && !hasFamily) {
-
-      console.log("🔄 가족 스페이스가 없어서 family-space-intro로 리다이렉트");
-      router.push("/family-space-tutorial");
+      console.log('🔄 가족 스페이스가 없어서 family-space-intro로 리다이렉트');
+      router.push('/family-space-tutorial');
     }
   }, [isLoading, hasFamily, router]);
 
@@ -287,7 +288,6 @@ export default function FamilySpacePage() {
       </div>
     );
   }
-
 
   // 가족이 없는 경우 로딩 화면 표시 (리다이렉트 중)
   if (!hasFamily) {
@@ -308,11 +308,10 @@ export default function FamilySpacePage() {
 
       {/* Plant Section */}
       <PlantSection
-        plant={family?.plant || { hasPlant: false, canCreateNew: true }}
-        plantStatus={plantStatus}
+        plant={family?.plant || { hasPlant: false, canCreateNew: false }}
         onPlantAction={handlePlantAction}
         familyNutrial={family?.family?.nutrial}
-        familyDaysAfterCreation={daysAfterFamilyCreation}
+        familyDaysAfterCreation={family?.family?.daysAfterCreation}
       />
 
       {/* Scrollable Content */}
@@ -321,9 +320,8 @@ export default function FamilySpacePage() {
           {/* Family Section */}
           <FamilyMemberSection
             members={transformedMembers}
-            inviteCode={family?.family?.inviteCode || ""}
-            familyName={family?.family?.name || ""}
-
+            inviteCode={family?.family?.inviteCode || ''}
+            familyName={family?.family?.name || ''}
             onGenerateCode={handleGenerateNewInviteCode}
             onCopyCode={handleCopyCode}
             onShareKakao={handleShareKakao}
@@ -342,9 +340,8 @@ export default function FamilySpacePage() {
             onViewRecommendation={() => {
               // TODO: 추천 페이지로 이동
               toast({
-                title: "추천 페이지로 이동합니다",
-                description: "곧 구현될 예정입니다.",
-
+                title: '추천 페이지로 이동합니다',
+                description: '곧 구현될 예정입니다.',
               });
             }}
           />
@@ -357,21 +354,9 @@ export default function FamilySpacePage() {
             messageCards={messageCards?.cards || []}
             totalCount={messageCards?.totalCount || 0}
             isLoading={isLoadingMessageCards}
-            onMessageCardCreated={handleMessageCardCreated}
           />
-
-
-          {/* Reward History Section */}
-          <RewardHistorySection />
-
         </div>
       </div>
-
-      {showMessageModal && (
-        <MessageCardModal onSendCard={handleSendCard}>
-          <></>
-        </MessageCardModal>
-      )}
     </div>
   );
 }
