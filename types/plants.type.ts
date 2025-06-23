@@ -29,6 +29,8 @@ export interface RewardHistory {
   description: string;
   receivedAt: string;
   used: boolean; // 사용완료 여부
+  memberName?: string; // 보상을 받은 구성원 이름 (가족별 조회 시)
+  memberAvatar?: string; // 보상을 받은 구성원 아바타 (가족별 조회 시)
 }
 
 // 물주기 포인트 적립: POST /points/add -

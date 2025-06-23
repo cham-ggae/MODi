@@ -1,7 +1,9 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { FamilyMemberCard } from './FamilyMemberCard';
-import { InviteCodeModal } from './InviteCodeModal';
-import { UIFamilyMember } from '@/types/family.type';
+import { Card, CardContent } from "@/components/ui/card";
+import { FamilyMemberCard } from "./FamilyMemberCard";
+import { InviteCodeModal } from "./InviteCodeModal";
+import { UIFamilyMember } from "@/types/family.type";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
 
 interface FamilyMemberSectionProps {
   members: UIFamilyMember[];
@@ -50,6 +52,14 @@ export function FamilyMemberSection({
             copied={copied}
             isLoading={isLoading}
             canInvite={canInvite}
+            trigger={
+              <Button
+                size="sm"
+                className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
+              >
+                <UserPlus className="w-5 h-5" />
+              </Button>
+            }
           />
         </div>
         <div className="space-y-4">
