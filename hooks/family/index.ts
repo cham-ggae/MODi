@@ -3,15 +3,28 @@ import { useMemo } from 'react';
 export * from './useFamilyQueries';
 export * from './useFamilyMutations';
 
-import { useFamilyData, useFamilyDashboard, useMessageCards } from './useFamilyQueries';
+import {
+  useFamilyData,
+  useFamilyDashboard,
+  useMessageCards,
+  useMessageCardComments,
+  useRecentMessageCardComments,
+  useMessageCardCommentCount,
+  useMemberCommentStatistics,
+  useCardCommentStatistics,
+} from './useFamilyQueries';
 import {
   useCreateFamily,
   useJoinFamily,
   useLeaveFamily,
   useGenerateInviteCode,
+  useUpdateFamilyName,
   useCreateMessageCard,
   useUpdateMessageCard,
   useDeleteMessageCard,
+  useCreateMessageCardComment,
+  useUpdateMessageCardComment,
+  useDeleteMessageCardComment,
 } from './useFamilyMutations';
 
 /**
@@ -112,5 +125,85 @@ export const useMessageCardsManager = () => {
 
     // 유틸리티
     refetch: () => messageCardsQuery.refetch(),
+  };
+};
+
+/**
+ * 메시지 카드 댓글 관련 기능을 통합한 훅
+ */
+export const useMessageCardCommentsManager = (fcid?: number) => {
+  const commentsQuery = useMessageCardComments(fcid);
+  const recentCommentsQuery = useRecentMessageCardComments(fcid);
+  const commentCountQuery = useMessageCardCommentCount(fcid);
+  const createMutation = useCreateMessageCardComment();
+  const updateMutation = useUpdateMessageCardComment();
+  const deleteMutation = useDeleteMessageCardComment();
+
+  return {
+    // 데이터
+    comments: commentsQuery.data?.comments || [],
+    totalCount: commentsQuery.data?.totalCount || 0,
+    cardContent: commentsQuery.data?.cardContent || '',
+    fcid: commentsQuery.data?.fcid,
+
+    // 최근 댓글 (미리보기용)
+    recentComments: recentCommentsQuery.data || [],
+
+    // 댓글 개수
+    commentCount: commentCountQuery.data?.commentCount || 0,
+
+    // 로딩 상태
+    isLoading: commentsQuery.isLoading,
+    isLoadingRecent: recentCommentsQuery.isLoading,
+    isLoadingCount: commentCountQuery.isLoading,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
+
+    // 에러
+    error: commentsQuery.error,
+    recentError: recentCommentsQuery.error,
+    countError: commentCountQuery.error,
+
+    // 액션
+    createComment: (data: { content: string }) => createMutation.mutate({ fcid: fcid!, data }),
+    updateComment: (commentId: number, data: { content: string }) =>
+      updateMutation.mutate({ fcid: fcid!, commentId, data }),
+    deleteComment: (commentId: number) => deleteMutation.mutate({ fcid: fcid!, commentId }),
+
+    // 유틸리티
+    refetch: () => {
+      commentsQuery.refetch();
+      recentCommentsQuery.refetch();
+      commentCountQuery.refetch();
+    },
+  };
+};
+
+/**
+ * 댓글 통계 관련 기능을 통합한 훅
+ */
+export const useCommentStatisticsManager = () => {
+  const memberStatsQuery = useMemberCommentStatistics();
+  const cardStatsQuery = useCardCommentStatistics();
+
+  return {
+    // 데이터
+    memberStatistics: memberStatsQuery.data || [],
+    cardStatistics: cardStatsQuery.data || [],
+
+    // 로딩 상태
+    isLoadingMemberStats: memberStatsQuery.isLoading,
+    isLoadingCardStats: cardStatsQuery.isLoading,
+
+    // 에러
+    memberStatsError: memberStatsQuery.error,
+    cardStatsError: cardStatsQuery.error,
+
+    // 유틸리티
+    refetch: () => {
+      memberStatsQuery.refetch();
+      cardStatsQuery.refetch();
+    },
   };
 };

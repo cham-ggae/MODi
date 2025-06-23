@@ -11,7 +11,7 @@ import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
 import { RewardModal } from '@/components/plant-game/RewardModal';
 import { MissionSheet } from '@/components/plant-game/MissionSheet';
 import { Mission } from '@/types/plant-game.type';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useFamily, useMessageCardsManager } from '@/hooks/family';
 import {
@@ -32,7 +32,7 @@ import { Sprout, TreePine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { CardMatchingGame } from '@/components/plant-game/CardMatchingGame';
-import { useGenerateInviteCode } from '@/hooks/family/useFamilyMutations';
+import { useGenerateInviteCode, useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
 import { MessageCardCreator } from '@/components/family-space/MessageCardCreator';
 import { InviteCodeModal } from '@/components/family-space/InviteCodeModal';
 import { QuizPage } from '@/components/plant-game/QuizPage';
@@ -87,14 +87,6 @@ const MISSIONS: Mission[] = [
     icon: '🎲',
     reward: '카드 맞히기',
     activityType: 'lastleaf',
-  },
-  {
-    id: 5,
-    title: '가족 등록',
-    description: '모든 가족들과 함께',
-    icon: '👨‍👩‍👧‍👦',
-    reward: '초대하기',
-    activityType: 'register',
   },
   {
     id: 6,
@@ -203,6 +195,7 @@ export default function PlantGamePage() {
   // ==========================================
   const { familyId, family } = useFamily(); // 가족 정보 및 ID
   const { mutate: generateNewCode } = useGenerateInviteCode(); // 초대 코드 생성 API
+  const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
 
   // 식물 상태 정보
   const {
@@ -572,7 +565,22 @@ export default function PlantGamePage() {
 
   // 가족명 저장 핸들러
   const handleSaveFamilyName = (name: string) => {
-    toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+    if (!familyId) {
+      toast.error('가족 ID를 찾을 수 없습니다.');
+      return;
+    }
+
+    updateFamilyName(
+      { fid: familyId, name },
+      {
+        onSuccess: () => {
+          toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+        },
+        onError: (error) => {
+          toast.error('가족명 변경에 실패했습니다');
+        },
+      }
+    );
   };
 
   // ==========================================
@@ -611,7 +619,7 @@ export default function PlantGamePage() {
   // 🎮 UI 렌더링
   // ==========================================
   return (
-    <div className="bg-gradient-to-b from-blue-100 to-blue-50 flex flex-col h-full">
+    <div className="bg-gradient-to-b from-blue-100 to-blue-50 flex flex-col h-full overflow-hidden">
       {/* 📱 헤더 영역 */}
       <div className="flex items-center justify-between p-3 flex-shrink-0">
         <Link href="/family-space">
@@ -621,48 +629,57 @@ export default function PlantGamePage() {
         <div className="w-6 h-6"></div> {/* 헤더 균형을 위한 빈 공간 */}
       </div>
 
-      {/* 👨‍👩‍👧‍👦 가족 구성원 상태 */}
+      {/* 👨‍👩‍👧‍👦 가족 구성원 상태 & 액션 버튼들 */}
       {currentLevel !== 5 && (
-        <div className="flex-shrink-0 mb-4">
-          <FamilyWateringStatus members={transformedMembers} />
-        </div>
-      )}
+        <div className="flex items-start justify-between px-3 mb-4 flex-shrink-0">
+          <div className="flex-1 min-w-0">
+            <FamilyWateringStatus members={transformedMembers} />
+          </div>
 
-      {/* 🎯 미션하기 버튼 */}
-      {currentLevel !== 5 && (
-        <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
-          <Button
-            className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
-            onClick={() => setShowMissions(true)}
-          >
-            미션하기
-          </Button>
+          {/* 가족 초대 버튼 */}
+          <div className="flex items-center gap-2 pl-4">
+            <Button
+              size="icon"
+              className="bg-green-500 text-white hover:bg-green-600 rounded-full w-10 h-10 p-0"
+              onClick={() => setShowInviteCodeModal(true)}
+            >
+              <UserPlus className="w-5 h-5" />
+            </Button>
+            <Button
+              className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-4 py-2 text-sm"
+              onClick={() => setShowMissions(true)}
+            >
+              미션하기
+            </Button>
+          </div>
         </div>
       )}
 
       {/* 🌱 식물 이미지 영역 */}
-      {currentLevel === 5 ? (
-        <div className="flex-1 flex items-center justify-center px-0 py-0 h-full w-full">
-          <PlantImageDisplay
-            selectedPlantType={plantStatus?.plantType}
-            currentLevel={currentLevel}
-            isWatering={isWatering}
-            isFeeding={isFeeding}
-          />
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center px-4 h-full w-full">
-          <PlantImageDisplay
-            selectedPlantType={plantStatus?.plantType}
-            currentLevel={currentLevel}
-            isWatering={isWatering}
-            isFeeding={isFeeding}
-          />
-        </div>
-      )}
+      <div className="flex-1 flex items-center justify-center min-h-0">
+        {currentLevel === 5 ? (
+          <div className="flex items-center justify-center w-full h-full">
+            <PlantImageDisplay
+              selectedPlantType={plantStatus?.plantType}
+              currentLevel={currentLevel}
+              isWatering={isWatering}
+              isFeeding={isFeeding}
+            />
+          </div>
+        ) : (
+          <div className="flex items-center justify-center w-full h-full px-4">
+            <PlantImageDisplay
+              selectedPlantType={plantStatus?.plantType}
+              currentLevel={currentLevel}
+              isWatering={isWatering}
+              isFeeding={isFeeding}
+            />
+          </div>
+        )}
+      </div>
 
       {/* 🎮 게임 컨트롤 영역 */}
-      <div className="flex-shrink-0 p-3">
+      <div className="flex-shrink-0 p-3 bg-white/80 backdrop-blur-sm">
         {currentLevel === 5 ? (
           <div className="flex flex-col items-center gap-4">
             <div className="text-xl font-bold text-green-600">5레벨 달성!!!</div>
@@ -735,10 +752,9 @@ export default function PlantGamePage() {
         familyName={family?.family?.name || '우리 가족'}
         onGenerateCode={handleGenerateNewInviteCode}
         onCopyCode={handleCopyCode}
-        onShareKakao={handleShareKakao}
         onSaveFamilyName={handleSaveFamilyName}
         copied={copied}
-        trigger={null}
+        isLoading={isUpdatingFamilyName}
       />
 
       {/* 🎯 퀴즈 페이지 */}
