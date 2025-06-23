@@ -11,9 +11,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 interface ChatInputProps {
   sessionId: string;
-  setMessages: React.Dispatch<React.SetStateAction<ClientMessage[]>>
+  setMessages: React.Dispatch<React.SetStateAction<ClientMessage[]>>;
+  familyMode: boolean;
+  familySize: number;
 }
-const ChatInput = ({ sessionId, setMessages }: ChatInputProps) => {
+const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const {
     isListening,
@@ -30,8 +32,7 @@ const ChatInput = ({ sessionId, setMessages }: ChatInputProps) => {
 
   // 사용자가 전송 버튼 클릭했을 때
   const handleSend = () => {
-    if (!message.trim()) return
-
+    if (!message.trim()) return;
     // 1) 사용자 메시지 추가
     const userMsg: ClientMessage = {
       id: uuidv4(),
@@ -55,7 +56,7 @@ const ChatInput = ({ sessionId, setMessages }: ChatInputProps) => {
     setMessages((prev) => [...prev, userMsg, aiMsg])
 
     // 3) 스트리밍 시작
-    start(message, sessionId)
+    start(message, sessionId, familyMode ? familySize : 1)
     setMessage('')
   }
 
