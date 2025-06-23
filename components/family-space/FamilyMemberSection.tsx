@@ -2,6 +2,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FamilyMemberCard } from './FamilyMemberCard';
 import { InviteCodeModal } from './InviteCodeModal';
 import { UIFamilyMember } from '@/types/family.type';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
 import { useState } from 'react';
 
 interface FamilyMemberSectionProps {

@@ -10,7 +10,13 @@ import { PlantSection } from '@/components/family-space/PlantSection';
 import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSection';
 import { FamilyRecommendationCard } from '@/components/family-space/FamilyRecommendationCard';
 import { MessageCardSection } from '@/components/family-space/MessageCardSection';
+import { RewardHistorySection } from '@/components/family-space/RewardHistorySection';
 import { UIFamilyMember } from '@/types/family.type';
+import { plantApi } from '@/lib/api/plant';
+import { PlantStatus } from '@/types/plants.type';
+import { MessageCardModal } from '@/components/message-card-modal';
+import { useAddPoint } from '@/hooks/plant';
+import { usePlantStatus } from '@/hooks/plant/usePlantStatus';
 import { useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
 
 declare global {
@@ -53,9 +59,15 @@ export default function FamilySpacePage() {
   } = useFamily();
 
   const [copied, setCopied] = useState(false);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [showMessageCardCreator, setShowMessageCardCreator] = useState(false);
+
   const router = useRouter();
   const { user } = useAuth();
-  const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
+  const { mutate: updateFamilyName } = useUpdateFamilyName();
+  const { mutate: addPoint } = useAddPoint();
+
+  const { data: plantStatus, error: plantStatusError } = usePlantStatus(familyId ?? 0);
 
   // 카카오톡 SDK 초기화
   useEffect(() => {
@@ -130,17 +142,55 @@ export default function FamilySpacePage() {
     }
   }, []);
 
-  const handlePlantAction = () => {
-    const plant = family?.plant;
-    if (plant?.hasPlant) {
-      router.push('/plant-game');
-    } else if (plant?.canCreateNew) {
-      router.push('/plant-selection');
-    } else {
-      toast.error(
-        plant?.createBlockReason || '새싹을 만들 수 없습니다. 잠시 후 다시 시도해주세요.'
-      );
+  const calculateDaysAfterFamilyCreation = (): number => {
+    if (family?.family?.daysAfterCreation !== undefined) {
+      return family.family.daysAfterCreation;
     }
+
+    if (family?.family?.createdAt) {
+      const createdAt = new Date(family.family.createdAt);
+      const today = new Date();
+
+      // 시간을 제거하고 날짜만 비교
+      const createdDate = new Date(
+        createdAt.getFullYear(),
+        createdAt.getMonth(),
+        createdAt.getDate()
+      );
+      const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+      const diffTime = todayDate.getTime() - createdDate.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+      return Math.max(0, diffDays); // 음수가 나오지 않도록 보장
+    }
+
+    return 0;
+  };
+
+  const daysAfterFamilyCreation = calculateDaysAfterFamilyCreation();
+
+  const plantType = family?.plant?.plantType; // "flower" or "tree"
+
+  const plantImage =
+    plantType === 'tree' ? '/public/images/tree1.png' : '/public/images/flower1.png';
+
+  <img src={plantImage} alt="식물 이미지" />;
+
+  const handlePlantAction = () => {
+    // 2인 이상 체크
+    if (memberCount < 2) {
+      toast.error('2인 이상부터 새싹을 만들 수 있어요! 가족을 더 초대해보세요.');
+      return;
+    }
+    //레벨 5 && 미완료 시에도 plant-game 으로 이동
+    if (plantStatus && !plantStatus.completed) {
+      router.push('/plant-game');
+      return;
+    }
+
+    // 완료됐거나 없으면 생성 화면으로
+    router.push('/plant-selection');
   };
 
   const handleCopyCode = async () => {
@@ -228,6 +278,19 @@ export default function FamilySpacePage() {
     );
   };
 
+  const handleSendCard = (design: string, message: string) => {
+    // 메시지 저장 로직...
+    addPoint({ activityType: 'emotion' });
+    setShowMessageModal(false);
+  };
+
+  const handleMessageCardCreated = () => {
+    // 메시지 카드 생성 후 포인트 적립
+    addPoint({ activityType: 'emotion' });
+    toast.success('메시지 카드를 생성했습니다! 💌 경험치가 적립되었습니다.');
+    setShowMessageCardCreator(false);
+  };
+
   // ==========================================
   // 📊 데이터 변환 및 준비
   // ==========================================
@@ -250,13 +313,19 @@ export default function FamilySpacePage() {
     if (error) {
       toast.error('가족 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
-  }, [error, toast]);
+  }, [error]);
 
   useEffect(() => {
     if (messageCardsError) {
       toast.error('메시지 카드를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
-  }, [messageCardsError, toast]);
+  }, [messageCardsError]);
+
+  useEffect(() => {
+    if (plantStatusError) {
+      toast.error('식물 상태를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  }, [plantStatusError]);
 
   // ==========================================
   // 🔄 가족 스페이스 리다이렉트 처리
@@ -322,7 +391,6 @@ export default function FamilySpacePage() {
             onSaveFamilyName={handleSaveFamilyName}
             copied={copied}
             isLoading={isGeneratingCode}
-            isUpdatingName={isUpdatingFamilyName}
             canInvite={canInvite}
             memberCount={memberCount}
           />
@@ -346,9 +414,19 @@ export default function FamilySpacePage() {
             messageCards={messageCards?.cards || []}
             totalCount={messageCards?.totalCount || 0}
             isLoading={isLoadingMessageCards}
+            onMessageCardCreated={handleMessageCardCreated}
           />
+
+          {/* Reward History Section */}
+          <RewardHistorySection />
         </div>
       </div>
+
+      {showMessageModal && (
+        <MessageCardModal onSendCard={handleSendCard}>
+          <></>
+        </MessageCardModal>
+      )}
     </div>
   );
 }

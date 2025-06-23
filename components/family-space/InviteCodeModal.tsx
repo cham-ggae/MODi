@@ -13,6 +13,8 @@ import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
 import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
 
 interface InviteCodeModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
   inviteCode: string;
   familyName: string;
   onGenerateCode: () => void;
@@ -23,11 +25,12 @@ interface InviteCodeModalProps {
   isLoading?: boolean;
   isUpdatingName?: boolean;
   canInvite?: boolean;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 export function InviteCodeModal({
+  isOpen: isOpenProp,
+  onOpenChange: onOpenChangeProp,
   inviteCode,
   familyName,
   onGenerateCode,
@@ -38,11 +41,14 @@ export function InviteCodeModal({
   isLoading = false,
   isUpdatingName = false,
   canInvite = true,
-  isOpen,
-  onOpenChange,
+  trigger,
 }: InviteCodeModalProps) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
+
+  const isOpen = isOpenProp ?? internalIsOpen;
+  const onOpenChange = onOpenChangeProp ?? setInternalIsOpen;
 
   useKakaoInit();
 
@@ -73,16 +79,7 @@ export function InviteCodeModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      {!isOpen && (
-        <DialogTrigger asChild>
-          <Button
-            size="sm"
-            className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
-          >
-            <UserPlus className="w-5 h-5" />
-          </Button>
-        </DialogTrigger>
-      )}
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
         <DialogHeader>
           <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
