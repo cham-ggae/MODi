@@ -1,89 +1,28 @@
-"use client";
+'use client';
 
-import { useRouter, usePathname } from "next/navigation";
-import { User, MessageSquare } from "lucide-react";
-import Link from "next/link";
-import { useFamilySpaceStatus } from "@/hooks/use-family-space";
+import { MobileHeader } from '@/components/layouts/mobile-header';
+import { BottomNav } from '@/components/bottom-nav';
+import { ResponsiveWrapper } from '@/components/responsive-wrapper';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { hasFamilySpace, isLoading } = useFamilySpaceStatus();
+  const isMobile = useIsMobile();
 
-  const handleFamilyNavigation = () => {
-    if (isLoading) return;
+  const header = <MobileHeader title="MODi" leftAction={null} />;
+  const main = children;
+  const footer = <BottomNav />;
 
-    if (hasFamilySpace) {
-      router.push("/family-space");
-    } else {
-      router.push("/family-space-tutorial");
-    }
-  };
+  if (isMobile) {
+    // 모바일 뷰
+    return (
+      <div className="h-full w-full flex flex-col bg-background max-w-md mx-auto">
+        <header className="flex-shrink-0">{header}</header>
+        <main className="flex-1 overflow-y-auto">{main}</main>
+        <footer className="flex-shrink-0">{footer}</footer>
+      </div>
+    );
+  }
 
-  // 현재 페이지에 따른 아이콘 활성화 상태
-  const isChatActive = pathname === "/chat";
-  const isFamilyActive = pathname.startsWith("/family-space");
-  const isMyPageActive = pathname === "/my-page";
-
-  // plant-game 페이지에서는 bottom navigation 숨기기
-  const shouldShowBottomNav = !pathname.startsWith("/plant-game");
-
-  return (
-    <div className="h-full w-full bg-gray-50 dark:bg-gray-900 max-w-md mx-auto flex flex-col overflow-hidden">
-      {/* 메인 콘텐츠 영역 - 스크롤 가능 */}
-      <div className="flex-1 overflow-y-auto">{children}</div>
-
-      {/* Bottom Navigation - 고정 (plant-game 페이지에서는 숨김) */}
-      {shouldShowBottomNav && (
-        <div className="flex justify-around py-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 flex-shrink-0 w-full max-w-md mx-auto">
-          <button
-            onClick={handleFamilyNavigation}
-            disabled={isLoading}
-            className="flex flex-col items-center space-y-1 disabled:opacity-50"
-          >
-            <User
-              className={`w-6 h-6 ${
-                isFamilyActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            />
-            <span
-              className={`text-xs ${
-                isFamilyActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            >
-              가족
-            </span>
-          </button>
-          <Link href="/chat" className="flex flex-col items-center space-y-1">
-            <MessageSquare
-              className={`w-6 h-6 ${
-                isChatActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            />
-            <span
-              className={`text-xs ${
-                isChatActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            >
-              챗봇
-            </span>
-          </Link>
-          <Link href="/my-page" className="flex flex-col items-center space-y-1">
-            <User
-              className={`w-6 h-6 ${
-                isMyPageActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            />
-            <span
-              className={`text-xs ${
-                isMyPageActive ? "text-green-500" : "text-gray-400 dark:text-gray-500"
-              }`}
-            >
-              마이페이지
-            </span>
-          </Link>
-        </div>
-      )}
-    </div>
-  );
+  // 데스크톱 뷰
+  return <ResponsiveWrapper header={header} main={main} footer={footer} />;
 }
