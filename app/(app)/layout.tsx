@@ -9,14 +9,15 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { usePathname } from 'next/navigation';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const isMobile = useIsMobile();
-  const pathname = usePathname();
+    const isMobile = useIsMobile();
+    const pathname = usePathname();
 
-  const showHeader = !pathname.startsWith('/plant-game');
+    const showHeader = !pathname.startsWith('/plant-game');
 
-  const header = <MobileHeader title="MODi" leftAction={<MobileNav />} />;
-  const main = children;
-  const footer = <BottomNav />;
+    const header = <MobileHeader title="MODi" leftAction={<MobileNav />} />;
+    const main = children;
+    const footer = <BottomNav />;
+
 
   if (isMobile) {
     // 모바일 뷰: flexbox 기반 레이아웃으로 안정화, 헤더 제거
@@ -28,6 +29,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // 데스크톱 뷰: ResponsiveWrapper 사용
-  return <ResponsiveWrapper header={header} main={main} footer={footer} />;
+    // 데스크톱 뷰: ResponsiveWrapper 사용
+    return <ResponsiveWrapper header={header} main={main} footer={footer} />;
 }
