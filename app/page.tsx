@@ -48,7 +48,7 @@ export default function HomePage() {
   }
 
   const pageContent = (
-    <div className="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-b from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 space-y-12">
+    <div className="flex flex-col items-center justify-center h-full p-8 space-y-12">
       <div className="text-center">
         <div className="inline-block p-4 bg-white rounded-full shadow-lg">
           <span className="text-4xl font-bold text-green-500">M</span>
@@ -109,7 +109,11 @@ export default function HomePage() {
   );
 
   if (isMobile) {
-    return pageContent;
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="w-full max-w-md mx-auto">{pageContent}</div>
+      </div>
+    );
   }
 
   return <ResponsiveWrapper main={pageContent} />;

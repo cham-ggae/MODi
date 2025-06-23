@@ -1,4 +1,3 @@
-// src/app/login/callback/kakao/page.tsx
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -43,15 +42,15 @@ export default function KakaoCallbackPage() {
                 // 백엔드에 토큰 교환 요청
                 const userInfo = await handleKakaoCallback(code);
 
-                // 추가 정보가 필요한 경우
-                if (userInfo.requiresAdditionalInfo) {
-                    setStatus('success');
-                    // 짧은 딜레이 후 추가 정보 입력 페이지로 이동
-                    setTimeout(() => {
-                        router.push('/basic-info');
-                    }, 1500);
-                    return;
-                }
+        // 추가 정보가 필요한 경우
+        if (userInfo.requiresAdditionalInfo) {
+          setStatus('success');
+          // 짧은 딜레이 후 추가 정보 입력 페이지로 이동
+          setTimeout(() => {
+            router.push('/basic-info');
+          }, 1000);
+          return;
+        }
 
                 setStatus('success');
 
@@ -71,8 +70,9 @@ export default function KakaoCallbackPage() {
             }
         };
 
-        processCallback();
-    }, [searchParams, router]);
+    processCallback();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
     // 로딩 상태
     if (status === 'loading') {
