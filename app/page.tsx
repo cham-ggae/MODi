@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Smartphone, Users, MessageCircle, TrendingUp } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { PageLayout } from "@/components/layouts/page-layout";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import KakaoLoginButton from "@/components/login/kakaoLoginButton";
-import { ResponsiveWrapper } from "@/components/responsive-wrapper";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Smartphone, Users, MessageCircle, TrendingUp } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { PageLayout } from '@/components/layouts/page-layout';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import KakaoLoginButton from '@/components/login/kakaoLoginButton';
+import { ResponsiveWrapper } from '@/components/responsive-wrapper';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading, login } = useAuth();
@@ -19,14 +19,14 @@ export default function HomePage() {
   // 로그인된 사용자가 루트 페이지에 접근하면 자동으로 /chat으로 리다이렉트
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      router.push("/chat");
+      router.push('/chat');
     }
   }, [isAuthenticated, isLoading, router]);
 
   const handleStartButton = () => {
     if (isAuthenticated) {
       // 이미 로그인된 경우 채팅 페이지로 이동
-      router.push("/chat");
+      router.push('/chat');
     } else {
       // 로그인되지 않은 경우 카카오 로그인 시작
       login();
@@ -48,7 +48,7 @@ export default function HomePage() {
   }
 
   const pageContent = (
-    <div className="flex flex-col items-center justify-center h-full p-8 bg-gradient-to-b from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 space-y-12">
+    <div className="flex flex-col items-center justify-center h-full p-8 space-y-12">
       <div className="text-center">
         <div className="inline-block p-4 bg-white rounded-full shadow-lg">
           <span className="text-4xl font-bold text-green-500">M</span>
@@ -109,7 +109,11 @@ export default function HomePage() {
   );
 
   if (isMobile) {
-    return pageContent;
+    return (
+      <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
+        <div className="w-full max-w-md mx-auto">{pageContent}</div>
+      </div>
+    );
   }
 
   return <ResponsiveWrapper main={pageContent} />;
