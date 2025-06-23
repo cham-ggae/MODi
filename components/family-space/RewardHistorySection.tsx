@@ -4,15 +4,16 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { useRewardHistory } from "@/hooks/plant/useRewardHistory";
+import { useFamilyRewardHistory } from "@/hooks/plant/useFamilyRewardHistory";
+import { useMarkRewardAsUsed } from "@/hooks/plant/useMarkRewardAsUsed";
 import { Gift, Calendar, CheckCircle, Package } from "lucide-react";
 import { motion } from "framer-motion";
 import { RewardHistory } from "@/types/plants.type";
 import { toast } from "sonner";
 
 export function RewardHistorySection() {
-  const { data: rewards, isLoading, error } = useRewardHistory();
-  const [usedRewards, setUsedRewards] = useState<Set<string>>(new Set());
+  const { data: rewards, isLoading, error } = useFamilyRewardHistory();
+  const { mutate: markRewardAsUsed, isPending: isMarking } = useMarkRewardAsUsed();
   const [selectedReward, setSelectedReward] = useState<RewardHistory | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -22,10 +23,16 @@ export function RewardHistorySection() {
   };
 
   const handleUseReward = () => {
-    if (selectedReward && !usedRewards.has(selectedReward.receivedAt)) {
-      setUsedRewards((prev) => new Set(prev).add(selectedReward.receivedAt));
-      setShowDetailModal(false);
-      toast.success(`${selectedReward.rewardName} 보상을 사용완료 처리했습니다! 🎉`);
+    if (selectedReward && !selectedReward.used) {
+      markRewardAsUsed(selectedReward.id, {
+        onSuccess: () => {
+          setShowDetailModal(false);
+          toast.success(`${selectedReward.rewardName} 보상을 사용완료 처리했습니다! 🎉`);
+        },
+        onError: () => {
+          toast.error("보상 사용완료 처리에 실패했습니다. 다시 시도해주세요.");
+        },
+      });
     }
   };
 
@@ -98,10 +105,10 @@ export function RewardHistorySection() {
         <CardContent>
           <div className="space-y-4">
             {rewards.map((reward, index) => {
-              const isUsed = usedRewards.has(reward.receivedAt);
+              const isUsed = reward.used;
               return (
                 <motion.div
-                  key={index}
+                  key={reward.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
@@ -154,9 +161,7 @@ export function RewardHistorySection() {
           {selectedReward && (
             <div className="space-y-4">
               <div className="text-center">
-                <div className="text-4xl mb-4">
-                  {usedRewards.has(selectedReward.receivedAt) ? "📦" : "🎁"}
-                </div>
+                <div className="text-4xl mb-4">{selectedReward.used ? "📦" : "🎁"}</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {selectedReward.rewardName}
                 </h3>
@@ -171,7 +176,7 @@ export function RewardHistorySection() {
                     minute: "2-digit",
                   })}
                 </div>
-                {usedRewards.has(selectedReward.receivedAt) && (
+                {selectedReward.used && (
                   <div className="flex items-center justify-center gap-2 text-green-600 font-medium">
                     <CheckCircle className="w-5 h-5" />
                     보상완료!
@@ -179,12 +184,13 @@ export function RewardHistorySection() {
                 )}
               </div>
 
-              {!usedRewards.has(selectedReward.receivedAt) && (
+              {!selectedReward.used && (
                 <Button
                   onClick={handleUseReward}
                   className="w-full bg-green-600 hover:bg-green-700"
+                  disabled={isMarking}
                 >
-                  사용완료
+                  {isMarking ? "처리 중..." : "사용완료"}
                 </Button>
               )}
             </div>
