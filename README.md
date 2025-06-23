@@ -21,6 +21,9 @@ NEXT_PUBLIC_ADDR=http://localhost:8090
 # 카카오 OAuth 설정
 NEXT_PUBLIC_KAKAO_CLIENT_ID=your_kakao_client_id
 NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://localhost:3000/login/callback
+
+#새싹 키우기 소켓
+NEXT_PUBLIC_SOCKET_URL=ws://localhost:8090 
 ```
 
 ### 개발 서버 실행
