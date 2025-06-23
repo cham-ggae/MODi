@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { cn } from '@/lib/utils';
+import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface MobileHeaderProps {
   children?: ReactNode;
@@ -23,7 +23,7 @@ export function MobileHeader({
   return (
     <div
       className={cn(
-        'md:hidden bg-white dark:bg-gray-800 border-b border-[#81C784] p-4 flex items-center justify-between',
+        "md:hidden bg-white dark:bg-gray-800 border-b border-[#81C784] p-4 flex items-center justify-between",
         className
       )}
     >
