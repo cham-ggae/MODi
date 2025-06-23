@@ -24,13 +24,13 @@ export default function ChatPage() {
       sessionId: sessionId
     },
   ]);
-  const { family } = useFamily();
+  const family = useFamily().memberCount;
   const [familyMode, setFamilyMode] = useState(false);
   return (
     <Fragment>
-      {family?.members && family.members.length > 1 && <FamilyModeToggle familyMode={familyMode} setFamilyMode={setFamilyMode} />}
+      {family && family > 1 && <FamilyModeToggle familyMode={familyMode} setFamilyMode={setFamilyMode} />}
       <ChatMessages messages={messages} />
-      <ChatInput setMessages={setMessages} sessionId={sessionId} familyMode={familyMode} familySize={family ? family?.members.length : 1} />
+      <ChatInput setMessages={setMessages} sessionId={sessionId} familyMode={familyMode} familySize={family ? family : 1} />
     </Fragment>
   );
 }
