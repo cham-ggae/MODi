@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,6 +12,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useFamilySpace } from '@/contexts/family-space-context';
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 interface FamilySpaceCreationModalProps {
   isOpen: boolean;
@@ -26,6 +32,78 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
   const { toast } = useToast();
   const router = useRouter();
   const { createFamilySpace } = useFamilySpace();
+
+  // 카카오톡 SDK 초기화
+  useEffect(() => {
+    const loadKakaoSDK = () => {
+      return new Promise<void>((resolve, reject) => {
+        // 이미 로드되어 있는 경우
+        if (window.Kakao) {
+          resolve();
+          return;
+        }
+
+        // 스크립트가 로드 중인지 확인
+        const existingScript = document.querySelector('script[src*="kakao.js"]');
+        if (existingScript) {
+          // 스크립트가 로드될 때까지 대기
+          const checkLoaded = setInterval(() => {
+            if (window.Kakao) {
+              clearInterval(checkLoaded);
+              resolve();
+            }
+          }, 100);
+
+          // 10초 후 타임아웃
+          setTimeout(() => {
+            clearInterval(checkLoaded);
+            reject(new Error('카카오 SDK 로드 타임아웃'));
+          }, 10000);
+          return;
+        }
+
+        // 스크립트 동적 로드
+        const script = document.createElement('script');
+        script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
+        script.async = true;
+        script.onload = () => {
+          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 완료');
+          resolve();
+        };
+        script.onerror = () => {
+          console.error('❌ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 실패');
+          reject(new Error('카카오 SDK 스크립트 로드 실패'));
+        };
+        document.head.appendChild(script);
+      });
+    };
+
+    const initKakao = async () => {
+      try {
+        console.log('🔍 FamilySpaceCreationModal - 카카오 SDK 초기화 시도:', {
+          windowExists: typeof window !== 'undefined',
+          windowKakao: typeof window !== 'undefined' ? !!window.Kakao : false,
+          isInitialized: typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
+          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY
+        });
+
+        // SDK 로드 대기
+        await loadKakaoSDK();
+
+        if (typeof window !== 'undefined' && window.Kakao && !window.Kakao.isInitialized()) {
+          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 실행');
+          window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 완료');
+        }
+      } catch (error) {
+        console.error('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 실패:', error);
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      initKakao();
+    }
+  }, []);
 
   const generateInviteCode = () => {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -84,24 +162,45 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
   };
 
   const handleShareKakao = () => {
-    const shareText = `🌱 MODi 가족 스페이스에 초대합니다!\n\n가족 이름: ${familyName}\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+    const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
 
-    if (navigator.share) {
-      navigator
-        .share({
-          title: 'MODi 가족 스페이스 초대',
-          text: shareText,
-        })
-        .catch(() => {
-          // 공유 실패 시 클립보드에 복사
-          navigator.clipboard.writeText(shareText);
-          toast({
-            title: '공유 링크가 복사되었습니다!',
-            description: '카카오톡에서 붙여넣기 해주세요.',
-          });
-        });
+    console.log('🔍 FamilySpaceCreationModal - 카카오 공유 시도:', {
+      windowKakao: !!window.Kakao,
+      isInitialized: window.Kakao?.isInitialized?.(),
+      familyName,
+      inviteCode,
+      imageUrl
+    });
+
+    // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화됨, 공유 실행');
+      window.Kakao.Link.sendDefault({
+        objectType: 'feed',
+        content: {
+          title: `🌱 ${familyName} 가족 스페이스에 초대합니다!`,
+          description: `함께 식물을 키우고 요금제도 절약해요!\n초대 코드: ${inviteCode}`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: 'https://modi.app',
+            webUrl: 'https://modi.app',
+          },
+        },
+        buttons: [
+          {
+            title: 'MODi에서 확인',
+            link: {
+              mobileWebUrl: 'https://modi.app',
+              webUrl: 'https://modi.app',
+            },
+          },
+        ],
+      });
     } else {
-      // Web Share API 미지원 시 클립보드에 복사
+      console.log('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
+      // 카카오톡 SDK가 없는 경우 클립보드에 복사
+      const shareText = `🌱 ${familyName} 가족 스페이스에 초대합니다!\n\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
       navigator.clipboard.writeText(shareText);
       toast({
         title: '공유 메시지가 복사되었습니다!',

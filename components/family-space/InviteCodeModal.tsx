@@ -10,13 +10,14 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
+import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
 
 interface InviteCodeModalProps {
   inviteCode: string;
   familyName: string;
   onGenerateCode: () => void;
   onCopyCode: () => void;
-  onShareKakao: () => void;
+  onShareKakao?: () => void;
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
   isLoading?: boolean;
@@ -28,7 +29,7 @@ export function InviteCodeModal({
   familyName,
   onGenerateCode,
   onCopyCode,
-  onShareKakao,
+  onShareKakao: onShareKakaoProp,
   onSaveFamilyName,
   copied,
   isLoading = false,
@@ -37,6 +38,8 @@ export function InviteCodeModal({
   const [isOpen, setIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
+
+  useKakaoInit();
 
   const handleEditFamilyName = () => {
     setTempFamilyName(familyName);
@@ -53,6 +56,14 @@ export function InviteCodeModal({
   const handleCancelEdit = () => {
     setTempFamilyName('');
     setIsEditingName(false);
+  };
+
+  const handleShareKakao = () => {
+    if (onShareKakaoProp) {
+      onShareKakaoProp();
+    } else {
+      shareKakao(inviteCode, familyName);
+    }
   };
 
   return (
@@ -136,11 +147,11 @@ export function InviteCodeModal({
                     {copied ? '복사됨' : '복사'}
                   </Button>
                   <Button
-                    onClick={onShareKakao}
+                    onClick={handleShareKakao}
                     size="sm"
-                    className="flex-1 bg-yellow-400 hover:bg-gray-400 text-black"
+                    className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
                   >
-                    <Share2 className="w-4 h-4 mr-2" />
+                    <img src="/images/kakao_login_medium_narrow.png" alt="카카오톡" className="w-4 h-4 mr-2 inline" />
                     카톡 공유
                   </Button>
                 </div>

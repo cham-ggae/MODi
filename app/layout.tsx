@@ -13,9 +13,32 @@ import { ResponsiveWrapper } from '@/components/responsive-wrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://modi.app';
+
 export const metadata: Metadata = {
   title: 'MODi - 스마트한 통신 생활의 시작',
   description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
+  openGraph: {
+    title: 'MODi - 스마트한 통신 생활의 시작',
+    description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
+    type: 'website',
+    url: baseUrl,
+    siteName: 'MODi',
+    images: [
+      {
+        url: `${baseUrl}/images/modi-logo-small.png`,
+        width: 1200,
+        height: 630,
+        alt: 'MODi 로고',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'MODi - 스마트한 통신 생활의 시작',
+    description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
+    images: [`${baseUrl}/images/modi-logo-small.png`],
+  },
 };
 
 export default function RootLayout({
