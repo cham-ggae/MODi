@@ -151,7 +151,6 @@ export function InviteCodeModal({
                     size="sm"
                     className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
                   >
-                    <img src="/images/kakao_login_medium_narrow.png" alt="카카오톡" className="w-4 h-4 mr-2 inline" />
                     카톡 공유
                   </Button>
                 </div>

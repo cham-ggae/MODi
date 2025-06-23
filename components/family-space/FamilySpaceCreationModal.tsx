@@ -67,11 +67,11 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
         script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
         script.async = true;
         script.onload = () => {
-          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 완료');
+          // console.log('✅ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 완료');
           resolve();
         };
         script.onerror = () => {
-          console.error('❌ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 실패');
+          // console.error('❌ FamilySpaceCreationModal - 카카오 SDK 스크립트 로드 실패');
           reject(new Error('카카오 SDK 스크립트 로드 실패'));
         };
         document.head.appendChild(script);
@@ -80,23 +80,23 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
 
     const initKakao = async () => {
       try {
-        console.log('🔍 FamilySpaceCreationModal - 카카오 SDK 초기화 시도:', {
-          windowExists: typeof window !== 'undefined',
-          windowKakao: typeof window !== 'undefined' ? !!window.Kakao : false,
-          isInitialized: typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
-          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY
-        });
+        // console.log('🔍 FamilySpaceCreationModal - 카카오 SDK 초기화 시도:', {
+        //   windowExists: typeof window !== 'undefined',
+        //   windowKakao: typeof window !== 'undefined' ? !!window.Kakao : false,
+        //   isInitialized: typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
+        //   jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY
+        // });
 
         // SDK 로드 대기
         await loadKakaoSDK();
 
         if (typeof window !== 'undefined' && window.Kakao && !window.Kakao.isInitialized()) {
-          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 실행');
+          // console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 실행');
           window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
-          console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 완료');
+          // console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화 완료');
         }
       } catch (error) {
-        console.error('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 실패:', error);
+        // console.error('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 실패:', error);
       }
     };
 
@@ -165,17 +165,17 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
     const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
 
-    console.log('🔍 FamilySpaceCreationModal - 카카오 공유 시도:', {
-      windowKakao: !!window.Kakao,
-      isInitialized: window.Kakao?.isInitialized?.(),
-      familyName,
-      inviteCode,
-      imageUrl
-    });
+    // console.log('🔍 FamilySpaceCreationModal - 카카오 공유 시도:', {
+    //   windowKakao: !!window.Kakao,
+    //   isInitialized: window.Kakao?.isInitialized?.(),
+    //   familyName,
+    //   inviteCode,
+    //   imageUrl
+    // });
 
     // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
     if (window.Kakao && window.Kakao.isInitialized()) {
-      console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화됨, 공유 실행');
+      // console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화됨, 공유 실행');
       window.Kakao.Link.sendDefault({
         objectType: 'feed',
         content: {
@@ -198,7 +198,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
         ],
       });
     } else {
-      console.log('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
+      // console.log('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
       // 카카오톡 SDK가 없는 경우 클립보드에 복사
       const shareText = `🌱 ${familyName} 가족 스페이스에 초대합니다!\n\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
       navigator.clipboard.writeText(shareText);

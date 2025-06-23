@@ -165,20 +165,10 @@ export default function FamilySpacePage() {
   const handleShareKakao = () => {
     if (!family?.family?.inviteCode || !family?.family?.name) return;
 
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
-
-    console.log('🔍 카카오 공유 시도:', {
-      windowKakao: !!window.Kakao,
-      isInitialized: window.Kakao?.isInitialized?.(),
-      familyName: family.family.name,
-      inviteCode: family.family.inviteCode,
-      imageUrl
-    });
-
-    // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
     if (window.Kakao && window.Kakao.isInitialized()) {
-      console.log('✅ 카카오 SDK 초기화됨, 공유 실행');
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+      const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
+
       window.Kakao.Link.sendDefault({
         objectType: 'feed',
         content: {
@@ -201,8 +191,6 @@ export default function FamilySpacePage() {
         ],
       });
     } else {
-      console.log('❌ 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
-      // 카카오톡 SDK가 없는 경우 클립보드에 복사
       const shareText = `🌱 ${family.family.name} 가족 스페이스에 초대합니다!\n\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
       navigator.clipboard.writeText(shareText);
       toast({

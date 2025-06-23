@@ -19,9 +19,9 @@ export function shareKakao(inviteCode: string, familyName: string) {
     window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
   }
   
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://modi.app');
   const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
-  
+
   window.Kakao.Link.sendDefault({
     objectType: 'feed',
     content: {
