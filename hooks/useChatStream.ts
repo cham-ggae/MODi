@@ -10,7 +10,7 @@ export function useChatStream() {
   const [error, setError] = useState<Error | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
 
-  const start = useCallback(async (prompt: string, sessionId: string) => {
+  const start = useCallback(async (prompt: string, sessionId: string, members: number) => {
     controllerRef.current?.abort();
     setMessage('');
     setError(null);
@@ -18,14 +18,14 @@ export function useChatStream() {
 
     // 1) 토큰 갱신 트리거
     await authenticatedApiClient.get('/test');
-    const { accessToken } = useAuthStore.getState();
+    const accessToken = localStorage.getItem("accessToken");
 
     // 2) fetch 스트림 열기
     const controller = new AbortController();
     controllerRef.current = controller;
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_ADDR}/chat?sessionId=${encodeURIComponent(sessionId)}&prompt=${encodeURIComponent(`${prompt} (요금제 추천 시 LGU+만)`)}`,
+        `${process.env.NEXT_PUBLIC_ADDR}/chat?sessionId=${encodeURIComponent(sessionId)}&prompt=${encodeURIComponent(`${prompt} (요금제 추천 시 LGU+만)`)}&members=${members}`,
         {
           headers: { 'Authorization': `Bearer ${accessToken}` },
           credentials: 'include',

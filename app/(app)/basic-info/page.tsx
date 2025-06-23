@@ -114,19 +114,19 @@ function BasicInfoPage() {
 
           <div className="space-y-4">
             {[
-              { emoji: '👶', label: '10대' },
-              { emoji: '👦', label: '20대' },
-              { emoji: '👨', label: '30대' },
-              { emoji: '👴', label: '40대' },
-              { emoji: '👵', label: '50대 이상' },
+              { emoji: '👶', label: '10대', value: '10~19' },
+              { emoji: '👦', label: '20대', value: '20~29' },
+              { emoji: '👨', label: '30대', value: '30~39' },
+              { emoji: '👴', label: '40대', value: '40~49' },
+              { emoji: '👵', label: '50대 이상', value: '50~99' },
             ].map((option) => (
               <button
                 key={option.label}
-                onClick={() => handleAgeSelect(option.label as AdditionalInfoRequest['age'])}
+                onClick={() => handleAgeSelect(option.value as AdditionalInfoRequest['age'])}
                 className={`
                   w-full p-6 bg-white dark:bg-gray-800 border-2 rounded-3xl flex items-center space-x-4 transition-colors
                   ${
-                    age === option.label
+                    age === option.value
                       ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-lg'
                       : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                   }
@@ -138,7 +138,7 @@ function BasicInfoPage() {
                 <span className="text-lg font-medium text-gray-900 dark:text-white">
                   {option.label}
                 </span>
-                {age === option.label && (
+                {age === option.value && (
                   <div className="ml-auto w-6 h-6 bg-green-500 rounded-full flex items-center justify-center">
                     <div className="w-2 h-2 bg-white rounded-full" />
                   </div>

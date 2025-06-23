@@ -1,52 +1,56 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from "lucide-react";
+} from '@/components/ui/dialog';
+import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
+import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
 
 interface InviteCodeModalProps {
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
   inviteCode: string;
   familyName: string;
   onGenerateCode: () => void;
   onCopyCode: () => void;
-  onShareKakao: () => void;
+  onShareKakao?: () => void;
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
   isLoading?: boolean;
+  isUpdatingName?: boolean;
   canInvite?: boolean;
-  isOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
   trigger?: React.ReactNode;
 }
 
 export function InviteCodeModal({
+  isOpen: isOpenProp,
+  onOpenChange: onOpenChangeProp,
   inviteCode,
   familyName,
   onGenerateCode,
   onCopyCode,
-  onShareKakao,
+  onShareKakao: onShareKakaoProp,
   onSaveFamilyName,
   copied,
   isLoading = false,
+  isUpdatingName = false,
   canInvite = true,
-  isOpen,
-  onOpenChange,
   trigger,
 }: InviteCodeModalProps) {
-  const [internalIsOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [tempFamilyName, setTempFamilyName] = useState("");
+  const [tempFamilyName, setTempFamilyName] = useState('');
 
-  const isControlled = isOpen !== undefined;
-  const open = isControlled ? isOpen : internalIsOpen;
-  const setOpen = isControlled ? onOpenChange : setIsOpen;
+  const isOpen = isOpenProp ?? internalIsOpen;
+  const onOpenChange = onOpenChangeProp ?? setInternalIsOpen;
+
+  useKakaoInit();
 
   const handleEditFamilyName = () => {
     setTempFamilyName(familyName);
@@ -54,38 +58,28 @@ export function InviteCodeModal({
   };
 
   const handleSaveFamilyName = () => {
-    if (tempFamilyName.trim()) {
+    if (tempFamilyName.trim() && !isUpdatingName) {
       onSaveFamilyName(tempFamilyName.trim());
       setIsEditingName(false);
     }
   };
 
   const handleCancelEdit = () => {
-    setTempFamilyName("");
+    setTempFamilyName('');
     setIsEditingName(false);
   };
 
   const handleShareKakao = () => {
-    onShareKakao();
-    if (isControlled) {
-      setOpen?.(false);
+    if (onShareKakaoProp) {
+      onShareKakaoProp();
+    } else {
+      shareKakao(inviteCode, familyName);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!isControlled && trigger !== null && (
-        <DialogTrigger asChild>
-          {trigger || (
-            <Button
-              size="sm"
-              className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
-            >
-              <UserPlus className="w-5 h-5" />
-            </Button>
-          )}
-        </DialogTrigger>
-      )}
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
         <DialogHeader>
           <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
@@ -108,7 +102,7 @@ export function InviteCodeModal({
                         className="text-center text-sm max-w-32 dark:bg-gray-600 dark:text-white"
                         placeholder="가족명 입력"
                         onKeyPress={(e) => {
-                          if (e.key === "Enter") {
+                          if (e.key === 'Enter') {
                             handleSaveFamilyName();
                           }
                         }}
@@ -118,8 +112,13 @@ export function InviteCodeModal({
                         size="sm"
                         variant="ghost"
                         className="p-1"
+                        disabled={isUpdatingName}
                       >
-                        <Save className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        {isUpdatingName ? (
+                          <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        )}
                       </Button>
                       <Button onClick={handleCancelEdit} size="sm" variant="ghost" className="p-1">
                         <X className="w-3 h-3 text-gray-400" />
@@ -128,7 +127,7 @@ export function InviteCodeModal({
                   ) : (
                     <div className="flex items-center gap-2 justify-center">
                       <span className="text-xs text-gray-400 dark:text-gray-500">
-                        가족명: {familyName || "우리 가족"}
+                        가족명: {familyName || '우리 가족'}
                       </span>
                       <Button
                         onClick={handleEditFamilyName}
@@ -154,14 +153,13 @@ export function InviteCodeModal({
                     ) : (
                       <Copy className="w-4 h-4 mr-2" />
                     )}
-                    {copied ? "복사됨" : "복사"}
+                    {copied ? '복사됨' : '복사'}
                   </Button>
                   <Button
                     onClick={handleShareKakao}
                     size="sm"
-                    className="flex-1 bg-yellow-400 hover:bg-gray-400 text-black"
+                    className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
                   >
-                    <Share2 className="w-4 h-4 mr-2" />
                     카톡 공유
                   </Button>
                 </div>
