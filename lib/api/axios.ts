@@ -1,5 +1,9 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_ADDR || "http://localhost:8090";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_ADDR || "http://localhost:8090";
 
 /**
@@ -7,13 +11,19 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_ADDR || "http://localhost:8090";
  */
 const getAccessToken = (): string | null => {
   if (typeof window === "undefined") {
+
+  if (typeof window === "undefined") {
+
     return null;
   }
 
   try {
     return localStorage.getItem("accessToken");
+
+    return localStorage.getItem("accessToken");
   } catch (error) {
     console.error("토큰 가져오기 실패:", error);
+
     return null;
   }
 };
@@ -22,6 +32,8 @@ const getAccessToken = (): string | null => {
  * 토큰 업데이트 함수
  */
 const updateAccessToken = (token: string) => {
+  if (typeof window === "undefined") return;
+
   if (typeof window === "undefined") return;
 
   try {
@@ -33,6 +45,8 @@ const updateAccessToken = (token: string) => {
     });
   } catch (error) {
     console.error("토큰 업데이트 실패:", error);
+    console.error("토큰 업데이트 실패:", error);
+
   }
 };
 
@@ -42,10 +56,14 @@ const updateAccessToken = (token: string) => {
 const clearAuth = () => {
   if (typeof window === "undefined") return;
 
+  if (typeof window === "undefined") return;
+
   localStorage.removeItem("accessToken");
 
   // Zustand 스토어도 클리어
   import("@/store/useAuthStore").then(({ useAuthStore }) => {
+  import("@/store/useAuthStore").then(({ useAuthStore }) => {
+
     useAuthStore.getState().clearAuth();
   });
 };
@@ -54,6 +72,8 @@ const clearAuth = () => {
  * 리프레시 토큰으로 새 액세스 토큰 발급
  */
 const refreshAccessToken = async (): Promise<string> => {
+  const response = await apiClient.post("/refresh", {}, { withCredentials: true });
+
   const response = await apiClient.post("/refresh", {}, { withCredentials: true });
 
   // 헤더에서 토큰 추출
@@ -68,6 +88,8 @@ const refreshAccessToken = async (): Promise<string> => {
   }
 
   throw new Error("새 토큰을 찾을 수 없습니다");
+  throw new Error("새 토큰을 찾을 수 없습니다");
+
 };
 
 /**
@@ -124,13 +146,17 @@ authenticatedApiClient.interceptors.request.use(
         url: config.url,
         method: config.method,
         windowDefined: typeof window !== "undefined",
+        windowDefined: typeof window !== "undefined",
+
       });
     }
 
     return config;
   },
   (error) => {
+
     console.error("❌ 요청 인터셉터 에러:", error);
+
     return Promise.reject(error);
   }
 );
@@ -140,13 +166,17 @@ authenticatedApiClient.interceptors.request.use(
  */
 authenticatedApiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+
     console.log("✅ API 응답 성공:", response.config.url, response.status);
+
     return response;
   },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
     console.log("🔄 API 응답 에러:", {
+    console.log("🔄 API 응답 에러:", {
+
       status: error.response?.status,
       url: error.config?.url,
       hasRetry: !!originalRequest._retry,
@@ -161,6 +191,8 @@ authenticatedApiClient.interceptors.response.use(
 
       if (isRefreshing) {
         console.log("⏳ 이미 토큰 갱신 중 - 대기열에 추가");
+        console.log("⏳ 이미 토큰 갱신 중 - 대기열에 추가");
+
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
@@ -181,6 +213,7 @@ authenticatedApiClient.interceptors.response.use(
         const newToken = await refreshAccessToken();
 
         console.log("✅ 새 토큰 발급 성공");
+p
         updateAccessToken(newToken);
 
         // 대기 중인 요청들에 새 토큰 전달
@@ -191,6 +224,8 @@ authenticatedApiClient.interceptors.response.use(
         return authenticatedApiClient(originalRequest);
       } catch (refreshError) {
         console.error("❌ 토큰 갱신 실패:", refreshError);
+        console.error("❌ 토큰 갱신 실패:", refreshError);
+
 
         // 대기 중인 요청들에게 에러 전달
         processQueue(refreshError as Error | AxiosError, null);
@@ -202,6 +237,10 @@ authenticatedApiClient.interceptors.response.use(
         if (typeof window !== "undefined") {
           console.log("🔄 로그인 페이지로 리다이렉트");
           window.location.href = "/";
+        if (typeof window !== "undefined") {
+          console.log("🔄 로그인 페이지로 리다이렉트");
+          window.location.href = "/";
+
         }
 
         return Promise.reject(refreshError);
@@ -213,3 +252,7 @@ authenticatedApiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+
+export { getAccessToken };
+

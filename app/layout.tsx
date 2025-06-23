@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning className="h-screen-dvh bg-gray-100 dark:bg-black">
+    <html lang="ko" suppressHydrationWarning className="h-full bg-gray-100 dark:bg-black">
       <head>
         {/* 파비콘 및 아이콘 설정 */}
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
@@ -43,9 +43,7 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
 
-      <body
-        className={`${inter.className} h-full w-full flex items-center justify-center overflow-hidden`}
-      >
+      <body className={`${inter.className} h-full w-full flex items-center justify-center`}>
         <ThemeProvider>
           <QueryProvider>
             <AuthProvider>
