@@ -13,33 +13,40 @@ import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
 import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
 
 interface InviteCodeModalProps {
-    inviteCode: string;
-    familyName: string;
-    onGenerateCode: () => void;
-    onCopyCode: () => void;
-    onShareKakao?: () => void;
-    onSaveFamilyName: (name: string) => void;
-    copied: boolean;
-    isLoading?: boolean;
-    canInvite?: boolean;
+
+  inviteCode: string;
+  familyName: string;
+  onGenerateCode: () => void;
+  onCopyCode: () => void;
+  onShareKakao?: () => void;
+  onSaveFamilyName: (name: string) => void;
+  copied: boolean;
+  isLoading?: boolean;
+  canInvite?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: React.ReactNode;
 }
 
 export function InviteCodeModal({
-                                    inviteCode,
-                                    familyName,
-                                    onGenerateCode,
-                                    onCopyCode,
-                                    onShareKakao: onShareKakaoProp,
-                                    onSaveFamilyName,
-                                    copied,
-                                    isLoading = false,
-                                    canInvite = true,
-                                }: InviteCodeModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [tempFamilyName, setTempFamilyName] = useState('');
+  inviteCode,
+  familyName,
+  onGenerateCode,
+  onCopyCode,
+  onShareKakao: onShareKakaoProp,
+  onSaveFamilyName,
+  copied,
+  isLoading = false,
+  canInvite = true,
+  isOpen,
+  onOpenChange,
+  trigger,
+}: InviteCodeModalProps) {
+  const [internalIsOpen, setIsOpen] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempFamilyName, setTempFamilyName] = useState('');
 
-    useKakaoInit();
+  useKakaoInit();
 
     const handleEditFamilyName = () => {
         setTempFamilyName(familyName);
@@ -69,6 +76,7 @@ export function InviteCodeModal({
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
+
                 <Button
                     size="sm"
                     className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"

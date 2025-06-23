@@ -176,6 +176,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
     // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
     if (window.Kakao && window.Kakao.isInitialized()) {
       // console.log('✅ FamilySpaceCreationModal - 카카오 SDK 초기화됨, 공유 실행');
+
       window.Kakao.Link.sendDefault({
         objectType: 'feed',
         content: {
@@ -199,6 +200,7 @@ export function FamilySpaceCreationModal({ isOpen, onClose }: FamilySpaceCreatio
       });
     } else {
       // console.log('❌ FamilySpaceCreationModal - 카카오 SDK 초기화 안됨, 클립보드 복사로 대체');
+
       // 카카오톡 SDK가 없는 경우 클립보드에 복사
       const shareText = `🌱 ${familyName} 가족 스페이스에 초대합니다!\n\n초대 코드: ${inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi 앱 다운로드: https://modi.app`;
       navigator.clipboard.writeText(shareText);
