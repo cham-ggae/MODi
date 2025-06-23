@@ -112,3 +112,127 @@ export const useImageTypes = () => {
     gcTime: 30 * 60 * 1000, // 30분
   });
 };
+
+/**
+ * 메시지 카드 댓글 목록 조회 훅
+ */
+export const useMessageCardComments = (fcid?: number) => {
+  return useQuery({
+    queryKey: ['family', 'message-cards', 'comments', fcid],
+    queryFn: () => familyApi.getMessageCardComments(fcid!),
+    enabled: !!fcid,
+    staleTime: 1 * 60 * 1000, // 1분
+    gcTime: 3 * 60 * 1000, // 3분
+    retry: (failureCount, error: any) => {
+      // 403(권한 없음), 404(없음)는 재시도하지 않음
+      const noRetryStatuses = [403, 404];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * 메시지 카드 댓글 상세 조회 훅
+ */
+export const useMessageCardCommentDetail = (fcid?: number, commentId?: number) => {
+  return useQuery({
+    queryKey: ['family', 'message-cards', 'comments', 'detail', fcid, commentId],
+    queryFn: () => familyApi.getMessageCardCommentDetail(fcid!, commentId!),
+    enabled: !!fcid && !!commentId,
+    staleTime: 2 * 60 * 1000, // 2분
+    gcTime: 5 * 60 * 1000, // 5분
+    retry: (failureCount, error: any) => {
+      // 403(권한 없음), 404(없음)는 재시도하지 않음
+      const noRetryStatuses = [403, 404];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * 메시지 카드 최근 댓글 조회 훅
+ */
+export const useRecentMessageCardComments = (fcid?: number, limit: number = 3) => {
+  return useQuery({
+    queryKey: ['family', 'message-cards', 'comments', 'recent', fcid, limit],
+    queryFn: () => familyApi.getRecentMessageCardComments(fcid!, limit),
+    enabled: !!fcid,
+    staleTime: 30 * 1000, // 30초
+    gcTime: 2 * 60 * 1000, // 2분
+    retry: (failureCount, error: any) => {
+      // 403(권한 없음), 404(없음)는 재시도하지 않음
+      const noRetryStatuses = [403, 404];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * 메시지 카드 댓글 개수 조회 훅
+ */
+export const useMessageCardCommentCount = (fcid?: number) => {
+  return useQuery({
+    queryKey: ['family', 'message-cards', 'comments', 'count', fcid],
+    queryFn: () => familyApi.getMessageCardCommentCount(fcid!),
+    enabled: !!fcid,
+    staleTime: 30 * 1000, // 30초
+    gcTime: 2 * 60 * 1000, // 2분
+    retry: (failureCount, error: any) => {
+      // 403(권한 없음), 404(없음)는 재시도하지 않음
+      const noRetryStatuses = [403, 404];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * 구성원별 댓글 통계 조회 훅
+ */
+export const useMemberCommentStatistics = () => {
+  return useQuery({
+    queryKey: ['family', 'comments', 'statistics', 'members'],
+    queryFn: familyApi.getMemberCommentStatistics,
+    staleTime: 5 * 60 * 1000, // 5분
+    gcTime: 10 * 60 * 1000, // 10분
+    retry: (failureCount, error: any) => {
+      // 400(가족 스페이스 미가입), 403(권한 없음)는 재시도하지 않음
+      const noRetryStatuses = [400, 403];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
+
+/**
+ * 카드별 댓글 통계 조회 훅
+ */
+export const useCardCommentStatistics = () => {
+  return useQuery({
+    queryKey: ['family', 'comments', 'statistics', 'cards'],
+    queryFn: familyApi.getCardCommentStatistics,
+    staleTime: 5 * 60 * 1000, // 5분
+    gcTime: 10 * 60 * 1000, // 10분
+    retry: (failureCount, error: any) => {
+      // 400(가족 스페이스 미가입), 403(권한 없음)는 재시도하지 않음
+      const noRetryStatuses = [400, 403];
+      if (noRetryStatuses.includes(error.response?.status)) {
+        return false;
+      }
+      return failureCount < 3;
+    },
+  });
+};
