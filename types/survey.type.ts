@@ -16,6 +16,8 @@ export type SurveyResult = {
   type: string;
   description: string;
   recommendations: string[];
+  suggest1: number; // 추천 요금제 ID 1
+  suggest2: number; // 추천 요금제 ID 2
 };
 
 // 백엔드에서 전달받는 설문 결과 응답 데이터 구조
