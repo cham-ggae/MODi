@@ -2,6 +2,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FamilyMemberCard } from './FamilyMemberCard';
 import { InviteCodeModal } from './InviteCodeModal';
 import { UIFamilyMember } from '@/types/family.type';
+import { Button } from '@/components/ui/button';
+import { UserPlus } from 'lucide-react';
+import { useState } from 'react';
 
 interface FamilyMemberSectionProps {
   members: UIFamilyMember[];
@@ -13,6 +16,7 @@ interface FamilyMemberSectionProps {
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
   isLoading: boolean;
+  isUpdatingName?: boolean;
   canInvite: boolean;
   memberCount: number;
 }
@@ -27,9 +31,12 @@ export function FamilyMemberSection({
   onSaveFamilyName,
   copied,
   isLoading = false,
+  isUpdatingName = false,
   canInvite = true,
   memberCount = 0,
 }: FamilyMemberSectionProps) {
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+
   return (
     <Card className="bg-white dark:bg-gray-800 shadow-sm border-0 rounded-2xl">
       <CardContent className="p-6">
@@ -49,7 +56,10 @@ export function FamilyMemberSection({
             onSaveFamilyName={onSaveFamilyName}
             copied={copied}
             isLoading={isLoading}
+            isUpdatingName={isUpdatingName}
             canInvite={canInvite}
+            isOpen={isInviteModalOpen}
+            onOpenChange={setIsInviteModalOpen}
           />
         </div>
         <div className="space-y-4">

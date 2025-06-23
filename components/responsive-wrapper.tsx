@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, memo } from 'react';
 import { useResponsiveScale } from '@/hooks/use-responsive-scale';
 
 const BASE_WIDTH = 430;
@@ -12,7 +12,11 @@ interface ResponsiveWrapperProps {
   footer?: React.ReactNode;
 }
 
-export function ResponsiveWrapper({ header, main, footer }: ResponsiveWrapperProps) {
+export const ResponsiveWrapper = memo(function ResponsiveWrapper({
+  header,
+  main,
+  footer,
+}: ResponsiveWrapperProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const scaleStyle = useResponsiveScale({
@@ -25,11 +29,11 @@ export function ResponsiveWrapper({ header, main, footer }: ResponsiveWrapperPro
     <div
       ref={containerRef}
       style={scaleStyle}
-      className="bg-background overflow-hidden shadow-2xl rounded-3xl flex flex-col"
+      className="bg-background overflow-hidden shadow-2xl rounded-3xl flex flex-col will-change-transform"
     >
       {header && <header className="flex-shrink-0">{header}</header>}
-      <main className="flex-1 overflow-y-auto">{main}</main>
+      <main className="flex-1 overflow-y-auto overscroll-contain">{main}</main>
       {footer && <footer className="flex-shrink-0">{footer}</footer>}
     </div>
   );
-}
+});

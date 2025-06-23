@@ -32,7 +32,7 @@ export function PlantImageDisplay({
   }
 
   return (
-    <div className="relative w-full max-w-md px-4 pt-4 pb-2 h-full flex items-center justify-center">
+    <div className="relative w-full h-full flex items-center justify-center">
       <AnimatePresence mode="wait">
         {plantImage ? (
           <motion.div
@@ -49,14 +49,14 @@ export function PlantImageDisplay({
               scale: { duration: 0.5 },
               rotate: { duration: 3, repeat: Infinity, ease: "easeInOut" },
             }}
-            className="relative w-full h-full"
+            className="relative w-full h-full max-w-sm"
           >
             <Image
               src={plantImage}
               alt={`${selectedPlantType} 레벨 ${currentLevel}`}
               fill
               priority
-              className="object-contain m-4"
+              className="object-contain"
             />
           </motion.div>
         ) : (
@@ -79,7 +79,7 @@ export function PlantImageDisplay({
             initial={{ opacity: 0, y: -50 }}
             animate={{ opacity: 1, y: 50 }}
             exit={{ opacity: 0 }}
-            className="absolute top-8  text-4xl"
+            className="absolute top-8 text-4xl"
           >
             💧💧💧💧
           </motion.div>
