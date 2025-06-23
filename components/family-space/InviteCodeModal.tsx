@@ -22,8 +22,8 @@ interface InviteCodeModalProps {
   copied: boolean;
   isLoading?: boolean;
   canInvite?: boolean;
-  isOpen?: boolean;
-  onOpenChange?: (isOpen: boolean) => void;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 }
 
 export function InviteCodeModal({
@@ -36,12 +36,11 @@ export function InviteCodeModal({
   copied,
   isLoading = false,
   canInvite = true,
-  isOpen = false,
+  isOpen,
   onOpenChange,
 }: InviteCodeModalProps) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
-  const [isOpenProp, setIsOpen] = useState(isOpen);
 
   useKakaoInit();
 
@@ -71,8 +70,8 @@ export function InviteCodeModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {isOpenProp === undefined && (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      {!isOpen && (
         <DialogTrigger asChild>
           <Button
             size="sm"
