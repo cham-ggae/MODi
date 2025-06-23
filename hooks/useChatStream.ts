@@ -18,7 +18,7 @@ export function useChatStream() {
 
     // 1) 토큰 갱신 트리거
     await authenticatedApiClient.get('/test');
-    const { accessToken } = useAuthStore.getState();
+    const accessToken = localStorage.getItem("accessToken");
 
     // 2) fetch 스트림 열기
     const controller = new AbortController();
