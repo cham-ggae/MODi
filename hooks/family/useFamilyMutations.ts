@@ -82,6 +82,26 @@ export const useGenerateInviteCode = () => {
 };
 
 /**
+ * 가족 이름 변경 뮤테이션
+ */
+export const useUpdateFamilyName = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ fid, name }: { fid: number; name: string }) =>
+      familyApi.updateFamilyName(fid, name),
+    onSuccess: (data, { fid }) => {
+      // 가족 관련 모든 쿼리 무효화
+      queryClient.invalidateQueries({ queryKey: ['family', 'dashboard', fid] });
+      queryClient.invalidateQueries({ queryKey: ['family', 'my-family'] });
+    },
+    onError: (error: any) => {
+      console.error('가족 이름 변경 에러:', error);
+    },
+  });
+};
+
+/**
  * 가족 탈퇴 뮤테이션
  */
 export const useLeaveFamily = () => {

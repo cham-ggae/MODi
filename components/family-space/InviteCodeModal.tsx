@@ -21,6 +21,7 @@ interface InviteCodeModalProps {
   onSaveFamilyName: (name: string) => void;
   copied: boolean;
   isLoading?: boolean;
+  isUpdatingName?: boolean;
   canInvite?: boolean;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
@@ -35,6 +36,7 @@ export function InviteCodeModal({
   onSaveFamilyName,
   copied,
   isLoading = false,
+  isUpdatingName = false,
   canInvite = true,
   isOpen,
   onOpenChange,
@@ -50,7 +52,7 @@ export function InviteCodeModal({
   };
 
   const handleSaveFamilyName = () => {
-    if (tempFamilyName.trim()) {
+    if (tempFamilyName.trim() && !isUpdatingName) {
       onSaveFamilyName(tempFamilyName.trim());
       setIsEditingName(false);
     }
@@ -113,8 +115,13 @@ export function InviteCodeModal({
                         size="sm"
                         variant="ghost"
                         className="p-1"
+                        disabled={isUpdatingName}
                       >
-                        <Save className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        {isUpdatingName ? (
+                          <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        )}
                       </Button>
                       <Button onClick={handleCancelEdit} size="sm" variant="ghost" className="p-1">
                         <X className="w-3 h-3 text-gray-400" />

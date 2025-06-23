@@ -18,6 +18,7 @@ import {
   useJoinFamily,
   useLeaveFamily,
   useGenerateInviteCode,
+  useUpdateFamilyName,
   useCreateMessageCard,
   useUpdateMessageCard,
   useDeleteMessageCard,

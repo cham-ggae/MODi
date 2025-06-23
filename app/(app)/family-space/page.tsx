@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useFamily } from '@/hooks/family';
 import { useAuth } from '@/hooks/useAuth';
 import { FamilySpaceHeader } from '@/components/family-space/FamilySpaceHeader';
@@ -11,6 +11,7 @@ import { FamilyMemberSection } from '@/components/family-space/FamilyMemberSecti
 import { FamilyRecommendationCard } from '@/components/family-space/FamilyRecommendationCard';
 import { MessageCardSection } from '@/components/family-space/MessageCardSection';
 import { UIFamilyMember } from '@/types/family.type';
+import { useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
 
 declare global {
   interface Window {
@@ -53,8 +54,8 @@ export default function FamilySpacePage() {
 
   const [copied, setCopied] = useState(false);
   const router = useRouter();
-  const { toast } = useToast();
   const { user } = useAuth();
+  const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
 
   // 카카오톡 SDK 초기화
   useEffect(() => {
@@ -106,8 +107,9 @@ export default function FamilySpacePage() {
         console.log('🔍 카카오 SDK 초기화 시도:', {
           windowExists: typeof window !== 'undefined',
           windowKakao: typeof window !== 'undefined' ? !!window.Kakao : false,
-          isInitialized: typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
-          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY
+          isInitialized:
+            typeof window !== 'undefined' && window.Kakao ? window.Kakao.isInitialized() : false,
+          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY,
         });
 
         // SDK 로드 대기
@@ -135,11 +137,9 @@ export default function FamilySpacePage() {
     } else if (plant?.canCreateNew) {
       router.push('/plant-selection');
     } else {
-      toast({
-        title: '새싹을 만들 수 없습니다',
-        description: plant?.createBlockReason || '잠시 후 다시 시도해주세요.',
-        variant: 'destructive',
-      });
+      toast.error(
+        plant?.createBlockReason || '새싹을 만들 수 없습니다. 잠시 후 다시 시도해주세요.'
+      );
     }
   };
 
@@ -149,16 +149,10 @@ export default function FamilySpacePage() {
     try {
       await navigator.clipboard.writeText(family.family.inviteCode);
       setCopied(true);
-      toast({
-        title: '초대 코드가 복사되었습니다!',
-        description: '가족들에게 공유해보세요.',
-      });
+      toast.success('초대 코드가 복사되었습니다! 가족들에게 공유해보세요.');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({
-        title: '복사에 실패했습니다',
-        variant: 'destructive',
-      });
+      toast.error('복사에 실패했습니다');
     }
   };
 
@@ -173,7 +167,7 @@ export default function FamilySpacePage() {
       isInitialized: window.Kakao?.isInitialized?.(),
       familyName: family.family.name,
       inviteCode: family.family.inviteCode,
-      imageUrl
+      imageUrl,
     });
 
     // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
@@ -205,10 +199,7 @@ export default function FamilySpacePage() {
       // 카카오톡 SDK가 없는 경우 클립보드에 복사
       const shareText = `🌱 ${family.family.name} 가족 스페이스에 초대합니다!\n\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
       navigator.clipboard.writeText(shareText);
-      toast({
-        title: '공유 메시지가 복사되었습니다!',
-        description: '카카오톡에서 붙여넣기 해주세요.',
-      });
+      toast.success('공유 메시지가 복사되었습니다! 카카오톡에서 붙여넣기 해주세요.');
     }
   };
 
@@ -219,11 +210,22 @@ export default function FamilySpacePage() {
   };
 
   const handleSaveFamilyName = (name: string) => {
-    // TODO: 가족명 변경 API 연동 필요
-    toast({
-      title: '가족명이 변경되었습니다! ✨',
-      description: `새로운 가족명: ${name}`,
-    });
+    if (!familyId) {
+      toast.error('가족 ID를 찾을 수 없습니다.');
+      return;
+    }
+
+    updateFamilyName(
+      { fid: familyId, name },
+      {
+        onSuccess: () => {
+          toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+        },
+        onError: (error) => {
+          toast.error('가족명 변경에 실패했습니다');
+        },
+      }
+    );
   };
 
   // ==========================================
@@ -246,21 +248,13 @@ export default function FamilySpacePage() {
   // ==========================================
   useEffect(() => {
     if (error) {
-      toast({
-        title: '가족 정보를 불러오는데 실패했습니다',
-        description: '잠시 후 다시 시도해주세요.',
-        variant: 'destructive',
-      });
+      toast.error('가족 정보를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   }, [error, toast]);
 
   useEffect(() => {
     if (messageCardsError) {
-      toast({
-        title: '메시지 카드를 불러오는데 실패했습니다',
-        description: '잠시 후 다시 시도해주세요.',
-        variant: 'destructive',
-      });
+      toast.error('메시지 카드를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   }, [messageCardsError, toast]);
 
@@ -328,6 +322,7 @@ export default function FamilySpacePage() {
             onSaveFamilyName={handleSaveFamilyName}
             copied={copied}
             isLoading={isGeneratingCode}
+            isUpdatingName={isUpdatingFamilyName}
             canInvite={canInvite}
             memberCount={memberCount}
           />
@@ -339,10 +334,7 @@ export default function FamilySpacePage() {
             membersWithPlan={dashboard?.membersWithPlan}
             onViewRecommendation={() => {
               // TODO: 추천 페이지로 이동
-              toast({
-                title: '추천 페이지로 이동합니다',
-                description: '곧 구현될 예정입니다.',
-              });
+              toast.info('추천 페이지로 이동합니다. 곧 구현될 예정입니다.');
             }}
           />
 

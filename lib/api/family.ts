@@ -129,6 +129,23 @@ export const familyApi = {
     }
   },
 
+  /**
+   * 가족 이름 변경
+   * POST /family/{fid}/name
+   */
+  updateFamilyName: async (
+    fid: number,
+    name: string
+  ): Promise<{ success: boolean; message: string }> => {
+    try {
+      const response = await authenticatedApiClient.post(`/family/${fid}/name`, { name });
+      return response.data;
+    } catch (error) {
+      console.error('가족 이름 변경 실패:', error);
+      throw error;
+    }
+  },
+
   // ==========================================
   // 메시지 카드 관련 API
   // ==========================================

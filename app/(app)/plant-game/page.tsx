@@ -32,7 +32,7 @@ import { Sprout, TreePine } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import confetti from 'canvas-confetti';
 import { CardMatchingGame } from '@/components/plant-game/CardMatchingGame';
-import { useGenerateInviteCode } from '@/hooks/family/useFamilyMutations';
+import { useGenerateInviteCode, useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
 import { MessageCardCreator } from '@/components/family-space/MessageCardCreator';
 import { InviteCodeModal } from '@/components/family-space/InviteCodeModal';
 import { QuizPage } from '@/components/plant-game/QuizPage';
@@ -195,6 +195,7 @@ export default function PlantGamePage() {
   // ==========================================
   const { familyId, family } = useFamily(); // 가족 정보 및 ID
   const { mutate: generateNewCode } = useGenerateInviteCode(); // 초대 코드 생성 API
+  const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
 
   // 식물 상태 정보
   const {
@@ -564,7 +565,22 @@ export default function PlantGamePage() {
 
   // 가족명 저장 핸들러
   const handleSaveFamilyName = (name: string) => {
-    toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+    if (!familyId) {
+      toast.error('가족 ID를 찾을 수 없습니다.');
+      return;
+    }
+
+    updateFamilyName(
+      { fid: familyId, name },
+      {
+        onSuccess: () => {
+          toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
+        },
+        onError: (error) => {
+          toast.error('가족명 변경에 실패했습니다');
+        },
+      }
+    );
   };
 
   // ==========================================
@@ -738,6 +754,7 @@ export default function PlantGamePage() {
         onCopyCode={handleCopyCode}
         onSaveFamilyName={handleSaveFamilyName}
         copied={copied}
+        isLoading={isUpdatingFamilyName}
       />
 
       {/* 🎯 퀴즈 페이지 */}
