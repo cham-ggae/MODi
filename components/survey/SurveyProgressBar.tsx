@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 interface SurveyProgressBarProps {
   currentStep: number;
@@ -8,7 +8,7 @@ interface SurveyProgressBarProps {
 export function SurveyProgressBar({ currentStep, totalSteps }: SurveyProgressBarProps) {
   const progress = Math.round((currentStep / totalSteps) * 100);
   return (
-    <div className="px-6 mb-8">
+    <div className="px-6 mb-4">
       <div className="flex justify-between items-center mb-2">
         <span className="text-sm text-gray-600 dark:text-gray-400">
           {currentStep} / {totalSteps}
