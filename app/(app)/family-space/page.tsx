@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,6 +17,7 @@ import { plantApi } from "@/lib/api/plant";
 import { PlantStatus } from "@/types/plants.type";
 import { MessageCardModal } from "@/components/message-card-modal";
 import { useAddPoint } from "@/hooks/plant";
+
 
 export default function FamilySpacePage() {
   const {
@@ -54,6 +56,7 @@ export default function FamilySpacePage() {
   const router = useRouter();
   const { toast } = useToast();
   const { user } = useAuth();
+
   const [plantStatus, setPlantStatus] = useState<PlantStatus | null>(null);
   const { mutate: addPoint } = useAddPoint();
   const [showMessageModal, setShowMessageModal] = useState(false);
@@ -132,6 +135,7 @@ export default function FamilySpacePage() {
     if (plantStatus && !plantStatus.completed) {
       router.push("/plant-game");
       return;
+
     }
 
     // 완료됐거나 없으면 생성 화면으로
@@ -193,10 +197,13 @@ export default function FamilySpacePage() {
   const handleSaveFamilyName = (name: string) => {
     // TODO: 가족명 변경 API 연동 필요
     toast({
+
       title: "가족명이 변경되었습니다! ✨",
+
       description: `새로운 가족명: ${name}`,
     });
   };
+
 
   const handleSendCard = (design: string, message: string) => {
     // 메시지 저장 로직...
@@ -223,7 +230,7 @@ export default function FamilySpacePage() {
     dashboard?.members?.map((member) => ({
       id: member.uid,
       name: member.name,
-      avatar: member.profileImage ? "👤" : "��", // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
+      avatar: member.profileImage ? "👤" : "🐛", // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
       profileImage: member.profileImage, // 카카오톡 프로필 이미지
       plan: member.planSummary || "요금제 없음",
       hasRecommendation: false, // TODO: 추천 시스템 연동 필요
@@ -238,6 +245,7 @@ export default function FamilySpacePage() {
         title: "가족 정보를 불러오는데 실패했습니다",
         description: "잠시 후 다시 시도해주세요.",
         variant: "destructive",
+
       });
     }
   }, [error, toast]);
@@ -245,9 +253,11 @@ export default function FamilySpacePage() {
   useEffect(() => {
     if (messageCardsError) {
       toast({
+
         title: "메시지 카드를 불러오는데 실패했습니다",
         description: "잠시 후 다시 시도해주세요.",
         variant: "destructive",
+
       });
     }
   }, [messageCardsError, toast]);
@@ -258,6 +268,7 @@ export default function FamilySpacePage() {
   useEffect(() => {
     // 로딩이 완료되고 가족이 없는 경우 family-space-intro로 리다이렉트
     if (!isLoading && !hasFamily) {
+
       console.log("🔄 가족 스페이스가 없어서 family-space-intro로 리다이렉트");
       router.push("/family-space-tutorial");
     }
@@ -276,6 +287,7 @@ export default function FamilySpacePage() {
       </div>
     );
   }
+
 
   // 가족이 없는 경우 로딩 화면 표시 (리다이렉트 중)
   if (!hasFamily) {
@@ -311,6 +323,7 @@ export default function FamilySpacePage() {
             members={transformedMembers}
             inviteCode={family?.family?.inviteCode || ""}
             familyName={family?.family?.name || ""}
+
             onGenerateCode={handleGenerateNewInviteCode}
             onCopyCode={handleCopyCode}
             onShareKakao={handleShareKakao}
@@ -331,6 +344,7 @@ export default function FamilySpacePage() {
               toast({
                 title: "추천 페이지로 이동합니다",
                 description: "곧 구현될 예정입니다.",
+
               });
             }}
           />
@@ -346,8 +360,10 @@ export default function FamilySpacePage() {
             onMessageCardCreated={handleMessageCardCreated}
           />
 
+
           {/* Reward History Section */}
           <RewardHistorySection />
+
         </div>
       </div>
 

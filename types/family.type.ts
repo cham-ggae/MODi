@@ -191,7 +191,10 @@ export interface CreateFamilyRequest {
    * 결합 상품 타입
    * 할인 혜택을 결정하는 중요한 값
    */
+
   combiType: "투게더 결합" | "참쉬운 가족 결합" | "가족 무한 사랑";
+
+
 }
 
 /**
@@ -336,13 +339,16 @@ export type FamilyRole = "OWNER" | "MEMBER";
  */
 export type FamilyStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
+
 /**
  * 결합 상품 타입 상수
  */
 export const COMBI_TYPES = {
+
   TOGETHER: "투게더 결합",
   EASY_FAMILY: "참쉬운 가족 결합",
   UNLIMITED_LOVE: "가족 무한 사랑",
+
 } as const;
 
 /**
@@ -407,6 +413,7 @@ export interface PlantInfo {
   /** 생성 차단 사유 (선택적) */
   createBlockReason?: string;
 
+
   /** 식물 완료 여부 */
   isCompleted?: boolean;
 }
@@ -415,3 +422,4 @@ export interface PlantInfo {
  * 식물 타입
  */
 export type PlantType = "flower" | "tree";
+
