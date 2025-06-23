@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { PlantType } from "@/types/family.type";
 import { PlantStatus } from "@/types/plants.type";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PlantSectionProps {
   plant: {
@@ -20,6 +21,7 @@ interface PlantSectionProps {
   onPlantAction: () => void;
   familyNutrial?: number;
   familyDaysAfterCreation?: number;
+  isPlantStatusLoading?: boolean;
 }
 
 export function PlantSection({
@@ -28,6 +30,7 @@ export function PlantSection({
   onPlantAction,
   familyNutrial = 0,
   familyDaysAfterCreation = 0,
+  isPlantStatusLoading = false,
 }: PlantSectionProps) {
   const { hasPlant, plantType, canCreateNew, createBlockReason } = plant;
 
@@ -53,23 +56,25 @@ export function PlantSection({
         )}
       </motion.div>
 
-      <Button
-        onClick={onPlantAction}
-        disabled={!canCreateNew && !hasPlant}
-        className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {!plantStatus || plantStatus.completed ? (
-          <>
-            <Sprout className="w-4 h-4 mr-2" />
-            새싹 만들기
-          </>
-        ) : (
-          <>
-            <TreePine className="w-4 h-4 mr-2" />
-            새싹 키우기
-          </>
-        )}
-      </Button>
+      {!isPlantStatusLoading && (
+        <Button
+          onClick={onPlantAction}
+          disabled={!canCreateNew && !hasPlant}
+          className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {!plantStatus || plantStatus.completed ? (
+            <>
+              <Sprout className="w-4 h-4 mr-2" />
+              새싹 만들기
+            </>
+          ) : (
+            <>
+              <TreePine className="w-4 h-4 mr-2" />
+              새싹 키우기
+            </>
+          )}
+        </Button>
+      )}
 
       {/* 생성 차단 사유 표시 */}
       {!canCreateNew && !hasPlant && createBlockReason && (

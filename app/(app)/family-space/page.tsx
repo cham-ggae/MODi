@@ -16,6 +16,7 @@ import { plantApi } from "@/lib/api/plant";
 import { PlantStatus } from "@/types/plants.type";
 import { MessageCardModal } from "@/components/message-card-modal";
 import { useAddPoint } from "@/hooks/plant";
+import { usePlantStatus } from "@/hooks/plant/usePlantStatus";
 
 declare global {
   interface Window {
@@ -61,7 +62,13 @@ export default function FamilySpacePage() {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const [plantStatus, setPlantStatus] = useState<PlantStatus | null>(null);
+  const {
+    data: plantStatus,
+    isLoading: isPlantStatusLoading,
+    error: plantStatusError,
+    refetch: refetchPlantStatus,
+  } = usePlantStatus(familyId ?? 0);
+
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [showMessageCardCreator, setShowMessageCardCreator] = useState(false);
   const { mutate: addPoint } = useAddPoint();
@@ -166,22 +173,6 @@ export default function FamilySpacePage() {
   };
 
   const daysAfterFamilyCreation = calculateDaysAfterFamilyCreation();
-
-  useEffect(() => {
-    if (!familyId) return;
-
-    // 서버에서 plant 상태를 최신으로 받아옴
-    plantApi
-      .getPlantStatus(familyId)
-      .then(setPlantStatus)
-      .catch(() =>
-        toast({
-          title: "식물 상태를 불러오지 못했습니다",
-          description: "잠시 후 다시 시도해주세요.",
-          variant: "destructive",
-        })
-      );
-  }, [familyId]);
 
   const plantType = family?.plant?.plantType; // "flower" or "tree"
 
@@ -347,6 +338,16 @@ export default function FamilySpacePage() {
     }
   }, [messageCardsError, toast]);
 
+  useEffect(() => {
+    if (plantStatusError) {
+      toast({
+        title: "식물 상태를 불러오지 못했습니다",
+        description: "잠시 후 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  }, [plantStatusError, toast]);
+
   // ==========================================
   // 🔄 가족 스페이스 리다이렉트 처리
   // ==========================================
@@ -395,6 +396,7 @@ export default function FamilySpacePage() {
         onPlantAction={handlePlantAction}
         familyNutrial={family?.family?.nutrial}
         familyDaysAfterCreation={daysAfterFamilyCreation}
+        isPlantStatusLoading={isPlantStatusLoading}
       />
 
       {/* Scrollable Content */}
