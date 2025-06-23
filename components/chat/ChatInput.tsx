@@ -32,15 +32,11 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
 
   // 사용자가 전송 버튼 클릭했을 때
   const handleSend = () => {
-    if (!message.trim()) return
-    let addMessage = "";
-    if (familyMode) {
-      addMessage = ` 가족 구성원의 수 : ${familySize}`
-    };
+    if (!message.trim()) return;
     // 1) 사용자 메시지 추가
     const userMsg: ClientMessage = {
       id: uuidv4(),
-      content: message + addMessage,
+      content: message,
       role: "user",
       timestamp: new Date(),
       sessionId: sessionId
@@ -60,7 +56,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
     setMessages((prev) => [...prev, userMsg, aiMsg])
 
     // 3) 스트리밍 시작
-    start(message, sessionId)
+    start(message, sessionId, familyMode ? familySize : 1)
     setMessage('')
   }
 
