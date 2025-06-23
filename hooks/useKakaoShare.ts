@@ -19,15 +19,9 @@ export function shareKakao(inviteCode: string, familyName: string) {
     window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
   }
   
-<<<<<<< HEAD
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://modi.app');
   const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
 
-=======
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-  const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
-  
->>>>>>> 857bdb5 (CHAM-79 feat: 카카오톡 공유하기 기능 구현)
   window.Kakao.Link.sendDefault({
     objectType: 'feed',
     content: {
