@@ -119,7 +119,7 @@ export function RewardHistorySection() {
                         {isUsed && <CheckCircle className="w-4 h-4 text-green-500" />}
                       </div>
                       <p className="text-gray-600 text-sm mb-2">{reward.description}</p>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
                         <Calendar className="w-3 h-3" />
                         {new Date(reward.receivedAt).toLocaleDateString("ko-KR", {
                           year: "numeric",
@@ -161,7 +161,7 @@ export function RewardHistorySection() {
                   {selectedReward.rewardName}
                 </h3>
                 <p className="text-gray-600 mb-4">{selectedReward.description}</p>
-                <div className="flex items-center justify-center gap-1 text-sm text-gray-500 mb-4">
+                <div className="flex items-center justify-center gap-1 text-sm text-gray-500 mb-2">
                   <Calendar className="w-4 h-4" />
                   {new Date(selectedReward.receivedAt).toLocaleDateString("ko-KR", {
                     year: "numeric",
