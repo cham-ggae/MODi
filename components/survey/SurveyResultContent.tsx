@@ -39,6 +39,7 @@ import { SurveyResultResponse } from "@/types/survey.type";
 import { planDetails, userTypes, typeImageMap } from "@/lib/survey-result-data";
 import { useInView } from "react-intersection-observer";
 import { parseBenefitString, getBenefitIcon, transformBenefitTextToHtml } from "@/lib/survey-utils";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 
 // bugId에 따른 추천 이유 매핑
 const getRecommendationReason = (bugId: number): string => {
@@ -62,6 +63,8 @@ export default function SurveyResultContent() {
   const [currentStep, setCurrentStep] = useState(0);
   const [hasAnimatedBenefit, setHasAnimatedBenefit] = useState(false);
   const [hasAnimatedPlan, setHasAnimatedPlan] = useState(false);
+  const [isFamilyBenefitOpen, setIsFamilyBenefitOpen] = useState(false);
+  const [isAdditionalDiscountOpen, setIsAdditionalDiscountOpen] = useState(false);
 
   // URL에서 bugId 가져오기
   const searchParams = useSearchParams();
@@ -279,6 +282,78 @@ export default function SurveyResultContent() {
           </div>
         </div>
       </div>
+
+      {bugId === 5 && (
+        <div className="bg-white pb-12">
+          {/* 가족 결합 혜택 안내 토글 */}
+          <Collapsible
+            open={isFamilyBenefitOpen}
+            onOpenChange={setIsFamilyBenefitOpen}
+            className="border-t border-[#eaeaea]"
+          >
+            <div className="max-w-md mx-auto px-6">
+              <CollapsibleTrigger className="w-full flex justify-between items-center py-5">
+                <h3 className="text-sm font-semibold text-gray-500">가족 결합 혜택 안내</h3>
+                <ChevronDown
+                  className={`transition-transform duration-300 ${
+                    isFamilyBenefitOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="bg-[#f8f8f8]">
+              <div className="max-w-md mx-auto px-6 py-6 text-left">
+                <div className="space-y-2 text-sm text-gray-800">
+                  <p>
+                    📌 1인당 <strong> 최대 20,000원 </strong> 아낄 수 있어요!
+                  </p>
+                  <ul className="list-disc space-y-1 pl-5">
+                    <li>
+                      2명: <strong>1인당 10,000원 할인</strong>
+                    </li>
+                    <li>
+                      3명: <strong>1인당 14,000원 할인</strong>
+                    </li>
+                    <li>
+                      4~5명: <strong>1인당 20,000원 할인</strong>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
+          {/* 추가 할인도 있어요 토글 */}
+          <Collapsible
+            open={isAdditionalDiscountOpen}
+            onOpenChange={setIsAdditionalDiscountOpen}
+            className="border-t border-b border-[#eaeaea]"
+          >
+            <div className="max-w-md mx-auto px-6">
+              <CollapsibleTrigger className="w-full flex justify-between items-center py-5">
+                <h4 className="text-sm font-semibold text-gray-500">🎁 추가 할인도 있어요</h4>
+                <ChevronDown
+                  className={`transition-transform duration-300 ${
+                    isAdditionalDiscountOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="bg-[#f8f8f8]">
+              <div className="max-w-md mx-auto px-6 py-6 text-left">
+                <ul className="list-disc space-y-1 pl-5 text-sm text-gray-800">
+                  <li>
+                    청소년 할인: 만 18세 이하 구성원 <strong>월 10,000원 추가 할인</strong>
+                  </li>
+                  <li>
+                    시그니처 가족 할인: <strong>최대 33,000원 할인</strong> (5G 시그니처 이용 시)
+                  </li>
+                </ul>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        </div>
+      )}
     </div>
   );
 }
