@@ -21,7 +21,7 @@ export default function FamilySpaceTutorialPage() {
   const [joinError, setJoinError] = useState('');
   const router = useRouter();
   const { createFamily, joinFamily, hasFamily, isCreating, isJoining } = useFamily();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
 
   // 이미 가족이 있는 경우 family-space로 리다이렉트
   useEffect(() => {
@@ -29,6 +29,13 @@ export default function FamilySpaceTutorialPage() {
       router.push('/family-space');
     }
   }, [hasFamily, router]);
+
+  // 인증되지 않은 경우 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const tutorialSteps = [
     {
@@ -58,14 +65,24 @@ export default function FamilySpaceTutorialPage() {
   ];
 
   const handleCreateFamily = async () => {
-    if (!user?.nickname) {
-      toast.error('사용자 정보를 불러올 수 없습니다. 로그인 상태를 확인해주세요.');
+    // 인증 상태 먼저 확인
+    if (!isAuthenticated) {
+      toast.error('로그인이 필요합니다. 다시 로그인해주세요.');
+      router.push('/');
       return;
     }
 
     try {
-      // 사용자 닉네임을 가족명으로 사용
-      const familyName = user.nickname;
+      // 사용자 닉네임을 가족명으로 사용 (닉네임이 없으면 기본값 사용)
+      const familyName = user?.nickname || user?.email?.split('@')[0] || '내 가족';
+
+      console.log('🔍 가족 생성 시도:', {
+        hasUser: !!user,
+        nickname: user?.nickname,
+        email: user?.email,
+        familyName,
+        isAuthenticated,
+      });
 
       await createFamily({
         name: familyName,
@@ -143,7 +160,22 @@ export default function FamilySpaceTutorialPage() {
     }
   };
 
+  // 로딩 중이면 로딩 화면 표시
+  if (authLoading) {
+    return (
+      <div className="h-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">사용자 정보를 확인하는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentTutorial = tutorialSteps[currentStep];
+
+  // 가족명 표시용 (닉네임 → 이메일 앞부분 → 기본값 순서)
+  const displayFamilyName = user?.nickname || user?.email?.split('@')[0] || '내';
 
   return (
     <>
@@ -277,7 +309,7 @@ export default function FamilySpaceTutorialPage() {
                 {currentStep === tutorialSteps.length - 1
                   ? isCreating
                     ? '생성 중...'
-                    : `${user?.nickname || '내'} 가족 스페이스 생성`
+                    : `${displayFamilyName} 가족 스페이스 생성`
                   : '다음'}
               </span>
               {currentStep === tutorialSteps.length - 1 ? (
