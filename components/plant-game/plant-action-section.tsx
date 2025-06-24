@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Droplets, Zap, Gift } from "lucide-react"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Droplets, Zap, Gift } from "lucide-react";
 
 interface PlantActionSectionProps {
-  onWaterPlant: () => void
-  onUseNutrient: () => void
-  canWater: boolean
-  canUseNutrient: boolean
-  waterCooldown: number
-  nutrientCooldown: number
-  isDarkMode?: boolean
+  onWaterPlant: () => void;
+  onUseNutrient: () => void;
+  canWater: boolean;
+  canUseNutrient: boolean;
+  waterCooldown: number;
+  nutrientCooldown: number;
+  isDarkMode?: boolean;
 }
 
 export function PlantActionSection({
@@ -25,18 +25,18 @@ export function PlantActionSection({
   isDarkMode = false,
 }: PlantActionSectionProps) {
   const formatCooldown = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
 
     if (hours > 0) {
-      return `${hours}시간 ${minutes}분`
+      return `${hours}시간 ${minutes}분`;
     } else if (minutes > 0) {
-      return `${minutes}분 ${secs}초`
+      return `${minutes}분 ${secs}초`;
     } else {
-      return `${secs}초`
+      return `${secs}초`;
     }
-  }
+  };
 
   return (
     <Card className={`border border-[#81C784] ${isDarkMode ? "bg-gray-800" : "bg-white"}`}>
@@ -99,11 +99,17 @@ export function PlantActionSection({
         <div className={`mt-4 p-3 rounded-lg ${isDarkMode ? "bg-gray-700" : "bg-[#F1F8E9]"}`}>
           <div className="flex items-center mb-2">
             <Gift className="w-4 h-4 mr-2 text-[#388E3C]" />
-            <span className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-[#4E342E]"}`}>액션 효과</span>
+            <span
+              className={`text-sm font-medium ${isDarkMode ? "text-gray-300" : "text-[#4E342E]"}`}
+            >
+              액션 효과
+            </span>
           </div>
           <div className="grid grid-cols-2 gap-4 text-xs">
             <div>
-              <p className={`font-medium ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>💧 물주기</p>
+              <p className={`font-medium ${isDarkMode ? "text-blue-400" : "text-blue-600"}`}>
+                💧 물주기
+              </p>
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                 • 성장 포인트 +10
                 <br />• 24시간마다 가능
@@ -111,7 +117,9 @@ export function PlantActionSection({
               </p>
             </div>
             <div>
-              <p className={`font-medium ${isDarkMode ? "text-orange-400" : "text-orange-600"}`}>⚡ 영양제</p>
+              <p className={`font-medium ${isDarkMode ? "text-orange-400" : "text-orange-600"}`}>
+                ⚡ 영양제
+              </p>
               <p className={isDarkMode ? "text-gray-400" : "text-gray-600"}>
                 • 성장 포인트 +25
                 <br />• 48시간마다 가능
@@ -122,5 +130,5 @@ export function PlantActionSection({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

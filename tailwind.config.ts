@@ -1,4 +1,4 @@
-import type { Config } from "tailwindcss"
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   darkMode: ["class"],
@@ -76,6 +76,24 @@ const config: Config = {
             height: "0",
           },
         },
+        "slide-up": {
+          from: {
+            opacity: "0",
+            transform: "translateY(2rem)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+        float: {
+          "0%, 100%": {
+            transform: "translateY(0px)",
+          },
+          "50%": {
+            transform: "translateY(-10px)",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -83,6 +101,6 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
-}
-export default config
+  plugins: [require('@tailwindcss/typography')],
+};
+export default config;
