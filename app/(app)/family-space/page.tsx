@@ -69,9 +69,11 @@ export default function FamilySpacePage() {
 
   // 가족에 식물이 있을 때만 식물 상태를 조회
   const hasPlant = family?.plant?.hasPlant ?? false;
-  const { data: plantStatus, error: plantStatusError } = usePlantStatus(
-    hasPlant && familyId ? familyId : 0
-  );
+  const {
+    data: plantStatus,
+    error: plantStatusError,
+    isLoading: isPlantStatusLoading,
+  } = usePlantStatus(hasPlant && familyId ? familyId : 0);
 
   // 카카오톡 SDK 초기화
   useEffect(() => {
@@ -377,6 +379,7 @@ export default function FamilySpacePage() {
         onPlantAction={handlePlantAction}
         familyNutrial={family?.family?.nutrial}
         familyDaysAfterCreation={family?.family?.daysAfterCreation}
+        isPlantStatusLoading={isPlantStatusLoading}
       />
 
       {/* Scrollable Content */}
