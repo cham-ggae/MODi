@@ -6,8 +6,10 @@
 // - 결과 계산 및 API 전송 포함
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
+import { useRouter, useSearchParams } from "next/navigation";
 import { usePostSurveyResult } from "@/hooks/use-survey-result";
+
 import {
   calculateScore,
   analyzeResult,
@@ -20,7 +22,9 @@ export function useSurvey() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const router = useRouter();
+  const searchParams = useSearchParams();
   const postSurveyResult = usePostSurveyResult();
+
 
   const handleAnswer = async (value: string) => {
     const newAnswers = { ...answers, [currentQuestion + 1]: value };
@@ -48,9 +52,14 @@ export function useSurvey() {
 
       // API call and navigation
       const bugId = typeToBugId[result.type];
+      const isFromMission = searchParams.get("mission") === "true";
+
       try {
         await postSurveyResult.mutateAsync(bugId);
-        router.push(`/survey-result?bugId=${bugId}`);
+        const resultUrl = isFromMission
+          ? `/survey-result?bugId=${bugId}&mission=true`
+          : `/survey-result?bugId=${bugId}`;
+        router.push(resultUrl);
       } catch (e) {
         alert("설문 결과 저장에 실패했습니다. 다시 시도해 주세요.");
       }
