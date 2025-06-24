@@ -3,6 +3,7 @@ import { UIFamilyMember } from '@/types/family.type';
 import { CheckCircle, Clock } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 interface FamilyMemberCardProps {
   member: UIFamilyMember;
@@ -32,8 +33,15 @@ const formatSurveyDate = (dateString: string): string => {
 
 export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleCardClick = () => {
+    // 다른 사용자가 설문 미완료인 경우 아무것도 하지 않음
+    // 현재 사용자는 user.nickname으로, 멤버는 member.name으로 비교
+    if (!member.hasSurveyCompleted && user?.nickname !== member.name) {
+      return;
+    }
+
     if (member.hasSurveyCompleted && member.bugId) {
       // 설문조사 완료된 경우 - 벌레 타입에 따른 결과 페이지로 이동
       router.push(`/survey-result?bugId=${member.bugId}`);

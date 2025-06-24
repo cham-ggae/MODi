@@ -148,14 +148,6 @@ export function FamilyRecommendationCard({
                 </div>
               </div>
             </div>
-
-            {/* 행동 유도 버튼 */}
-            <Button
-              onClick={onViewRecommendation}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-full flex items-center justify-center gap-2"
-            >
-              💰 지금 바로 절약하러 가기
-            </Button>
           </div>
         </div>
       </CardContent>
