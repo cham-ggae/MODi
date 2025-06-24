@@ -15,7 +15,7 @@ const getBugInfo = (bugId: number): { type: string; emoji: string } => {
     2: { type: '무당벌레형', emoji: '🐞' },
     3: { type: '라바형', emoji: '🐛' },
     4: { type: '나비형', emoji: '🦋' },
-    5: { type: '장수풍뎅이형', emoji: '🪲' },
+    5: { type: '개미형', emoji: '🐜' },
   };
   return bugInfoMap[bugId] || { type: '알 수 없음', emoji: '🐣' };
 };

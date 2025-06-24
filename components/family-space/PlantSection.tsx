@@ -1,11 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Sprout, TreePine, Flower, Leaf, AlertCircle } from "lucide-react";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import { PlantType } from "@/types/family.type";
-import { PlantStatus } from "@/types/plants.type";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Sprout, TreePine, Flower, Leaf, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import { PlantType } from '@/types/family.type';
+import { PlantStatus } from '@/types/plants.type';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface PlantSectionProps {
   plant: {
@@ -38,14 +38,14 @@ export function PlantSection({
     <div className="text-center py-8">
       <motion.div
         animate={{ y: [0, -10, 0] }}
-        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
+        transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: 'easeInOut' }}
         className="mb-6"
       >
         {hasPlant && plantType ? (
           <div className="w-24 h-24 mx-auto">
             <Image
-              src={plantType === "flower" ? "/images/flower5.png" : "/images/tree5.png"}
-              alt={plantType === "flower" ? "꽃" : "나무"}
+              src={plantType === 'flower' ? '/images/flower5.png' : '/images/tree5.png'}
+              alt={plantType === 'flower' ? '꽃' : '나무'}
               width={96}
               height={96}
               className="w-full h-full object-contain drop-shadow-lg"
@@ -56,30 +56,40 @@ export function PlantSection({
         )}
       </motion.div>
 
-      {!isPlantStatusLoading && (
-        <Button
-          onClick={onPlantAction}
-          disabled={isPlantStatusLoading || plantStatus == null || (!canCreateNew && !hasPlant)}
-          className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isPlantStatusLoading || plantStatus == null ? (
-            <>
-              <Sprout className="w-4 h-4 mr-2 animate-pulse" />
-              ...
-            </>
-          ) : !plantStatus.completed ? (
+      {/* 항상 버튼 표시, 조건에 따라 비활성화만 처리 */}
+      <Button
+        onClick={onPlantAction}
+        disabled={isPlantStatusLoading || (!hasPlant && !canCreateNew)}
+        className="bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-full px-8 py-3 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isPlantStatusLoading ? (
+          <>
+            <Sprout className="w-4 h-4 mr-2 animate-pulse" />
+            로딩중...
+          </>
+        ) : hasPlant ? (
+          plantStatus && !plantStatus.completed ? (
             <>
               <TreePine className="w-4 h-4 mr-2" />
               새싹 키우기
             </>
           ) : (
             <>
-              <Sprout className="w-4 h-4 mr-2" />
-              새싹 만들기
+              <Sprout className="w-4 h-4 mr-2" />새 식물 만들기
             </>
-          )}
-        </Button>
-      )}
+          )
+        ) : canCreateNew ? (
+          <>
+            <Sprout className="w-4 h-4 mr-2" />
+            새싹 만들기
+          </>
+        ) : (
+          <>
+            <Sprout className="w-4 h-4 mr-2" />
+            가족 초대 필요
+          </>
+        )}
+      </Button>
 
       {/* 생성 차단 사유 표시 */}
       {!canCreateNew && !hasPlant && createBlockReason && (
@@ -113,7 +123,7 @@ export function PlantSection({
       {hasPlant && plantType && (
         <div className="text-center mt-3">
           <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300">
-            {plantType === "flower" ? (
+            {plantType === 'flower' ? (
               <>
                 <Flower className="w-3 h-3 mr-1" />꽃 키우는 중
               </>
