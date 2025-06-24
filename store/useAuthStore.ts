@@ -156,24 +156,32 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { user } = get();
       const expiresAt = token ? getTokenExpirationTime(token) : null;
 
+      // 토큰이 있으면 인증된 것으로 간주 (사용자 정보는 나중에 로드 가능)
+      const hasValidToken = !!token;
+
       if (process.env.NODE_ENV === 'development') {
         console.log('인증 상태 확인:', {
           hasToken: !!token,
           hasUser: !!user,
           tokenPreview: token ? token.substring(0, 20) + '...' : 'none',
           expiresAt: expiresAt ? new Date(expiresAt) : 'N/A',
+          willSetAuthenticated: hasValidToken,
         });
       }
 
       set({
         accessToken: token,
-        isAuthenticated: !!(token && user),
+        isAuthenticated: hasValidToken, // 토큰만 있으면 인증된 것으로 간주
         isLoading: false,
         tokenExpiresAt: expiresAt,
       });
 
       if (process.env.NODE_ENV === 'development') {
-        console.log('✅ 인증 초기화 완료');
+        console.log('✅ 인증 초기화 완료:', {
+          isAuthenticated: hasValidToken,
+          hasToken: !!token,
+          hasUser: !!user,
+        });
       }
     } catch (error) {
       console.error('❌ 인증 초기화 실패:', error);
@@ -200,25 +208,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         '🔄 토큰 업데이트:',
         token.substring(0, 20) + '...',
         '만료:',
-        expiresAt ? new Date(expiresAt) : 'N/A'
+        expiresAt ? new Date(expiresAt) : 'N/A',
+        'hasUser:',
+        !!user
       );
     }
 
-    if (user) {
-      set({
-        accessToken: token,
-        isAuthenticated: true,
-        isLoading: false,
-        tokenExpiresAt: expiresAt,
-      });
-    } else {
-      set({
-        accessToken: token,
-        isAuthenticated: !!token,
-        isLoading: false,
-        tokenExpiresAt: expiresAt,
-      });
-    }
+    // 토큰이 있으면 항상 인증된 것으로 간주
+    set({
+      accessToken: token,
+      isAuthenticated: !!token,
+      isLoading: false,
+      tokenExpiresAt: expiresAt,
+    });
   },
 
   setLoading: (loading: boolean) => {
