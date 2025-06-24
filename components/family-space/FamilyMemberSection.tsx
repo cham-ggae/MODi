@@ -47,20 +47,14 @@ export function FamilyMemberSection({
               <p className="text-sm text-gray-500 dark:text-gray-400">{memberCount}명의 구성원</p>
             )}
           </div>
-          <InviteCodeModal
-            inviteCode={inviteCode}
-            familyName={familyName}
-            onGenerateCode={onGenerateCode}
-            onCopyCode={onCopyCode}
-            onShareKakao={onShareKakao}
-            onSaveFamilyName={onSaveFamilyName}
-            copied={copied}
-            isLoading={isLoading}
-            isUpdatingName={isUpdatingName}
-            canInvite={canInvite}
-            isOpen={isInviteModalOpen}
-            onOpenChange={setIsInviteModalOpen}
-          />
+          <Button
+            onClick={() => setIsInviteModalOpen(true)}
+            disabled={!canInvite}
+            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2"
+          >
+            <UserPlus className="w-4 h-4" />
+            초대하기
+          </Button>
         </div>
         <div className="space-y-4">
           {members.map((member) => (
@@ -72,6 +66,22 @@ export function FamilyMemberSection({
             </div>
           )}
         </div>
+
+        <InviteCodeModal
+          inviteCode={inviteCode}
+          familyName={familyName}
+          onGenerateCode={onGenerateCode}
+          onCopyCode={onCopyCode}
+          onShareKakao={onShareKakao}
+          onSaveFamilyName={onSaveFamilyName}
+          copied={copied}
+          isLoading={isLoading}
+          isUpdatingName={isUpdatingName}
+          canInvite={canInvite}
+          isOpen={isInviteModalOpen}
+          onOpenChange={setIsInviteModalOpen}
+          trigger={null}
+        />
       </CardContent>
     </Card>
   );
