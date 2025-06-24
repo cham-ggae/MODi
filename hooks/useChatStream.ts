@@ -6,6 +6,7 @@ import { ChatCompletionChunk } from '@/types/chat.type';
 
 export function useChatStream() {
   const [message, setMessage] = useState('');
+  const [cid, setCid] = useState<number | undefined>(undefined);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const controllerRef = useRef<AbortController | null>(null);
@@ -14,6 +15,7 @@ export function useChatStream() {
   const start = useCallback(async (prompt: string, sessionId: string, members: number) => {
     controllerRef.current?.abort();
     setMessage('');
+    setCid(undefined);
     setError(null);
     setIsStreaming(true);
 
@@ -55,6 +57,13 @@ export function useChatStream() {
           try {
             const chunk = JSON.parse(jsonString) as ChatCompletionChunk;
             console.log(chunk);
+            
+            // cid가 있으면 상태에 저장
+            if (chunk.cid) {
+              setCid(chunk.cid);
+              console.log('CID found and set:', chunk.cid);
+            }
+            
             const choice = chunk.choices[0];
             if (choice.finish_reason) {
               controller.abort();
@@ -67,13 +76,13 @@ export function useChatStream() {
               const combined = currentMessageRef.current + delta;
               // ② ### 바로붙어 있는 곳에 공백 추가
               let fixed = combined
-                // 붙어 있는 “###” → “### ” (헤딩 문법 보정)
+                // 붙어 있는 "###" → "### " (헤딩 문법 보정)
                 .replace(/###(?=\S)/g, '### ')
-                // “### 제목” → “- 제목” (마크다운 리스트로 변환)
+                // "### 제목" → "- 제목" (마크다운 리스트로 변환)
                 .replace(/^###\s*(.*)$/gm, '- $1');
-              // ③ 한 줄에 붙은 “ - ” 구문을 실제 리스트 항목으로 분리
+              // ③ 한 줄에 붙은 " - " 구문을 실제 리스트 항목으로 분리
               fixed = fixed
-                // “<내용> - <키워드>” 패턴을 “\n- <키워드>”로 분리
+                // "<내용> - <키워드>" 패턴을 "\n- <키워드>"로 분리
                 .replace(/([^\n])\s*-\s*/g, '$1\n- ')
                 // 혹시 연속된 빈 줄이 많다면 하나로
                 .replace(/\n{2,}/g, '\n\n')
@@ -103,5 +112,5 @@ export function useChatStream() {
 
   useEffect(() => () => controllerRef.current?.abort(), []);
 
-  return { message, isStreaming, error, start, stop };
+  return { message, cid, isStreaming, error, start, stop };
 }
