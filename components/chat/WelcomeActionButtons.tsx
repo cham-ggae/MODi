@@ -12,7 +12,7 @@ export default function WelcomeActionButtons() {
       className="flex flex-col gap-3 mt-4"
     >
       <Button
-        className="w-full bg-green-500 text-white hover:bg-green-600"
+        className="w-full bg-emerald-100 text-green-700 hover:bg-emerald-200"
         onClick={() => router.push("/survey")}
       >
         통신 성향 검사하기
