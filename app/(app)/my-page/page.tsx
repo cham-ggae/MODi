@@ -169,15 +169,17 @@ export default function MyPage() {
         console.log("히스토리 API 응답:", rawHistory);
 
         // 프론트에서 매핑 처리
-        const processed = rawHistory.map((item: any) => ({
-          planId: item.planId,
-          planName: item.planName,
-          price: item.price,
-          discountPrice: item.discountPrice,
-          link: item.link,
-          benefit: item.benefit,
-          createdAt: item.createdAt,
-        }));
+        const processed = rawHistory
+          .map((item: any) => ({
+            planId: item.planId,
+            planName: item.planName,
+            price: item.price,
+            discountPrice: item.discountPrice,
+            link: item.link,
+            benefit: item.benefit,
+            createdAt: item.createdAt,
+          }))
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
         console.log("처리된 히스토리:", processed);
         setRecommendHistoryList(processed);
@@ -328,7 +330,7 @@ export default function MyPage() {
                 const isRecommended = idx === 0;
                 return (
                   <SwiperSlide key={plan.planId}>
-                    <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between transition-colors duration-200 hover:bg-blue-500 hover:text-white group">
+                    <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between transition-colors duration-200 hover:bg-blue-50 group">
                       <div className="flex flex-col gap-2 mb-4">
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-400 font-medium group-hover:text-blue-100">
