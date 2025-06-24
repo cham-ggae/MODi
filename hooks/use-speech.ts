@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef, useEffect } from "react"
+import { VoiceService } from "@/lib/api/voice"
 
 interface UseSpeechProps {
   onResult?: (transcript: string) => void
@@ -74,46 +75,53 @@ export function useSpeechRecognition({ onResult, onError }: UseSpeechProps = {})
 
 export function useTextToSpeech() {
   const [isSpeaking, setIsSpeaking] = useState(false)
-  const [isSupported, setIsSupported] = useState(false)
+  const [isSupported] = useState(true) // 백엔드 API 사용하므로 항상 true
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  useEffect(() => {
-    setIsSupported("speechSynthesis" in window)
-  }, [])
-
-  const speak = useCallback((text: string) => {
-    if (!("speechSynthesis" in window)) {
-      console.error("TTS가 지원되지 않는 브라우저입니다.")
-      return
+  const speak = useCallback(async (text: string, cid?: number) => {
+    if (!cid) {
+      console.error("cid가 필요합니다.");
+      setIsSpeaking(false);
+      return;
     }
 
-    // 기존 음성 중지
-    window.speechSynthesis.cancel()
-
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = "ko-KR"
-    utterance.rate = 0.9
-    utterance.pitch = 1
-
-    utterance.onstart = () => {
-      setIsSpeaking(true)
+    try {
+      setIsSpeaking(true);
+      console.log('TTS API 호출:', `/chat/voice/tts/${cid}`);
+      
+      // 백엔드 TTS API 호출
+      const audioBlob = await VoiceService.getTtsAudio(cid);
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+        URL.revokeObjectURL(audioRef.current.src);
+      }
+      
+      audioRef.current = new Audio(audioUrl);
+      audioRef.current.onended = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      }
+      audioRef.current.onerror = () => {
+        setIsSpeaking(false);
+        URL.revokeObjectURL(audioUrl);
+      }
+      
+      await audioRef.current.play();
+    } catch (error) {
+      console.error("TTS 오류:", error);
+      setIsSpeaking(false);
     }
-
-    utterance.onend = () => {
-      setIsSpeaking(false)
-    }
-
-    utterance.onerror = () => {
-      setIsSpeaking(false)
-    }
-
-    window.speechSynthesis.speak(utterance)
   }, [])
 
   const stopSpeaking = useCallback(() => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel()
+    if (audioRef.current) {
+      audioRef.current.pause();
+      URL.revokeObjectURL(audioRef.current.src);
+      audioRef.current = null;
     }
-    setIsSpeaking(false)
+    setIsSpeaking(false);
   }, [])
 
   return {

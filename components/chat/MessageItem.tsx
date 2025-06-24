@@ -10,11 +10,12 @@ interface MessageItemProps {
   role: string;
   content: string;
   timestamp: Date;
+  cid?: number;
   isSpeaking: boolean;
   ttsSupported: boolean;
-  handleSpeakMessage: (text: string) => void;
+  handleSpeakMessage: (text: string, cid?: number) => void;
 }
-const MessageItem = ({ role, content, timestamp, isSpeaking, ttsSupported, handleSpeakMessage }: MessageItemProps) => {
+const MessageItem = ({ role, content, timestamp, cid, isSpeaking, ttsSupported, handleSpeakMessage }: MessageItemProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -57,15 +58,23 @@ const MessageItem = ({ role, content, timestamp, isSpeaking, ttsSupported, handl
           </p>
           {role === "bot" && ttsSupported && (
             <Button
-              onClick={() => handleSpeakMessage(content)}
+              onClick={() => handleSpeakMessage(content, cid)}
               variant="ghost"
               size="sm"
-              className="p-1 h-auto ml-2 hover:bg-gray-100 dark:hover:bg-gray-600"
+              className={`p-1 h-auto ml-2 ${
+                !cid
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'
+              }`}
+              disabled={!cid}
+              title={!cid ? 'TTS 준비 중...' : '음성으로 들으기'}
             >
               {isSpeaking ? (
                 <VolumeX className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               ) : (
-                <Volume2 className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <Volume2 className={`w-4 h-4 ${
+                  !cid ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'
+                }`} />
               )}
             </Button>
           )}
