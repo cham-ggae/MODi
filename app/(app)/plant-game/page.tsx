@@ -205,12 +205,13 @@ export default function PlantGamePage() {
   const { mutate: generateNewCode } = useGenerateInviteCode(); // 초대 코드 생성 API
   const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
 
-  // 식물 상태 정보
+  // 식물 상태 정보 - 가족에 식물이 있을 때만 조회
+  const hasPlant = family?.plant?.hasPlant ?? false;
   const {
     data: plantStatus,
     isLoading: isPlantLoading,
     error: plantError,
-  } = usePlantStatus(familyId ?? 0);
+  } = usePlantStatus(hasPlant && familyId ? familyId : 0);
 
   // 오늘 활동 완료 여부 확인
   const { data: checkAlreadyWatered } = useCheckTodayActivity('water');

@@ -67,7 +67,11 @@ export default function FamilySpacePage() {
   const { mutate: updateFamilyName } = useUpdateFamilyName();
   const { mutate: addPoint } = useAddPoint();
 
-  const { data: plantStatus, error: plantStatusError } = usePlantStatus(familyId ?? 0);
+  // 가족에 식물이 있을 때만 식물 상태를 조회
+  const hasPlant = family?.plant?.hasPlant ?? false;
+  const { data: plantStatus, error: plantStatusError } = usePlantStatus(
+    hasPlant && familyId ? familyId : 0
+  );
 
   // 카카오톡 SDK 초기화
   useEffect(() => {
