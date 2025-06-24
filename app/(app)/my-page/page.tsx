@@ -13,6 +13,7 @@ import {
   Calendar,
   TrendingUp,
   FileText,
+  ChevronDown,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -136,6 +137,8 @@ export default function MyPage() {
   const [recommendHistory, setRecommendHistory] = useState<SurveyResult[]>([]);
   const [recommendHistoryList, setRecommendHistoryList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(2);
+  const [showCount, setShowCount] = useState(3);
 
   useEffect(() => {
     async function fetchData() {
@@ -157,6 +160,34 @@ export default function MyPage() {
       }
     }
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const rawHistory = await mypageApi.getHistory();
+        console.log("히스토리 API 응답:", rawHistory);
+
+        // 프론트에서 매핑 처리
+        const processed = rawHistory.map((item: any) => ({
+          planId: item.planId,
+          planName: item.planName,
+          price: item.price,
+          discountPrice: item.discountPrice,
+          link: item.link,
+          benefit: item.benefit,
+          createdAt: item.createdAt,
+        }));
+
+        console.log("처리된 히스토리:", processed);
+        setRecommendHistoryList(processed);
+      } catch (e) {
+        console.error("히스토리 불러오기 실패:", e);
+        setRecommendHistoryList([]);
+      }
+    }
+
+    fetchHistory();
   }, []);
 
   if (loading) {
@@ -350,29 +381,75 @@ export default function MyPage() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   지난 요금제 추천 기록
                 </h3>
-                {/* <FileText className="w-5 h-5 text-gray-400" /> */}
               </div>
               <div className="space-y-3">
-                {recommendHistory.filter(isHistoryItem).map((result, index) => (
-                  <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-xs">
-                        {result.type}
-                      </Badge>
-                      <span className="text-xs text-gray-400">{result.date}</span>
+                {recommendHistoryList.length > 0 ? (
+                  <>
+                    {recommendHistoryList.slice(0, showCount).map((plan: any, idx: number) => (
+                      <div
+                        key={`${plan.planId}-${idx}`}
+                        className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl mb-2"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                            {plan.planName}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {plan.createdAt
+                              ? new Date(plan.createdAt).toLocaleDateString("ko-KR")
+                              : ""}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-800 dark:text-gray-200">
+                            월 {plan.discountPrice?.toLocaleString()}원
+                          </span>
+                          <a
+                            href={plan.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 dark:text-blue-400 underline ml-2"
+                          >
+                            자세히
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex justify-center mt-2">
+                      {showCount < recommendHistoryList.length ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowCount((prev) => prev + 3)}
+                          className="text-sm text-black-300 hover:bg-transparent hover:text-blue-500 dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-green-400"
+                        >
+                          <ChevronDown className="w-4 h-4 mr-1" />
+                          추천 요금제 {Math.min(3, recommendHistoryList.length - showCount)}개
+                          더보기
+                        </Button>
+                      ) : recommendHistoryList.length > 3 &&
+                        showCount >= recommendHistoryList.length ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowCount(3)}
+                          className="text-sm text-gray-500 hover:bg-transparent hover:text-green-600 dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-green-400"
+                        >
+                          <ChevronDown
+                            className="w-4 h-4 mr-1"
+                            style={{ transform: "rotate(180deg)" }}
+                          />
+                          숨기기
+                        </Button>
+                      ) : null}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                      {result.description}
-                    </p>
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                      추천: {result.recommendedPlan}
-                    </p>
+                  </>
+                ) : (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    추천 기록이 없습니다.
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
-
           {/* Menu Items */}
           <div className="space-y-3">
             <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
