@@ -36,6 +36,7 @@ export interface ChatCompletionChunk {
   service_tier: string;
   system_fingerprint: string;
   choices: ChatCompletionChunkChoice[];
+  cid?: number;              // cid 추가
 }
 
 export interface Chatting {
@@ -53,4 +54,5 @@ export interface ClientMessage {
   role: string;
   timestamp: Date;
   sessionId: string;
+  cid?: number;
 }
