@@ -21,6 +21,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/useAuthStore";
 import { planDetails } from "@/lib/survey-result-data";
 import { motion } from "framer-motion";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
 
 interface UserInfo {
   name: string;
@@ -240,7 +244,7 @@ export default function MyPage() {
             <CardContent className="pb-4 px-6">
               {userInfo.bugId ? (
                 <div className="flex flex-col items-center text-center w-full">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
                     {bugIdToFeatureMap[userInfo.bugId]?.title || "유형 정보"}
                   </h3>
                   <div className="bg-blue-50 rounded-xl px-4 py-3 w-full text-left max-w-sm space-y-2">
@@ -279,33 +283,35 @@ export default function MyPage() {
           <div className="mb-2 mt-6">
             <p className="text-lg font-bold text-gray-900">추천 요금제</p>
           </div>
-          <div className="overflow-x-auto scrollbar-hide">
-            <div className="flex flex-row gap-4 min-w-[340px]">
-              {recommendHistory && recommendHistory.filter(isPlanCard).length > 0 ? (
-                recommendHistory.filter(isPlanCard).map((plan, idx) => {
-                  // 추천 뱃지는 첫번째 카드만, 카드 스타일은 모두 동일하게
-                  const isRecommended = idx === 0;
-                  return (
-                    <div
-                      key={plan.planId}
-                      className={
-                        "w-[320px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between"
-                      }
-                    >
+          <Swiper
+            modules={[Pagination]}
+            spaceBetween={32}
+            slidesPerView={1}
+            pagination={{ clickable: true }}
+            className="!pb-8"
+          >
+            {recommendHistory && recommendHistory.filter(isPlanCard).length > 0 ? (
+              recommendHistory.filter(isPlanCard).map((plan, idx) => {
+                const isRecommended = idx === 0;
+                return (
+                  <SwiperSlide key={plan.planId}>
+                    <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between transition-colors duration-200 hover:bg-blue-500 hover:text-white group">
                       <div className="flex flex-col gap-2 mb-4">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400 font-medium">
+                          <span className="text-xs text-gray-400 font-medium group-hover:text-blue-100">
                             {plan.description || ""}
                           </span>
                           {isRecommended && (
-                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 font-semibold">
+                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 font-semibold group-hover:bg-white group-hover:text-blue-500">
                               추천
                             </span>
                           )}
                         </div>
-                        <div className="text-lg font-bold text-gray-900">{plan.planName}</div>
+                        <div className="text-lg font-bold text-gray-900 group-hover:text-white">
+                          {plan.planName}
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold text-gray-900 mb-4">
+                      <div className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-white">
                         {plan.price ? `월 ${plan.price.toLocaleString()}원` : ""}
                       </div>
                       <a
@@ -313,23 +319,27 @@ export default function MyPage() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className={
-                          "block w-full border border-blue-500 text-blue-500 text-center rounded-lg py-2 font-semibold transition hover:bg-blue-50"
+                          "block w-full border border-blue-500 text-blue-500 text-center rounded-lg py-2 font-semibold transition hover:bg-white hover:text-blue-500 group-hover:bg-white group-hover:text-blue-500"
                         }
                       >
                         요금제 자세히 보기
                       </a>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="w-[320px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-center items-center">
-                  <div className="text-gray-600 dark:text-gray-400 text-sm">
-                    추천 요금제 정보가 없습니다.
+                  </SwiperSlide>
+                );
+              })
+            ) : (
+              <SwiperSlide>
+                <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between">
+                  <div className="flex flex-1 items-center justify-center">
+                    <div className="text-gray-600 dark:text-gray-400 text-sm text-center w-full">
+                      추천 요금제 정보가 없습니다.
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
+              </SwiperSlide>
+            )}
+          </Swiper>
 
           {/* Survey Results History */}
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
