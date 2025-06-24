@@ -307,30 +307,6 @@ export default function PlantGamePage() {
             toast.success(`${event.name}님이 영양제를 주었습니다! 🌱`);
             break;
 
-          case "quiz":
-            toast.success(`${event.name}님이 퀴즈를 완료했습니다! 🎯`);
-            break;
-
-          case "emotion":
-            toast.success(`${event.name}님이 감정을 기록했습니다! 😊`);
-            break;
-
-          case "attendance":
-            toast.success(`${event.name}님이 출석했습니다! 📅`);
-            break;
-
-          case "survey":
-            toast.success(`${event.name}님이 설문을 완료했습니다! 📝`);
-            break;
-
-          case "lastleaf":
-            toast.success(`${event.name}님이 카드 맞히기를 달성했습니다! 🍃`);
-            break;
-
-          case "register":
-            toast.success(`${event.name}님이 가입했습니다! 🎉`);
-            break;
-
           default:
           // console.log("알 수 없는 활동 타입:", event.type);
         }
@@ -523,6 +499,10 @@ export default function PlantGamePage() {
         setShowMissions(false);
         setShowInviteCodeModal(true);
         break;
+      case "survey":
+        setShowMissions(false);
+        router.push("/survey?mission=true");
+        break;
       default:
         addPoint({ activityType });
         setShowMissions(false);
@@ -542,7 +522,7 @@ export default function PlantGamePage() {
   // 카드 게임 완료 핸들러
   const handleCardGameCompleted = () => {
     addPoint({ activityType: "lastleaf" });
-    toast.success("마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃");
+    toast.success("카드 맞히기 완료! 경험치가 적립되었습니다. 🍃");
   };
 
   // 카카오톡 공유 핸들러

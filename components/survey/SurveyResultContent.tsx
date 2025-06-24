@@ -41,6 +41,8 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useFamily } from "@/hooks/family";
+import { useAddPoint } from "@/hooks/plant";
+import { toast } from "sonner";
 
 // bugId에 따른 추천 이유 매핑
 const getRecommendationReason = (bugId: number): string => {
@@ -63,15 +65,17 @@ const getRecommendationReason = (bugId: number): string => {
 export default function SurveyResultContent() {
   const router = useRouter();
   const { hasFamily } = useFamily();
+  const { mutate: addPoint, isPending } = useAddPoint();
   const [hasAnimatedBenefit, setHasAnimatedBenefit] = useState(false);
   const [isFamilyBenefitOpen, setIsFamilyBenefitOpen] = useState(false);
   const [isAdditionalDiscountOpen, setIsAdditionalDiscountOpen] = useState(false);
   const [isSproutInfoOpen, setIsSproutInfoOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // URL에서 bugId 가져오기
+  // URL에서 bugId와 mission 파라미터 가져오기
   const searchParams = useSearchParams();
   const bugId = searchParams.get("bugId") ? Number.parseInt(searchParams.get("bugId")!) : null;
+  const isFromMission = searchParams.get("mission") === "true";
 
   const {
     data: surveyResult,
@@ -91,6 +95,28 @@ export default function SurveyResultContent() {
       setHasAnimatedBenefit(true);
     }
   }, [benefitInView, hasAnimatedBenefit]);
+
+  // 요금제 추천 보고 포인트 받기 핸들러 (미션에서만 사용)
+  const handleGetPoint = () => {
+    addPoint(
+      { activityType: "survey" },
+      {
+        onSuccess: () => {
+          toast.success("설문 완료! 경험치가 적립되었습니다. 📝");
+          setIsModalOpen(true);
+        },
+        onError: (error: any) => {
+          toast.error("포인트 적립에 실패했습니다.");
+          setIsModalOpen(true);
+        },
+      }
+    );
+  };
+
+  // 요금제 자세히 보기 핸들러 (일반 조사에서 사용)
+  const handleShowPlans = () => {
+    setIsModalOpen(true);
+  };
 
   if (isError || !bugId) {
     return (
@@ -357,12 +383,22 @@ export default function SurveyResultContent() {
 
           {/* 요금제 추천 보고 포인트 받기 버튼 */}
           <div className="pb-8 mt-0">
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
-            >
-              요금제 추천 보고 포인트 받기
-            </Button>
+            {isFromMission ? (
+              <Button
+                onClick={handleGetPoint}
+                disabled={isPending}
+                className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+              >
+                {isPending ? "포인트 적립 중..." : "요금제 추천 보고 포인트 받기"}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleShowPlans}
+                className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+              >
+                요금제 자세히 보기
+              </Button>
+            )}
           </div>
         </div>
       </div>
