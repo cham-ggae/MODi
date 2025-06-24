@@ -176,20 +176,6 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-8 h-8 border-4 border-[#81C784] border-t-transparent animate-spin rounded-full"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {!isInitialized ? '인증 시스템 초기화 중...' : '인증 정보를 확인하는 중...'}
-          </p>
-          {process.env.NODE_ENV === 'development' && (
-            <div className="text-xs text-gray-500 text-center">
-              <p>
-                디버그: isInitialized={isInitialized.toString()}, isLoading={isLoading.toString()}
-              </p>
-              <p>
-                hasToken={!!accessToken ? 'true' : 'false'}, isAuthenticated=
-                {isAuthenticated.toString()}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     );
