@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import Lottie from "lottie-react";
 import wateringAnimation from "../../public/animations/watering.json";
+import nutrientAnimation from "../../public/animations/nutrient.json";
 
 interface Props {
   selectedPlantType: "flower" | "tree" | null;
@@ -75,6 +76,31 @@ export function PlantImageDisplay({
               >
                 <Lottie
                   animationData={wateringAnimation}
+                  loop={true}
+                  autoplay={true}
+                  style={{ width: '100%', height: '100%' }}
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice'
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Nutrient Effect */}
+            {isFeeding && (
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  top: '0',
+                  left: '0',
+                  zIndex: 10
+                }}
+              >
+                <Lottie
+                  animationData={nutrientAnimation}
                   loop={true}
                   autoplay={true}
                   style={{ width: '100%', height: '100%' }}

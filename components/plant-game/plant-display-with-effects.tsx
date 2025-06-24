@@ -7,6 +7,7 @@ import { useTheme } from "@/contexts/theme-context"
 import { usePlant } from "@/contexts/plant-context-v2"
 import Lottie from "lottie-react"
 import wateringAnimation from "../../public/animations/watering.json"
+import nutrientAnimation from "../../public/animations/nutrient.json"
 
 interface PlantDisplayWithEffectsProps {
   showWaterEffect?: boolean
@@ -148,13 +149,18 @@ export function PlantDisplayWithEffects({
     console.log('showWaterEffect changed:', showWaterEffect)
   }, [showWaterEffect])
 
+  useEffect(() => {
+    console.log('nutrientAnimation loaded:', nutrientAnimation)
+    console.log('showNutrientEffect changed:', showNutrientEffect)
+  }, [showNutrientEffect])
+
   if (!plantState) return null
 
   const plantStages = getPlantStages(plantState.type)
   const currentStage = plantStages[plantState.level - 1] || plantStages[0]
   const progressPercentage = getProgressPercentage()
 
-  console.log('Rendering plant display with effects:', { showWaterEffect, wateringAnimation });
+  console.log('Rendering plant display with effects:', { showWaterEffect, showNutrientEffect, nutrientAnimation });
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
@@ -201,11 +207,11 @@ export function PlantDisplayWithEffects({
                 maxHeight: '250px',
               }}
               onComplete={() => {
-                console.log('Animation completed');
+                console.log('Water animation completed');
                 setIsGrowing(false);
               }}
               onDOMLoaded={() => {
-                console.log('Lottie DOM loaded');
+                console.log('Water Lottie DOM loaded');
               }}
               rendererSettings={{
                 preserveAspectRatio: 'xMidYMid slice'
@@ -215,16 +221,43 @@ export function PlantDisplayWithEffects({
         )}
 
         {/* Nutrient Effect */}
-        {showNutrientEffect && (
-          <motion.div
+        {showNutrientEffect && nutrientAnimation && (
+          <div 
             className="absolute inset-0 pointer-events-none"
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1.2 }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ duration: 0.5 }}
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              top: '0%',
+              left: '0%',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
           >
-            <div className="absolute inset-0 bg-yellow-400 opacity-20 rounded-full blur-xl" />
-          </motion.div>
+            <Lottie
+              animationData={nutrientAnimation}
+              loop={false}
+              autoplay={true}
+              style={{
+                width: '100%',
+                height: '100%',
+                maxWidth: '250px',
+                maxHeight: '250px',
+              }}
+              onComplete={() => {
+                console.log('Nutrient animation completed');
+                setIsGrowing(false);
+              }}
+              onDOMLoaded={() => {
+                console.log('Nutrient Lottie DOM loaded');
+              }}
+              rendererSettings={{
+                preserveAspectRatio: 'xMidYMid slice'
+              }}
+            />
+          </div>
         )}
       </div>
 
