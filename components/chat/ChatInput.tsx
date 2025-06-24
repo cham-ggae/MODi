@@ -14,8 +14,9 @@ interface ChatInputProps {
   setMessages: React.Dispatch<React.SetStateAction<ClientMessage[]>>;
   familyMode: boolean;
   familySize: number;
+  familySessionId: string;
 }
-const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInputProps) => {
+const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessionId }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const {
     isListening,
@@ -39,7 +40,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
       content: message,
       role: "user",
       timestamp: new Date(),
-      sessionId: sessionId
+      sessionId: familyMode ? familySessionId : sessionId
     }
 
     // 2) AI placeholder 메시지 추가 (content는 빈 문자열로 시작)
@@ -50,13 +51,13 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
       content: '',
       role: "bot",
       timestamp: new Date(),
-      sessionId: sessionId
+      sessionId: familyMode ? familySessionId : sessionId
     }
 
     setMessages((prev) => [...prev, userMsg, aiMsg])
 
     // 3) 스트리밍 시작
-    start(message, sessionId, familyMode ? familySize : 1)
+    start(message, familyMode ? familySessionId : sessionId, familyMode ? familySize : 1)
     setMessage('')
   }
 
