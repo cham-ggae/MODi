@@ -142,40 +142,29 @@ export default function FamilySpacePage() {
     }
   }, []);
 
-  const calculateDaysAfterFamilyCreation = (): number => {
+  const daysAfterFamilyCreation = (() => {
     if (family?.family?.daysAfterCreation !== undefined) {
       return family.family.daysAfterCreation;
     }
-
     if (family?.family?.createdAt) {
       const createdAt = new Date(family.family.createdAt);
       const today = new Date();
-
-      // 시간을 제거하고 날짜만 비교
       const createdDate = new Date(
         createdAt.getFullYear(),
         createdAt.getMonth(),
         createdAt.getDate()
       );
       const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-
       const diffTime = todayDate.getTime() - createdDate.getTime();
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-      return Math.max(0, diffDays); // 음수가 나오지 않도록 보장
+      return Math.max(0, diffDays);
     }
-
     return 0;
-  };
-
-  const daysAfterFamilyCreation = calculateDaysAfterFamilyCreation();
+  })();
 
   const plantType = family?.plant?.plantType; // "flower" or "tree"
-
   const plantImage =
     plantType === "tree" ? "/public/images/tree1.png" : "/public/images/flower1.png";
-
-  <img src={plantImage} alt="식물 이미지" />;
 
   const handlePlantAction = () => {
     // 2인 이상 체크
@@ -183,12 +172,11 @@ export default function FamilySpacePage() {
       toast.error("2인 이상부터 새싹을 만들 수 있어요! 가족을 더 초대해보세요.");
       return;
     }
-    //레벨 5 && 미완료 시에도 plant-game 으로 이동
+    // 식물 상태(react-query) 기준으로 분기
     if (plantStatus && !plantStatus.completed) {
       router.push("/plant-game");
       return;
     }
-
     // 완료됐거나 없으면 생성 화면으로
     router.push("/plant-selection");
   };
@@ -372,6 +360,7 @@ export default function FamilySpacePage() {
       {/* Plant Section */}
       <PlantSection
         plant={family?.plant || { hasPlant: false, canCreateNew: false }}
+        plantStatus={plantStatus}
         onPlantAction={handlePlantAction}
         familyNutrial={family?.family?.nutrial}
         familyDaysAfterCreation={family?.family?.daysAfterCreation}
