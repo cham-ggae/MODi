@@ -44,13 +44,6 @@ export function FamilyRecommendationCard({
               가족이 2명 이상 모이면 결합 요금제로
               <br />더 많이 절약할 수 있어요
             </p>
-            <Button
-              onClick={() => {}}
-              className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2"
-            >
-              <UserPlus className="w-4 h-4" />
-              가족 초대하기
-            </Button>
           </div>
         </CardContent>
       </Card>

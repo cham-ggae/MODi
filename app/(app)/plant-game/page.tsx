@@ -1,41 +1,41 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { AnimatePresence } from "framer-motion";
-import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus";
-import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
-import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
-import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
-import { ClaimRewardButton } from "@/components/plant-game/ClaimRewardButton";
-import { RewardModal } from "@/components/plant-game/RewardModal";
-import { MissionSheet } from "@/components/plant-game/MissionSheet";
-import { Mission } from "@/types/plant-game.type";
-import { ArrowLeft, UserPlus } from "lucide-react";
-import Link from "next/link";
-import { useFamily, useMessageCardsManager } from "@/hooks/family";
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { AnimatePresence } from 'framer-motion';
+import { FamilyWateringStatus } from '@/components/plant-game/FamilyWateringStatus';
+import { PlantImageDisplay } from '@/components/plant-game/PlantImageDisplay';
+import { PlantProgressBar } from '@/components/plant-game/PlantProgressBar';
+import { PlantActionButtons } from '@/components/plant-game/PlantActionButtons';
+import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
+import { RewardModal } from '@/components/plant-game/RewardModal';
+import { MissionSheet } from '@/components/plant-game/MissionSheet';
+import { Mission } from '@/types/plant-game.type';
+import { ArrowLeft, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { useFamily, useMessageCardsManager } from '@/hooks/family';
 import {
   useAddPoint,
   useCheckTodayActivity,
   usePlantStatus,
   useNutrientStatus,
   useClaimReward,
-} from "@/hooks/plant";
-import { toast } from "sonner";
-import { useQueryClient } from "@tanstack/react-query";
-import { usePlantSocket } from "@/hooks/plant/usePlantSocket";
-import { ActivityType, PlantEventData, RewardHistory } from "@/types/plants.type";
-import { useAuth } from "@/hooks/useAuth";
-import { plantApi } from "@/lib/api/plant";
-import { FamilyMember } from "@/types/family.type";
-import { Sprout, TreePine } from "lucide-react";
-import { useRouter } from "next/navigation";
-import confetti from "canvas-confetti";
-import { CardMatchingGame } from "@/components/plant-game/CardMatchingGame";
-import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFamilyMutations";
-import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
-import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
-import { QuizPage } from "@/components/plant-game/QuizPage";
+} from '@/hooks/plant';
+import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
+import { usePlantSocket } from '@/hooks/plant/usePlantSocket';
+import { ActivityType, PlantEventData, RewardHistory } from '@/types/plants.type';
+import { useAuth } from '@/hooks/useAuth';
+import { plantApi } from '@/lib/api/plant';
+import { FamilyMember } from '@/types/family.type';
+import { Sprout, TreePine } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import confetti from 'canvas-confetti';
+import { CardMatchingGame } from '@/components/plant-game/CardMatchingGame';
+import { useGenerateInviteCode, useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
+import { MessageCardCreator } from '@/components/family-space/MessageCardCreator';
+import { InviteCodeModal } from '@/components/family-space/InviteCodeModal';
+import { QuizPage } from '@/components/plant-game/QuizPage';
 
 // ==========================================
 // 🎮 새싹 키우기 게임 메인 페이지
@@ -58,51 +58,51 @@ import { QuizPage } from "@/components/plant-game/QuizPage";
 const MISSIONS: Mission[] = [
   {
     id: 1,
-    title: "1일 1회 출석하기",
-    description: "매일 밤 12시에 다시 시작됩니다.",
-    icon: "✏️",
-    reward: "출석하기",
-    activityType: "attendance",
+    title: '1일 1회 출석하기',
+    description: '매일 밤 12시에 다시 시작됩니다.',
+    icon: '✏️',
+    reward: '출석하기',
+    activityType: 'attendance',
   },
   {
     id: 2,
-    title: "가족에게 메세지 남기기",
-    description: "사랑하는 가족에게 작은 한마디",
-    icon: "💌",
-    reward: "메세지 작성",
-    activityType: "emotion",
+    title: '가족에게 메세지 남기기',
+    description: '사랑하는 가족에게 작은 한마디',
+    icon: '💌',
+    reward: '메세지 작성',
+    activityType: 'emotion',
   },
   {
     id: 3,
-    title: "요금제 퀴즈 풀기",
-    description: "더 많은 할인이 기다릴지도?",
-    icon: "🎯",
-    reward: "퀴즈 풀기",
-    activityType: "quiz",
+    title: '요금제 퀴즈 풀기',
+    description: '더 많은 할인이 기다릴지도?',
+    icon: '🎯',
+    reward: '퀴즈 풀기',
+    activityType: 'quiz',
   },
   {
     id: 4,
-    title: "골라 골라 오늘의 요금제",
-    description: "카들르 맞히고 요금제를 알아봐!!",
-    icon: "🎲",
-    reward: "카드 맞히기",
-    activityType: "lastleaf",
+    title: '골라 골라 오늘의 요금제',
+    description: '카들르 맞히고 요금제를 알아봐!!',
+    icon: '🎲',
+    reward: '카드 맞히기',
+    activityType: 'lastleaf',
   },
   {
     id: 5,
-    title: "가족 등록",
-    description: "가족 등록하고 더 많은 보상을 받아보세요!",
-    icon: "👨‍👩‍👧‍👦",
-    reward: "초대하기",
-    activityType: "register",
+    title: '가족 등록',
+    description: '가족 등록하고 더 많은 보상을 받아보세요!',
+    icon: '👨‍👩‍👧‍👦',
+    reward: '초대하기',
+    activityType: 'register',
   },
   {
     id: 6,
-    title: "통신 성향 검사",
-    description: "나에게 맞는 통신 캐릭터는?",
-    icon: "💬",
-    reward: "검사하기",
-    activityType: "survey",
+    title: '통신 성향 검사',
+    description: '나에게 맞는 통신 캐릭터는?',
+    icon: '💬',
+    reward: '검사하기',
+    activityType: 'survey',
   },
 ];
 
@@ -114,13 +114,13 @@ function ChoiceModal({
   options,
   onSubmit,
   onClose,
-  direction = "row",
+  direction = 'row',
 }: {
   title: string;
   options: string[];
   onSubmit: (choice: string) => void;
   onClose: () => void;
-  direction?: "row" | "col";
+  direction?: 'row' | 'col';
 }) {
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -128,12 +128,12 @@ function ChoiceModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white rounded-xl p-6 w-80 flex flex-col items-center">
         <div className="text-lg font-bold mb-4">{title}</div>
-        <div className={`flex mb-4 gap-2 ${direction === "row" ? "flex-row" : "flex-col"}`}>
+        <div className={`flex mb-4 gap-2 ${direction === 'row' ? 'flex-row' : 'flex-col'}`}>
           {options.map((opt) => (
             <button
               key={opt}
               className={`px-4 py-2 rounded-lg border ${
-                selected === opt ? "bg-blue-500 text-white" : "bg-gray-100"
+                selected === opt ? 'bg-blue-500 text-white' : 'bg-gray-100'
               }`}
               onClick={() => setSelected(opt)}
             >
@@ -213,8 +213,8 @@ export default function PlantGamePage() {
   } = usePlantStatus(familyId ?? 0);
 
   // 오늘 활동 완료 여부 확인
-  const { data: checkAlreadyWatered } = useCheckTodayActivity("water");
-  const { data: checkAlreadyFed } = useCheckTodayActivity("nutrient");
+  const { data: checkAlreadyWatered } = useCheckTodayActivity('water');
+  const { data: checkAlreadyFed } = useCheckTodayActivity('nutrient');
   const { data: nutrientCount = 0 } = useNutrientStatus(); // 영양제 개수
 
   // 포인트 적립 및 보상 수령 API
@@ -258,7 +258,7 @@ export default function PlantGamePage() {
       const wateredIds = await plantApi.getWaterMembers(familyId);
       setWateredMemberIds(wateredIds);
     } catch (error) {
-      console.error("물주기 완료 구성원 조회 실패:", error);
+      console.error('물주기 완료 구성원 조회 실패:', error);
     }
   }, [familyId]);
 
@@ -282,12 +282,12 @@ export default function PlantGamePage() {
 
         // 레벨업 토스트 표시
         if (event.isLevelUp) {
-          toast.success("🎉 레벨업! 식물이 성장했습니다!");
+          toast.success('🎉 레벨업! 식물이 성장했습니다!');
         }
 
         // 활동 타입별 처리
         switch (event.type) {
-          case "water":
+          case 'water':
             // 현재 사용자의 활동인 경우에만 상태 변경
             if (event.name === user?.nickname) {
               setAlreadyWatered(true);
@@ -297,37 +297,37 @@ export default function PlantGamePage() {
             toast.success(`${event.name}님이 물을 주었습니다! 💧`);
             break;
 
-          case "nutrient":
+          case 'nutrient':
             // 현재 사용자의 활동인 경우에만 상태 변경
             if (event.name === user?.nickname) {
               setAlreadyFed(true);
             }
             // 영양제 사용 시 영양제 개수 감소 (서버에서 업데이트된 값으로 동기화)
-            queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
+            queryClient.invalidateQueries({ queryKey: ['plant-status', familyId] });
             toast.success(`${event.name}님이 영양제를 주었습니다! 🌱`);
             break;
 
-          case "quiz":
+          case 'quiz':
             toast.success(`${event.name}님이 퀴즈를 완료했습니다! 🎯`);
             break;
 
-          case "emotion":
+          case 'emotion':
             toast.success(`${event.name}님이 감정을 기록했습니다! 😊`);
             break;
 
-          case "attendance":
+          case 'attendance':
             toast.success(`${event.name}님이 출석했습니다! 📅`);
             break;
 
-          case "survey":
+          case 'survey':
             toast.success(`${event.name}님이 설문을 완료했습니다! 📝`);
             break;
 
-          case "lastleaf":
+          case 'lastleaf':
             toast.success(`${event.name}님이 카드 맞히기를 달성했습니다! 🍃`);
             break;
 
-          case "register":
+          case 'register':
             toast.success(`${event.name}님이 가입했습니다! 🎉`);
             break;
 
@@ -350,22 +350,22 @@ export default function PlantGamePage() {
   const handleWatering = () => {
     // 중복 요청 방지
     if (isPending || alreadyWatered) {
-      toast.warning("오늘은 이미 물을 주었어요 💧");
+      toast.warning('오늘은 이미 물을 주었어요 💧');
       return;
     }
 
     setIsWatering(true);
 
     addPoint(
-      { activityType: "water" },
+      { activityType: 'water' },
       {
         onSuccess: () => {
-          toast.success("물주기 완료!");
+          toast.success('물주기 완료!');
           setAlreadyWatered(true);
           setTimeout(() => setIsWatering(false), 2000);
-          queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "water"] });
+          queryClient.invalidateQueries({ queryKey: ['activity', 'check-today', 'water'] });
           // 식물 상태 업데이트를 위해 쿼리 무효화
-          queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
+          queryClient.invalidateQueries({ queryKey: ['plant-status', familyId] });
           // 물주기 완료된 구성원 목록 업데이트
           fetchWateredMembers();
         },
@@ -387,7 +387,7 @@ export default function PlantGamePage() {
   const handleFeeding = async () => {
     // 중복 요청 방지
     if (isPending || alreadyFed) {
-      toast.warning("오늘은 이미 영양제를 주었어요 🌿");
+      toast.warning('오늘은 이미 영양제를 주었어요 🌿');
       return;
     }
 
@@ -396,13 +396,13 @@ export default function PlantGamePage() {
       const serverNutrientCount = await plantApi.getNutrients();
 
       if (serverNutrientCount <= 0) {
-        toast.warning("영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯");
+        toast.warning('영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯');
         return;
       }
     } catch (error) {
       // 서버 확인 실패 시 로컬 상태로 판단
       if (nutrientCount <= 0) {
-        toast.warning("영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯");
+        toast.warning('영양제가 부족합니다! 미션을 완료해서 영양제를 얻어보세요! 🎯');
         return;
       }
     }
@@ -410,16 +410,16 @@ export default function PlantGamePage() {
     setIsFeeding(true);
 
     addPoint(
-      { activityType: "nutrient" },
+      { activityType: 'nutrient' },
       {
         onSuccess: () => {
-          toast.success("영양제 주기 완료! 포인트 적립 ✅");
+          toast.success('영양제 주기 완료! 포인트 적립 ✅');
           setAlreadyFed(true);
           setTimeout(() => setIsFeeding(false), 2000);
-          queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "nutrient"] });
-          queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
+          queryClient.invalidateQueries({ queryKey: ['activity', 'check-today', 'nutrient'] });
+          queryClient.invalidateQueries({ queryKey: ['plant-status', familyId] });
           // 영양제 개수 업데이트를 위해 쿼리 무효화
-          queryClient.invalidateQueries({ queryKey: ["nutrient", "stock"] });
+          queryClient.invalidateQueries({ queryKey: ['nutrient', 'stock'] });
         },
         onError: (error) => {
           setIsFeeding(false);
@@ -476,12 +476,12 @@ export default function PlantGamePage() {
 
   // 미션별 오늘 완료 여부 (서버에서 확인)
   const missionTypes: ActivityType[] = [
-    "attendance",
-    "emotion",
-    "quiz",
-    "lastleaf",
-    "register",
-    "survey",
+    'attendance',
+    'emotion',
+    'quiz',
+    'lastleaf',
+    'register',
+    'survey',
   ];
   const missionQueries = missionTypes.map((type) => useCheckTodayActivity(type, { staleTime: 0 }));
   const missionCompletedMap = Object.fromEntries(
@@ -501,25 +501,25 @@ export default function PlantGamePage() {
    */
   const handleMissionClick = (activityType: ActivityType) => {
     if (missionCompletedMap[activityType]) {
-      toast("내일 다시");
+      toast('내일 다시');
       setShowMissions(false);
       return;
     }
 
     switch (activityType) {
-      case "quiz":
+      case 'quiz':
         setShowMissions(false);
         setShowQuizPage(true);
         break;
-      case "lastleaf":
+      case 'lastleaf':
         setShowMissions(false);
         setShowCardMatchingGame(true);
         break;
-      case "emotion":
+      case 'emotion':
         setShowMissions(false);
         setShowMessageCardCreator(true);
         break;
-      case "register":
+      case 'register':
         setShowMissions(false);
         setShowInviteCodeModal(true);
         break;
@@ -535,20 +535,20 @@ export default function PlantGamePage() {
 
   // 메시지 카드 생성 완료 핸들러
   const handleMessageCardCreated = () => {
-    addPoint({ activityType: "emotion" });
-    toast.success("메시지 카드를 생성했습니다! 경험치가 적립되었습니다. 💌");
+    addPoint({ activityType: 'emotion' });
+    toast.success('메시지 카드를 생성했습니다! 경험치가 적립되었습니다. 💌');
   };
 
   // 카드 게임 완료 핸들러
   const handleCardGameCompleted = () => {
-    addPoint({ activityType: "lastleaf" });
-    toast.success("마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃");
+    addPoint({ activityType: 'lastleaf' });
+    toast.success('마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃');
   };
 
   // 카카오톡 공유 핸들러
   const handleShareKakao = () => {
-    addPoint({ activityType: "register" });
-    toast.success("가족을 초대했습니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦");
+    addPoint({ activityType: 'register' });
+    toast.success('가족을 초대했습니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦');
   };
 
   // 초대 코드 복사 핸들러
@@ -558,10 +558,10 @@ export default function PlantGamePage() {
     try {
       await navigator.clipboard.writeText(family.family.inviteCode);
       setCopied(true);
-      toast.success("초대 코드가 복사되었습니다! 가족들에게 공유해보세요.");
+      toast.success('초대 코드가 복사되었습니다! 가족들에게 공유해보세요.');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast.error("복사에 실패했습니다");
+      toast.error('복사에 실패했습니다');
     }
   };
 
@@ -574,7 +574,7 @@ export default function PlantGamePage() {
   // 가족명 저장 핸들러
   const handleSaveFamilyName = (name: string) => {
     if (!familyId) {
-      toast.error("가족 ID를 찾을 수 없습니다.");
+      toast.error('가족 ID를 찾을 수 없습니다.');
       return;
     }
 
@@ -585,7 +585,7 @@ export default function PlantGamePage() {
           toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
         },
         onError: (error) => {
-          toast.error("가족명 변경에 실패했습니다");
+          toast.error('가족명 변경에 실패했습니다');
         },
       }
     );
@@ -602,9 +602,9 @@ export default function PlantGamePage() {
   const transformedMembers = familyMembers.map((member) => ({
     id: member.uid,
     name: member.name,
-    avatar: member.profileImage || "👤", // 카카오 프로필 이미지 또는 기본 이모지
+    avatar: member.profileImage || '👤', // 카카오 프로필 이미지 또는 기본 이모지
     hasWatered: wateredMemberIds.includes(member.uid),
-    status: wateredMemberIds.includes(member.uid) ? "물주기 완료" : "",
+    status: wateredMemberIds.includes(member.uid) ? '물주기 완료' : '',
   }));
 
   // ==========================================
@@ -747,8 +747,8 @@ export default function PlantGamePage() {
       <InviteCodeModal
         isOpen={showInviteCodeModal}
         onOpenChange={setShowInviteCodeModal}
-        inviteCode={family?.family?.inviteCode || ""}
-        familyName={family?.family?.name || "우리 가족"}
+        inviteCode={family?.family?.inviteCode || ''}
+        familyName={family?.family?.name || '가족'}
         onGenerateCode={handleGenerateNewInviteCode}
         onCopyCode={handleCopyCode}
         onShareKakao={handleShareKakao}
@@ -763,8 +763,8 @@ export default function PlantGamePage() {
           <QuizPage
             onBack={() => setShowQuizPage(false)}
             onQuizComplete={() => {
-              addPoint({ activityType: "quiz" });
-              toast.success("퀴즈 완료! 경험치가 적립되었습니다. 🎯");
+              addPoint({ activityType: 'quiz' });
+              toast.success('퀴즈 완료! 경험치가 적립되었습니다. 🎯');
               setShowQuizPage(false);
             }}
           />
