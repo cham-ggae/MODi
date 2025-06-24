@@ -5,6 +5,7 @@ import { Volume2, VolumeX } from 'lucide-react';
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeSanitize from 'rehype-sanitize'
+import TypingIndicator from './TypingIndicator';
 
 interface MessageItemProps {
   role: string;
@@ -33,18 +34,19 @@ const MessageItem = ({ role, content, timestamp, cid, isSpeaking, ttsSupported, 
           : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-600 rounded-bl-md prose prose-p:mb-0 prose-sm dark:prose-invert'
           }`}
       >
-        {role === 'bot'
+        {role === 'bot' && content === ''
           ? (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeSanitize]}
-            >
-              {content}
-            </ReactMarkdown>
+            <TypingIndicator />
           )
-          : (
-            <p className="text-sm m-0">{content}</p>
-          )
+          : role === 'bot'
+            ? (
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+                {content}
+              </ReactMarkdown>
+            )
+            : (
+              <p className="text-sm m-0">{content}</p>
+            )
         }
         <div className="flex items-center justify-between mt-2">
           <p
@@ -61,20 +63,18 @@ const MessageItem = ({ role, content, timestamp, cid, isSpeaking, ttsSupported, 
               onClick={() => handleSpeakMessage(content, cid)}
               variant="ghost"
               size="sm"
-              className={`p-1 h-auto ml-2 ${
-                !cid
+              className={`p-1 h-auto ml-2 ${!cid
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'
-              }`}
+                }`}
               disabled={!cid}
               title={!cid ? 'TTS 준비 중...' : '음성으로 들으기'}
             >
               {isSpeaking ? (
                 <VolumeX className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               ) : (
-                <Volume2 className={`w-4 h-4 ${
-                  !cid ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'
-                }`} />
+                <Volume2 className={`w-4 h-4 ${!cid ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 dark:text-gray-400'
+                  }`} />
               )}
             </Button>
           )}
