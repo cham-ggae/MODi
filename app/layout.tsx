@@ -7,20 +7,17 @@ import { FamilySpaceProvider } from '@/contexts/family-space-context';
 import { PlantProvider } from '@/contexts/plant-context-v2';
 import AuthProvider from '@/components/providers/AuthProvider';
 import { QueryProvider } from '@/components/providers/QueryProvider';
-import { MobileHeader } from '@/components/layouts/mobile-header';
-import { MobileNav } from '@/components/mobile-nav';
-import { ResponsiveWrapper } from '@/components/responsive-wrapper';
 import { Toaster } from '@/components/ui/sonner';
 
 const inter = Inter({ subsets: ['latin'] });
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://modi.app';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 export const metadata: Metadata = {
-  title: 'MODi - 스마트한 통신 생활의 시작',
+  title: 'MODi',
   description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
   openGraph: {
-    title: 'MODi - 스마트한 통신 생활의 시작',
+    title: 'MODi',
     description: '개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스',
     type: 'website',
     url: baseUrl,

@@ -2,7 +2,8 @@
 
 import { useEffect, useState, type ReactNode } from 'react';
 import { useAuthStore } from '@/store/useAuthStore'; // 통합된 스토어 사용
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { refreshAccessToken } from '@/lib/api/auth';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -13,8 +14,53 @@ interface AuthProviderProps {
  */
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [isInitialized, setIsInitialized] = useState(false);
-  const { isLoading, isAuthenticated, accessToken, initAuth } = useAuthStore();
+  const {
+    isLoading,
+    isAuthenticated,
+    accessToken,
+    initAuth,
+    shouldRefreshToken,
+    setRefreshing,
+    updateLastRefreshAttempt,
+    updateToken,
+    clearAuth,
+    isRefreshing,
+  } = useAuthStore();
   const router = useRouter();
+  const pathname = usePathname();
+
+  // 사전 토큰 갱신 함수
+  const preemptiveTokenRefresh = async () => {
+    if (!shouldRefreshToken() || isRefreshing) {
+      return;
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔄 사전 토큰 갱신 시작');
+    }
+
+    try {
+      setRefreshing(true);
+      updateLastRefreshAttempt();
+
+      const newToken = await refreshAccessToken();
+      updateToken(newToken);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ 사전 토큰 갱신 성공');
+      }
+    } catch (error) {
+      console.error('❌ 사전 토큰 갱신 실패:', error);
+
+      // 리프레시 토큰이 만료된 경우에만 로그아웃
+      if ((error as Error).message === 'REFRESH_TOKEN_EXPIRED') {
+        clearAuth();
+        router.push('/');
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -49,6 +95,35 @@ export default function AuthProvider({ children }: AuthProviderProps) {
 
     initializeAuth();
   }, [initAuth, accessToken, isAuthenticated]);
+
+  // 인증된 사용자의 루트 페이지 접근 시 리다이렉트
+  useEffect(() => {
+    if (isInitialized && !isLoading && isAuthenticated && pathname === '/') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 인증된 사용자 자동 리다이렉트: / → /chat');
+      }
+      router.replace('/chat'); // replace 사용으로 히스토리 스택 오염 방지
+    }
+  }, [isInitialized, isLoading, isAuthenticated, pathname, router]);
+
+  // 주기적인 토큰 갱신 체크
+  useEffect(() => {
+    if (!isAuthenticated || !isInitialized) {
+      return;
+    }
+
+    // 즉시 한 번 체크
+    preemptiveTokenRefresh();
+
+    // 1분마다 토큰 만료 시간 체크
+    const tokenCheckInterval = setInterval(() => {
+      preemptiveTokenRefresh();
+    }, 60 * 1000);
+
+    return () => {
+      clearInterval(tokenCheckInterval);
+    };
+  }, [isAuthenticated, isInitialized, shouldRefreshToken, isRefreshing]);
 
   // 초기화 완료 전에는 로딩 표시
   if (!isInitialized || isLoading) {
