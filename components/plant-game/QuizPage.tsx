@@ -32,32 +32,125 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
   const [timeLeft, setTimeLeft] = useState(30); // 30초 제한
   const [timerActive, setTimerActive] = useState(true);
 
-  // 통신 관련 퀴즈 문제들 (3개)
-  const quizQuestions: QuizQuestion[] = [
+  // 통신 관련 퀴즈 문제들 (12개)
+  const allQuizQuestions: QuizQuestion[] = [
     {
       id: 1,
-      question: "5G 네트워크의 최대 이론 속도는 얼마인가요?",
-      options: ["1Gbps", "10Gbps", "20Gbps", "100Gbps"],
-      correctAnswer: 2,
+      question: "너깃 69/65 요금제 가입 시 제공되는 OTT 혜택은 무엇인가요?",
+      options: [
+        "넷플릭스 무료 이용",
+        "티빙 + 디즈니+ 스탠다드",
+        "유튜브 프리미엄 제공",
+        "왓챠 + 웨이브 무료",
+      ],
+      correctAnswer: 1,
       explanation:
-        "5G의 최대 이론 속도는 20Gbps입니다. 하지만 실제 환경에서는 1-3Gbps 정도가 일반적입니다.",
+        "너깃 69/65 요금제는 티빙 베이직 + 디즈니 플러스 스탠다드 월정액을 무료 제공합니다.",
     },
     {
       id: 2,
-      question: "LTE와 5G의 가장 큰 차이점은 무엇인가요?",
-      options: ["속도만 빠름", "배터리 소모가 적음", "초저지연과 대규모 연결", "요금이 저렴함"],
-      correctAnswer: 2,
-      explanation:
-        "5G는 LTE 대비 속도뿐만 아니라 1ms 수준의 초저지연과 평방킬로미터당 100만 개 기기 연결이 가능합니다.",
+      question: "너깃패스/너깃쿠폰 혜택을 받을 수 있는 최소 요금제는?",
+      options: [
+        "월 49,000원 이상 요금제",
+        "월 59,000원 이상 요금제",
+        "월 69,000원 이상 요금제",
+        "모든 요금제",
+      ],
+      correctAnswer: 1,
+      explanation: "너깃패스는 59,000원 이상 너깃 요금제를 사용할 경우 받을 수 있는 혜택입니다.",
     },
     {
       id: 3,
-      question: "무제한 요금제에서 '속도 제한'이 걸리는 기준은 보통 얼마인가요?",
-      options: ["10GB", "30GB", "50GB", "100GB"],
+      question: "너깃 요금제(59 이상) 이용자에게 제공되는 혜택이 아닌 것은?",
+      options: [
+        "매달 U+멤버십 VIP 무료",
+        "네이버페이/포인트/콘텐츠 쿠폰 선택",
+        "기기변경 시 에어팟 프로 무조건 무료",
+        "최초 가입 시 멀티무제한 듣기 선택 가능",
+      ],
+      correctAnswer: 2,
+      explanation: "기기변경 시 일부 혜택은 기기와 조건에 따라 다르며, 무조건 무료는 아닙니다.",
+    },
+    {
+      id: 4,
+      question: "참 쉬운 가족 결합으로 휴대폰 3회선 결합 시 최대 얼마까지 절감 가능한가요?",
+      options: ["월 6,600원", "월 10,000원", "월 20,460원", "월 33,660원"],
       correctAnswer: 3,
-      explanation: "대부분의 통신사에서 무제한 요금제는 100GB 사용 후 속도가 제한됩니다.",
+      explanation: "3회선 결합 시 최대 월 33,660원의 할인이 가능합니다.",
+    },
+    {
+      id: 5,
+      question: "참 쉬운 가족 결합은 최대 몇 명까지 결합 가능한가요? (휴대폰 기준)",
+      options: ["3명", "5명", "7명", "10명"],
+      correctAnswer: 3,
+      explanation: "참 쉬운 가족 결합으로 휴대폰은 최대 10회선까지 결합 가능합니다.",
+    },
+    {
+      id: 6,
+      question: "휴대폰 4~5명을 결합하면 1인당 얼마의 할인을 받을 수 있나요?",
+      options: ["10,000원", "14,000원", "18,000원", "20,000원"],
+      correctAnswer: 3,
+      explanation: "4~5명 결합 시 1인당 월 20,000원의 할인을 받을 수 있습니다.",
+    },
+    {
+      id: 7,
+      question: "모바일 이용기간이 4년 이상인 경우 받을 수 있는 데이터 쿠폰 수는?",
+      options: ["2장", "4장", "6장", "8장"],
+      correctAnswer: 2,
+      explanation: "모바일 이용기간이 4년 이상이면 매년 2GB 쿠폰 6장을 받을 수 있습니다.",
+    },
+    {
+      id: 8,
+      question: "모바일 이용기간 2년 이상일 경우 받을 수 있는 데이터 쿠폰 수는?",
+      options: ["2장", "4장", "6장", "8장"],
+      correctAnswer: 1,
+      explanation: "2년 이상 사용 시 2GB 쿠폰 4장을 받을 수 있습니다.",
+    },
+    {
+      id: 9,
+      question: "LTE 데이터 기본 제공량 초과 시 요금은?",
+      options: ["약 10원/MB", "약 19.8원/MB", "약 22.53원/MB", "약 281.6원/MB"],
+      correctAnswer: 2,
+      explanation: "LTE 데이터 33 요금제 기준 초과 요금은 22.53원/MB입니다.",
+    },
+    {
+      id: 10,
+      question: "'5G 프리미어 에센셜' 요금제의 테더링·쉐어링 제공량은?",
+      options: ["50GB", "60GB", "70GB", "무제한"],
+      correctAnswer: 2,
+      explanation: "5G 프리미어 에센셜 요금제는 테더링/쉐어링 70GB를 제공합니다.",
+    },
+    {
+      id: 11,
+      question: "U+투게더 청소년 할인은 어떤 조건일 때 제공되나요?",
+      options: [
+        "만 18세 이상 대학생 자녀",
+        "구성원 중 만 19세 이하 청소년이 있는 경우",
+        "5인 가족 이상 구성 시",
+        "가족 모두 동일 요금제 이용 시",
+      ],
+      correctAnswer: 1,
+      explanation: "만 19세 이하 청소년이 있는 구성원에게는 월 1만원 추가 할인이 제공됩니다.",
+    },
+    {
+      id: 12,
+      question: "5G 시그니처 요금제 이용 시 자녀에게 제공되는 할인 혜택은?",
+      options: [
+        "자녀 요금제 무제한 데이터 제공",
+        "자녀 1인당 월 최대 33,000원 할인",
+        "가족 전체 무선요금 50% 할인",
+        "U+멤버십 포인트 2배 적립",
+      ],
+      correctAnswer: 1,
+      explanation: "5G 시그니처 요금제 이용 시 자녀 요금에서 최대 월 33,000원까지 할인됩니다.",
     },
   ];
+
+  // 12개 문제 중에서 랜덤으로 3개 선택
+  const [quizQuestions, setQuizQuestions] = useState(() => {
+    const shuffled = [...allQuizQuestions].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 3);
+  });
 
   const currentQuestion = quizQuestions[currentQuestionIndex];
   const progress = ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
@@ -123,6 +216,10 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
 
   // 퀴즈 재시작
   const handleRestartQuiz = () => {
+    // 새로운 랜덤 문제 선택
+    const shuffled = [...allQuizQuestions].sort(() => Math.random() - 0.5);
+    const newQuizQuestions = shuffled.slice(0, 3);
+
     setCurrentQuestionIndex(0);
     setSelectedAnswer(null);
     setShowResult(false);
@@ -130,6 +227,9 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
     setIsQuizCompleted(false);
     setTimeLeft(30);
     setTimerActive(true);
+
+    // 새로운 문제로 교체
+    setQuizQuestions(newQuizQuestions);
   };
 
   // 퀴즈 완료 및 미션 완료

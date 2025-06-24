@@ -42,7 +42,9 @@ export function FamilyMemberSection({
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">우리 가족</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+              {familyName || '우리 가족'}
+            </h2>
             {memberCount > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400">{memberCount}명의 구성원</p>
             )}

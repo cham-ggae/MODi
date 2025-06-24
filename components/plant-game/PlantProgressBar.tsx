@@ -1,5 +1,5 @@
-import { Leaf } from "lucide-react";
-import { useNutrientStatus, usePlantStatus } from "@/hooks/plant";
+import { Leaf } from 'lucide-react';
+import { useNutrientStatus, usePlantStatus } from '@/hooks/plant';
 
 interface ProgressProps {
   level: number;
@@ -10,7 +10,8 @@ interface ProgressProps {
 export function PlantProgressBar({ level, progress, fid }: ProgressProps) {
   // 영양제 개수를 직접 API에서 가져오기
   const { data: nutrientCount = 0 } = useNutrientStatus();
-  const { data: plantStatus } = usePlantStatus(fid);
+  // fid가 유효할 때만 식물 상태 조회
+  const { data: plantStatus } = usePlantStatus(fid && fid > 0 ? fid : 0);
 
   const calculatedProgress =
     !progress && plantStatus

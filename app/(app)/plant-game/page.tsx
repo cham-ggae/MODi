@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { AnimatePresence } from "framer-motion";
-import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus";
-import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
-import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
-import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
-import { ClaimRewardButton } from "@/components/plant-game/ClaimRewardButton";
-import { RewardModal } from "@/components/plant-game/RewardModal";
-import { MissionSheet } from "@/components/plant-game/MissionSheet";
-import { Mission } from "@/types/plant-game.type";
-import { ArrowLeft, UserPlus } from "lucide-react";
-import Link from "next/link";
-import { useFamily, useMessageCardsManager } from "@/hooks/family";
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { AnimatePresence } from 'framer-motion';
+import { FamilyWateringStatus } from '@/components/plant-game/FamilyWateringStatus';
+import { PlantImageDisplay } from '@/components/plant-game/PlantImageDisplay';
+import { PlantProgressBar } from '@/components/plant-game/PlantProgressBar';
+import { PlantActionButtons } from '@/components/plant-game/PlantActionButtons';
+import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
+import { RewardModal } from '@/components/plant-game/RewardModal';
+import { MissionSheet } from '@/components/plant-game/MissionSheet';
+import { Mission } from '@/types/plant-game.type';
+import { ArrowLeft, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { useFamily, useMessageCardsManager } from '@/hooks/family';
 import {
   useAddPoint,
   useCheckTodayActivity,
@@ -36,6 +36,13 @@ import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFa
 import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
 import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
+import { useKakaoInit } from "@/hooks/useKakaoShare";
+
+declare global {
+  interface Window {
+    Kakao: any;
+  }
+}
 
 // ==========================================
 // 🎮 새싹 키우기 게임 메인 페이지
@@ -229,6 +236,9 @@ export default function PlantGamePage() {
   // ==========================================
   const [initialized, setInitialized] = useState(false);
 
+  // 카카오톡 SDK 초기화
+  useKakaoInit();
+
   // 서버 응답으로 최초 상태 세팅 (소켓보다 우선 적용)
   useEffect(() => {
     if (plantStatus && !initialized) {
@@ -305,30 +315,6 @@ export default function PlantGamePage() {
             // 영양제 사용 시 영양제 개수 감소 (서버에서 업데이트된 값으로 동기화)
             queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
             toast.success(`${event.name}님이 영양제를 주었습니다! 🌱`);
-            break;
-
-          case "quiz":
-            toast.success(`${event.name}님이 퀴즈를 완료했습니다! 🎯`);
-            break;
-
-          case "emotion":
-            toast.success(`${event.name}님이 감정을 기록했습니다! 😊`);
-            break;
-
-          case "attendance":
-            toast.success(`${event.name}님이 출석했습니다! 📅`);
-            break;
-
-          case "survey":
-            toast.success(`${event.name}님이 설문을 완료했습니다! 📝`);
-            break;
-
-          case "lastleaf":
-            toast.success(`${event.name}님이 카드 맞히기를 달성했습니다! 🍃`);
-            break;
-
-          case "register":
-            toast.success(`${event.name}님이 가입했습니다! 🎉`);
             break;
 
           default:
@@ -507,6 +493,11 @@ export default function PlantGamePage() {
     }
 
     switch (activityType) {
+      case "attendance":
+        addPoint({ activityType });
+        toast.success("출석 완료! 경험치가 적립되었습니다. ✏️");
+        setShowMissions(false);
+        break;
       case "quiz":
         setShowMissions(false);
         setShowQuizPage(true);
@@ -523,6 +514,10 @@ export default function PlantGamePage() {
         setShowMissions(false);
         setShowInviteCodeModal(true);
         break;
+      case "survey":
+        setShowMissions(false);
+        router.push("/survey?mission=true");
+        break;
       default:
         addPoint({ activityType });
         setShowMissions(false);
@@ -536,19 +531,70 @@ export default function PlantGamePage() {
   // 메시지 카드 생성 완료 핸들러
   const handleMessageCardCreated = () => {
     addPoint({ activityType: "emotion" });
-    toast.success("메시지 카드를 생성했습니다! 경험치가 적립되었습니다. 💌");
   };
 
   // 카드 게임 완료 핸들러
   const handleCardGameCompleted = () => {
     addPoint({ activityType: "lastleaf" });
-    toast.success("마지막 잎새를 찾았습니다! 경험치가 적립되었습니다. 🍃");
+    toast.success("카드 맞히기 완료! 경험치가 적립되었습니다. 🍃");
   };
 
   // 카카오톡 공유 핸들러
   const handleShareKakao = () => {
-    addPoint({ activityType: "register" });
-    toast.success("가족을 초대했습니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦");
+    if (!family?.family?.inviteCode || !family?.family?.name) {
+      toast.error("가족 정보를 불러올 수 없습니다.");
+      return;
+    }
+
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
+    const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
+
+    console.log("🔍 카카오 공유 시도:", {
+      windowKakao: !!window.Kakao,
+      isInitialized: window.Kakao?.isInitialized?.(),
+      familyName: family.family.name,
+      inviteCode: family.family.inviteCode,
+      imageUrl,
+    });
+
+    // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
+    if (window.Kakao && window.Kakao.isInitialized()) {
+      console.log("✅ 카카오 SDK 초기화됨, 공유 실행");
+      window.Kakao.Link.sendDefault({
+        objectType: "feed",
+        content: {
+          title: `🌱 ${family.family.name} 가족 스페이스에 초대합니다!`,
+          description: `함께 식물을 키우고 요금제도 절약해요!\n초대 코드: ${family.family.inviteCode}`,
+          imageUrl: imageUrl,
+          link: {
+            mobileWebUrl: "https://modi.app",
+            webUrl: "https://modi.app",
+          },
+        },
+        buttons: [
+          {
+            title: "MODi에서 확인",
+            link: {
+              mobileWebUrl: "https://modi.app",
+              webUrl: "https://modi.app",
+            },
+          },
+        ],
+      });
+
+      // 공유 성공 후 포인트 적립
+      addPoint({ activityType: "register" });
+      toast.success("가족을 초대합니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦");
+    } else {
+      console.log("❌ 카카오 SDK 초기화 안됨, 클립보드 복사로 대체");
+      // 카카오톡 SDK가 없는 경우 클립보드에 복사
+      const shareText = `🌱 ${family.family.name} 가족 스페이스에 초대합니다!\n\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
+      navigator.clipboard.writeText(shareText);
+      toast.success("공유 메시지가 복사되었습니다! 카카오톡에서 붙여넣기 해주세요.");
+
+      // 복사 성공 후 포인트 적립
+      addPoint({ activityType: "register" });
+    }
   };
 
   // 초대 코드 복사 핸들러

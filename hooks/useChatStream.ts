@@ -18,10 +18,11 @@ export function useChatStream() {
     setCid(undefined);
     setError(null);
     setIsStreaming(true);
+    currentMessageRef.current = '';
 
     // 1) 토큰 갱신 트리거
     await authenticatedApiClient.get('/test');
-    const accessToken = localStorage.getItem("accessToken");
+    const accessToken = localStorage.getItem('accessToken');
 
     // 2) fetch 스트림 열기
     const controller = new AbortController();
@@ -29,9 +30,11 @@ export function useChatStream() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_ADDR}/chat?sessionId=${encodeURIComponent(sessionId)}&prompt=${encodeURIComponent(`${prompt} (요금제 추천 시 LGU+만)`)}&members=${members}`,
+        `${process.env.NEXT_PUBLIC_ADDR}/chat?sessionId=${encodeURIComponent(
+          sessionId
+        )}&prompt=${encodeURIComponent(`${prompt} (요금제 추천 시 LGU+만)`)}&members=${members}`,
         {
-          headers: { 'Authorization': `Bearer ${accessToken}` },
+          headers: { Authorization: `Bearer ${accessToken}` },
           credentials: 'include',
           signal: controller.signal,
         }
@@ -57,13 +60,13 @@ export function useChatStream() {
           try {
             const chunk = JSON.parse(jsonString) as ChatCompletionChunk;
             console.log(chunk);
-            
+
             // cid가 있으면 상태에 저장
             if (chunk.cid) {
               setCid(chunk.cid);
               console.log('CID found and set:', chunk.cid);
             }
-            
+
             const choice = chunk.choices[0];
             if (choice.finish_reason) {
               controller.abort();
@@ -91,7 +94,6 @@ export function useChatStream() {
               setMessage(fixed);
               // ④ ref 도 업데이트
               currentMessageRef.current = fixed;
-              setMessage(prev => prev + delta);
             }
           } catch (e) {
             console.error('JSON 파싱 에러', e);
