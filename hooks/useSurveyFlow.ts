@@ -6,8 +6,10 @@
 // - 결과 계산 및 API 전송 포함
 
 import { useState } from "react";
+
 import { useRouter, useSearchParams } from "next/navigation";
 import { usePostSurveyResult } from "@/hooks/use-survey-result";
+
 import {
   calculateScore,
   analyzeResult,
@@ -22,6 +24,7 @@ export function useSurvey() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const postSurveyResult = usePostSurveyResult();
+
 
   const handleAnswer = async (value: string) => {
     const newAnswers = { ...answers, [currentQuestion + 1]: value };
