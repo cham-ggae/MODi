@@ -47,12 +47,12 @@ export function useSpeechRecognition({ onResult, onError, sessionId }: UseSpeech
             // 오디오 데이터를 Blob으로 변환
             const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
             
-            console.log('STT API 호출:', '/chat/voice/upload');
-            console.log('오디오 정보:', {
-              blobSize: audioBlob.size,
-              duration: audioChunksRef.current.length,
-              type: audioBlob.type
-            });
+            // console.log('STT API 호출:', '/chat/voice/upload');
+            // console.log('오디오 정보:', {
+            //   blobSize: audioBlob.size,
+            //   duration: audioChunksRef.current.length,
+            //   type: audioBlob.type
+            // });
             
             // 1) 토큰 갱신 트리거
             const { authenticatedApiClient } = await import('@/lib/api/axios');
@@ -61,18 +61,18 @@ export function useSpeechRecognition({ onResult, onError, sessionId }: UseSpeech
             // 백엔드 STT API로 전송 (VoiceService static 메서드 사용)
             const response = await VoiceService.uploadAudio(audioBlob, sessionId)
             
-            console.log('STT 응답 상세:', response);
+            // console.log('STT 응답 상세:', response);
             
             if (response.success) {
               const transcribedText = response.data.transcribedText
-              console.log('인식된 텍스트:', transcribedText);
+              // console.log('인식된 텍스트:', transcribedText);
               setTranscript(transcribedText)
               onResult?.(transcribedText)
             } else {
               onError?.("음성 인식에 실패했습니다.")
             }
           } catch (error) {
-            console.error("음성 인식 오류:", error)
+            // console.error("음성 인식 오류:", error)
             onError?.("음성 인식 중 오류가 발생했습니다.")
           } finally {
             setIsListening(false)
@@ -85,7 +85,7 @@ export function useSpeechRecognition({ onResult, onError, sessionId }: UseSpeech
         mediaRecorder.start()
       })
       .catch((error) => {
-        console.error("마이크 접근 오류:", error)
+        // console.error("마이크 접근 오류:", error)
         onError?.("마이크 접근 권한이 필요합니다.")
         setIsListening(false)
       })
@@ -120,7 +120,7 @@ export function useTextToSpeech() {
 
     try {
       setIsSpeaking(true);
-      console.log('TTS API 호출:', `/chat/voice/tts/${cid}`);
+      // console.log('TTS API 호출:', `/chat/voice/tts/${cid}`);
       
       // 백엔드 TTS API 호출
       const audioBlob = await VoiceService.getTtsAudio(cid);
@@ -143,7 +143,7 @@ export function useTextToSpeech() {
       
       await audioRef.current.play();
     } catch (error) {
-      console.error("TTS 오류:", error);
+      // console.error("TTS 오류:", error);
       setIsSpeaking(false);
     }
   }, [])

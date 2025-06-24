@@ -22,31 +22,31 @@ export class VoiceService {
         },
       });
 
-      console.log('VoiceService.uploadAudio 응답:', response.data);
+    //   console.log('VoiceService.uploadAudio 응답:', response.data);
       return response.data;
     } catch (error: any) {
-      console.error('VoiceService.uploadAudio 오류:', {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message
-      });
+    //   console.error('VoiceService.uploadAudio 오류:', {
+    //     status: error.response?.status,
+    //     statusText: error.response?.statusText,
+    //     data: error.response?.data,
+    //     message: error.message
+    //   });
       throw error;
     }
   }
 
   // TTS 오디오 스트리밍
   static async getTtsAudio(cid: number): Promise<Blob> {
-    console.log('VoiceService.getTtsAudio 호출:', { cid });
+    // console.log('VoiceService.getTtsAudio 호출:', { cid });
     
     const response = await authenticatedApiClient.get(`/chat/voice/tts/${cid}`, {
       responseType: 'blob',
     });
 
-    console.log('VoiceService.getTtsAudio 응답:', { 
-      status: response.status, 
-      blobSize: response.data.size 
-    });
+    // console.log('VoiceService.getTtsAudio 응답:', { 
+    //   status: response.status, 
+    //   blobSize: response.data.size 
+    // });
     return response.data;
   }
 } 
