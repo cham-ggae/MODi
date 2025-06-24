@@ -14,7 +14,7 @@ const ChatMessages = ({ messages }: ChatMessages) => {
   const { isSpeaking, speak, stopSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const { toast } = useToast();
 
-  const handleSpeakMessage = useCallback((text: string) => {
+  const handleSpeakMessage = useCallback((text: string, cid?: number) => {
     if (!ttsSupported) {
       toast({
         title: 'TTS 미지원',
@@ -23,13 +23,12 @@ const ChatMessages = ({ messages }: ChatMessages) => {
       });
       return;
     }
-
     if (isSpeaking) {
       stopSpeaking();
     } else {
-      speak(text);
+      speak(text, cid);
     }
-  }, []);
+  }, [ttsSupported, isSpeaking, speak, stopSpeaking, toast]);
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollToBottom = () =>
@@ -46,6 +45,7 @@ const ChatMessages = ({ messages }: ChatMessages) => {
             role={msg.role}
             content={msg.content}
             timestamp={msg.timestamp}
+            cid={msg.cid}
             isSpeaking={isSpeaking}
             ttsSupported={ttsSupported}
             handleSpeakMessage={handleSpeakMessage}
