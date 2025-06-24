@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { typeImageMap, bugIdToNameMap } from '@/lib/survey-result-data'
+import { useEffect, useState } from "react";
+import { typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
 
 declare global {
   interface Window {
@@ -13,8 +13,8 @@ let isSDKLoaded = false;
 // SDK 로드 및 초기화를 처리하는 함수
 const initializeKakao = () => {
   return new Promise<void>((resolve, reject) => {
-    if (typeof window === 'undefined') {
-      reject(new Error('Window is not defined'));
+    if (typeof window === "undefined") {
+      reject(new Error("Window is not defined"));
       return;
     }
 
@@ -32,14 +32,14 @@ const initializeKakao = () => {
     }
 
     // SDK 로드 시도
-    const script = document.createElement('script');
-    script.src = 'https://developers.kakao.com/sdk/js/kakao.js';
+    const script = document.createElement("script");
+    script.src = "https://developers.kakao.com/sdk/js/kakao.js";
     script.onload = () => {
       window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
       isSDKLoaded = true;
       resolve();
     };
-    script.onerror = () => reject(new Error('Failed to load Kakao SDK'));
+    script.onerror = () => reject(new Error("Failed to load Kakao SDK"));
     document.head.appendChild(script);
   });
 };
@@ -59,51 +59,55 @@ export function useKakaoInit() {
 
 export function shareKakao(inviteCode: string, familyName: string) {
   if (!window.Kakao || !window.Kakao.isInitialized()) {
-    window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+    throw new Error("카카오톡 SDK가 초기화되지 않았습니다.");
   }
-  
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://modi.app');
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://modi.app");
   const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
 
   window.Kakao.Link.sendDefault({
-    objectType: 'feed',
+    objectType: "feed",
     content: {
       title: `🌱 ${familyName} 가족 스페이스에 초대합니다!`,
       description: `함께 식물을 키우고 요금제도 절약해요!\n초대 코드: ${inviteCode}`,
       imageUrl: imageUrl,
       link: {
-        mobileWebUrl: 'https://modi.app',
-        webUrl: 'https://modi.app',
+        mobileWebUrl: "https://modi.app",
+        webUrl: "https://modi.app",
       },
     },
     buttons: [
       {
-        title: 'MODi에서 확인',
+        title: "MODi에서 확인",
         link: {
-          mobileWebUrl: 'https://modi.app',
-          webUrl: 'https://modi.app',
+          mobileWebUrl: "https://modi.app",
+          webUrl: "https://modi.app",
         },
       },
     ],
-  })
+  });
 }
 
 export function shareSurveyResult(bugId: number, userType: string) {
   if (!window.Kakao || !window.Kakao.isInitialized()) {
-    window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY)
+    window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
   }
-  
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'https://modi.app');
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://modi.app");
   // bugId에 해당하는 이미지 가져오기
-  const bugName = bugIdToNameMap[bugId] || '호박벌형';
+  const bugName = bugIdToNameMap[bugId] || "호박벌형";
   const imageUrl = `${baseUrl}${typeImageMap[bugName]}`;
   const shareUrl = `${baseUrl}/survey-result?bugId=${bugId}`;
 
   window.Kakao.Link.sendDefault({
-    objectType: 'feed',
+    objectType: "feed",
     content: {
       title: `💚 내 성향테스트 결과는?! ${userType}!`,
-      description: '내 성향이 궁금하다면 MDOi에서 테스트해보세요!',
+      description: "내 성향이 궁금하다면 MDOi에서 테스트해보세요!",
       imageUrl: imageUrl,
       link: {
         mobileWebUrl: shareUrl,
@@ -112,12 +116,12 @@ export function shareSurveyResult(bugId: number, userType: string) {
     },
     buttons: [
       {
-        title: 'MODi에서 확인',
+        title: "MODi에서 확인",
         link: {
           mobileWebUrl: shareUrl,
           webUrl: shareUrl,
         },
       },
     ],
-  })
-} 
+  });
+}
