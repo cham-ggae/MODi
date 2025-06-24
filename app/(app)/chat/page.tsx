@@ -11,6 +11,10 @@ export default function ChatPage() {
   const [sessionId] = useState(
     () => window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
   );
+  const [familySessionId] = useState(
+    () =>
+      window.crypto?.randomUUID?.() ?? `family-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  );
   const [messages, setMessages] = useState<ClientMessage[]>([
     {
       id: 'welcome',
@@ -46,6 +50,7 @@ export default function ChatPage() {
         sessionId={sessionId}
         familyMode={familyMode}
         familySize={memberCount || 1}
+        familySessionId={familySessionId}
       />
     </Fragment>
   );
