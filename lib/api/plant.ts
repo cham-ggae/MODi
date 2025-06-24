@@ -51,4 +51,14 @@ export const plantApi = {
     const response = await authenticatedApiClient.get("/nutrients/stock");
     return response.data;
   },
+  // 9. 가족 보상 히스토리 조회
+  getFamilyRewardHistory: async (): Promise<RewardHistory[]> => {
+    const response = await authenticatedApiClient.get("/plants/rewards/family-history");
+    return response.data;
+  },
+
+  // 10. 보상 사용 완료 처리
+  markRewardAsUsed: async (rewardLogId: number): Promise<void> => {
+    await authenticatedApiClient.patch(`/plants/rewards/mark-used/${rewardLogId}`);
+  },
 };
