@@ -25,6 +25,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
+import { mypageApi } from "@/lib/api/mypage";
 
 interface UserInfo {
   name: string;
@@ -133,6 +134,7 @@ export default function MyPage() {
   const { user } = useAuth();
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [recommendHistory, setRecommendHistory] = useState<SurveyResult[]>([]);
+  const [recommendHistoryList, setRecommendHistoryList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -348,7 +350,7 @@ export default function MyPage() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   지난 요금제 추천 기록
                 </h3>
-                <FileText className="w-5 h-5 text-gray-400" />
+                {/* <FileText className="w-5 h-5 text-gray-400" /> */}
               </div>
               <div className="space-y-3">
                 {recommendHistory.filter(isHistoryItem).map((result, index) => (
