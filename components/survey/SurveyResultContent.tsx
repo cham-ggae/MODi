@@ -32,7 +32,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronDown, X, ArrowLeft } from "lucide-react";
+import { ChevronDown, X, ArrowLeft, Share2 } from "lucide-react";
 import { useGetSurveyResult } from "@/hooks/use-survey-result";
 import { bugNameUiMap } from "@/types/survey.type";
 import { planDetails, userTypes, typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
@@ -41,6 +41,7 @@ import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/component
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { useFamily } from "@/hooks/family";
+import { useKakaoInit, shareSurveyResult } from "@/hooks/useKakaoShare";
 import { useAddPoint } from "@/hooks/plant";
 import { toast } from "sonner";
 
@@ -71,6 +72,8 @@ export default function SurveyResultContent() {
   const [isAdditionalDiscountOpen, setIsAdditionalDiscountOpen] = useState(false);
   const [isSproutInfoOpen, setIsSproutInfoOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isLoaded, error } = useKakaoInit(); // Initialize Kakao SDK
+  const [isSharing, setIsSharing] = useState(false);
 
   // URL에서 bugId와 mission 파라미터 가져오기
   const searchParams = useSearchParams();
@@ -155,6 +158,23 @@ export default function SurveyResultContent() {
   };
 
   const recommendationReason = getRecommendationReason(bugId);
+
+  const handleShare = async () => {
+    if (!isLoaded) {
+      alert("공유하기 기능을 불러오는 중입니다. 잠시만 기다려주세요.");
+      return;
+    }
+
+    try {
+      setIsSharing(true);
+      await shareSurveyResult(bugId!, displayName);
+    } catch (error) {
+      console.error("Failed to share:", error);
+      alert("공유하기에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <div className="bg-gradient-to-b from-blue-100 to-blue-50 min-h-screen w-full">
@@ -383,22 +403,28 @@ export default function SurveyResultContent() {
 
           {/* 요금제 추천 보고 포인트 받기 버튼 */}
           <div className="pb-8 mt-0">
-            {isFromMission ? (
-              <Button
-                onClick={handleGetPoint}
-                disabled={isPending}
-                className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
-              >
-                {isPending ? "포인트 적립 중..." : "요금제 추천 보고 포인트 받기"}
-              </Button>
-            ) : (
-              <Button
-                onClick={handleShowPlans}
-                className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
-              >
-                요금제 자세히 보기
-              </Button>
-            )}
+            <Button
+              onClick={() => setIsModalOpen(true)}
+              className="w-full !bg-[#53a2f5] hover:!bg-[#3069a6] text-white py-4 rounded-2xl text-base shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300"
+            >
+              요금제 추천 보고 포인트 받기
+            </Button>
+          </div>
+
+          {/* 카카오톡 공유 버튼 */}
+          <div className="flex justify-center mt-8 mb-12">
+            <Button
+              onClick={handleShare}
+              disabled={!isLoaded || isSharing}
+              className="bg-[#FEE500] hover:bg-[#FEE500]/90 text-black flex items-center gap-2 px-6 py-2 rounded-full shadow-md disabled:opacity-50"
+            >
+              {isSharing ? (
+                <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Share2 className="w-5 h-5" />
+              )}
+              {isSharing ? "공유하는 중..." : "카카오톡으로 공유하기"}
+            </Button>
           </div>
         </div>
       </div>

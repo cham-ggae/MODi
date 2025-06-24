@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
 
 declare global {
   interface Window {
@@ -6,78 +7,54 @@ declare global {
   }
 }
 
-export function useKakaoInit() {
-  useEffect(() => {
-    const loadKakaoSDK = () => {
-      return new Promise<void>((resolve, reject) => {
-        // 이미 로드되어 있는 경우
-        if (window.Kakao) {
-          resolve();
-          return;
-        }
+// SDK 로드 상태를 추적하는 전역 변수
+let isSDKLoaded = false;
 
-        // 스크립트가 로드 중인지 확인
-        const existingScript = document.querySelector('script[src*="kakao.js"]');
-        if (existingScript) {
-          // 스크립트가 로드될 때까지 대기
-          const checkLoaded = setInterval(() => {
-            if (window.Kakao) {
-              clearInterval(checkLoaded);
-              resolve();
-            }
-          }, 100);
-
-          // 10초 후 타임아웃
-          setTimeout(() => {
-            clearInterval(checkLoaded);
-            reject(new Error("카카오 SDK 로드 타임아웃"));
-          }, 10000);
-          return;
-        }
-
-        // 스크립트 동적 로드
-        const script = document.createElement("script");
-        script.src = "https://developers.kakao.com/sdk/js/kakao.js";
-        script.async = true;
-        script.onload = () => {
-          console.log("✅ 카카오 SDK 스크립트 로드 완료");
-          resolve();
-        };
-        script.onerror = () => {
-          console.error("❌ 카카오 SDK 스크립트 로드 실패");
-          reject(new Error("카카오 SDK 스크립트 로드 실패"));
-        };
-        document.head.appendChild(script);
-      });
-    };
-
-    const initKakao = async () => {
-      try {
-        console.log("🔍 카카오 SDK 초기화 시도:", {
-          windowExists: typeof window !== "undefined",
-          windowKakao: typeof window !== "undefined" ? !!window.Kakao : false,
-          isInitialized:
-            typeof window !== "undefined" && window.Kakao ? window.Kakao.isInitialized() : false,
-          jsKey: process.env.NEXT_PUBLIC_KAKAO_JS_KEY,
-        });
-
-        // SDK 로드 대기
-        await loadKakaoSDK();
-
-        if (typeof window !== "undefined" && window.Kakao && !window.Kakao.isInitialized()) {
-          console.log("✅ 카카오 SDK 초기화 실행");
-          window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
-          console.log("✅ 카카오 SDK 초기화 완료");
-        }
-      } catch (error) {
-        console.error("❌ 카카오 SDK 초기화 실패:", error);
-      }
-    };
-
-    if (typeof window !== "undefined") {
-      initKakao();
+// SDK 로드 및 초기화를 처리하는 함수
+const initializeKakao = () => {
+  return new Promise<void>((resolve, reject) => {
+    if (typeof window === "undefined") {
+      reject(new Error("Window is not defined"));
+      return;
     }
+
+    if (window.Kakao && isSDKLoaded) {
+      resolve();
+      return;
+    }
+
+    // SDK가 이미 로드되어 있는 경우
+    if (window.Kakao && !isSDKLoaded) {
+      window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+      isSDKLoaded = true;
+      resolve();
+      return;
+    }
+
+    // SDK 로드 시도
+    const script = document.createElement("script");
+    script.src = "https://developers.kakao.com/sdk/js/kakao.js";
+    script.onload = () => {
+      window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+      isSDKLoaded = true;
+      resolve();
+    };
+    script.onerror = () => reject(new Error("Failed to load Kakao SDK"));
+    document.head.appendChild(script);
+  });
+};
+
+export function useKakaoInit() {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    initializeKakao()
+      .then(() => setIsLoaded(true))
+      .catch((err) => setError(err));
   }, []);
+
+  return { isLoaded, error };
 }
 
 export function shareKakao(inviteCode: string, familyName: string) {
@@ -107,6 +84,42 @@ export function shareKakao(inviteCode: string, familyName: string) {
         link: {
           mobileWebUrl: "https://modi.app",
           webUrl: "https://modi.app",
+        },
+      },
+    ],
+  });
+}
+
+export function shareSurveyResult(bugId: number, userType: string) {
+  if (!window.Kakao || !window.Kakao.isInitialized()) {
+    window.Kakao.init(process.env.NEXT_PUBLIC_KAKAO_JS_KEY);
+  }
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://modi.app");
+  // bugId에 해당하는 이미지 가져오기
+  const bugName = bugIdToNameMap[bugId] || "호박벌형";
+  const imageUrl = `${baseUrl}${typeImageMap[bugName]}`;
+  const shareUrl = `${baseUrl}/survey-result?bugId=${bugId}`;
+
+  window.Kakao.Link.sendDefault({
+    objectType: "feed",
+    content: {
+      title: `💚 내 성향테스트 결과는?! ${userType}!`,
+      description: "내 성향이 궁금하다면 MDOi에서 테스트해보세요!",
+      imageUrl: imageUrl,
+      link: {
+        mobileWebUrl: shareUrl,
+        webUrl: shareUrl,
+      },
+    },
+    buttons: [
+      {
+        title: "MODi에서 확인",
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
         },
       },
     ],
