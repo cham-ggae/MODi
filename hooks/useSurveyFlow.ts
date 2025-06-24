@@ -7,7 +7,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { usePostSurveyResult } from "@/hooks/use-survey-result";
+// import { usePostSurveyResult } from "../hooks/use-survey-result";
 import {
   calculateScore,
   analyzeResult,
@@ -20,7 +20,7 @@ export function useSurvey() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const router = useRouter();
-  const postSurveyResult = usePostSurveyResult();
+  // const postSurveyResult = usePostSurveyResult();
 
   const handleAnswer = async (value: string) => {
     const newAnswers = { ...answers, [currentQuestion + 1]: value };
