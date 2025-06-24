@@ -237,13 +237,13 @@ export default function MyPage() {
 
           {/* User Info Details */}
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
-            <CardContent className="p-6">
+            <CardContent className="p-0">
               {userInfo.bugId ? (
-                <div className="flex flex-col items-start text-left gap-2 w-full">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 text-center w-full">
+                <div className="flex flex-col items-center text-center gap-2 w-full">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
                     {bugIdToFeatureMap[userInfo.bugId]?.title || "유형 정보"}
                   </h3>
-                  <div className="bg-blue-50 rounded-xl p-4 w-full max-w-xs">
+                  <div className="bg-blue-50 rounded-xl p-4 w-full text-left max-w-xs">
                     {bugIdToFeatureMap[userInfo.bugId]?.features.map((feature, idx) => (
                       <div key={idx} className="text-sm text-gray-800 mb-1 flex items-start">
                         <span>{feature}</span>
