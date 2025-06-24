@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
+import Lottie from "lottie-react";
+import wateringAnimation from "../../public/animations/watering.json";
 
 interface Props {
   selectedPlantType: "flower" | "tree" | null;
@@ -36,7 +38,7 @@ export function PlantImageDisplay({
       <AnimatePresence mode="wait">
         {plantImage ? (
           <motion.div
-            key={plantImage} // 이미지 변경 시 전환 애니메이션
+            key={plantImage}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{
               opacity: 1,
@@ -58,6 +60,30 @@ export function PlantImageDisplay({
               priority
               className="object-contain"
             />
+            {/* Water Effect */}
+            {isWatering && (
+              <div 
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  position: 'absolute',
+                  width: '100%',
+                  height: '100%',
+                  top: '0',
+                  left: '0',
+                  zIndex: 10
+                }}
+              >
+                <Lottie
+                  animationData={wateringAnimation}
+                  loop={true}
+                  autoplay={true}
+                  style={{ width: '100%', height: '100%' }}
+                  rendererSettings={{
+                    preserveAspectRatio: 'xMidYMid slice'
+                  }}
+                />
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -68,33 +94,6 @@ export function PlantImageDisplay({
             className="text-8xl"
           >
             🌱
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Water Animation */}
-      <AnimatePresence>
-        {isWatering && (
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 50 }}
-            exit={{ opacity: 0 }}
-            className="absolute top-8 text-4xl"
-          >
-            💧💧💧💧
-          </motion.div>
-        )}
-      </AnimatePresence>
-      {/* Feed Animation */}
-      <AnimatePresence>
-        {isFeeding && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-            className="absolute top-8 text-4xl"
-          >
-            ✨⭐⭐✨
           </motion.div>
         )}
       </AnimatePresence>

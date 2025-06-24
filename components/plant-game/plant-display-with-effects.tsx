@@ -5,6 +5,8 @@ import Image from "next/image"
 import { useState, useEffect } from "react"
 import { useTheme } from "@/contexts/theme-context"
 import { usePlant } from "@/contexts/plant-context-v2"
+import Lottie from "lottie-react"
+import wateringAnimation from "../../public/animations/watering.json"
 
 interface PlantDisplayWithEffectsProps {
   showWaterEffect?: boolean
@@ -26,6 +28,7 @@ export function PlantDisplayWithEffects({
   const { plantState, getProgressPercentage } = usePlant()
   const [isGrowing, setIsGrowing] = useState(false)
   const [prevLevel, setPrevLevel] = useState(1)
+  const [wateringData, setWateringData] = useState<any>(null)
 
   const getPlantStages = (type: "flower" | "tree"): PlantStage[] => {
     if (type === "flower") {
@@ -108,185 +111,126 @@ export function PlantDisplayWithEffects({
     }
   }, [plantState, prevLevel])
 
+  useEffect(() => {
+    if (showWaterEffect || showNutrientEffect) {
+      setIsGrowing(true)
+      console.log('Effect triggered:', { showWaterEffect, showNutrientEffect });
+    }
+  }, [showWaterEffect, showNutrientEffect])
+
+  useEffect(() => {
+    const loadAnimation = async () => {
+      try {
+        console.log('Fetching animation data...')
+        const response = await fetch('/animations/watering.json')
+        console.log('Response:', response)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data = await response.json()
+        console.log('Animation data loaded:', data)
+        setWateringData(data)
+      } catch (error) {
+        console.error('Error loading animation:', error)
+      }
+    }
+
+    loadAnimation()
+  }, [])
+
+  useEffect(() => {
+    console.log('showWaterEffect:', showWaterEffect)
+    console.log('wateringData:', wateringData)
+  }, [showWaterEffect, wateringData])
+
+  useEffect(() => {
+    console.log('wateringAnimation loaded:', wateringAnimation)
+    console.log('showWaterEffect changed:', showWaterEffect)
+  }, [showWaterEffect])
+
   if (!plantState) return null
 
   const plantStages = getPlantStages(plantState.type)
   const currentStage = plantStages[plantState.level - 1] || plantStages[0]
   const progressPercentage = getProgressPercentage()
 
+  console.log('Rendering plant display with effects:', { showWaterEffect, wateringAnimation });
+
   return (
-    <div className="text-center">
-      {/* Plant Image with Effects */}
-      <div className="relative mb-6 h-64 flex items-center justify-center">
-        <motion.div
-          key={plantState.level}
-          initial={{ scale: 0.8, opacity: 0, y: 20 }}
-          animate={{
-            scale: isGrowing ? [1, 1.2, 1] : 1,
-            opacity: 1,
-            y: 0,
-            rotate: isGrowing ? [0, 5, -5, 0] : 0,
-          }}
-          transition={{
-            duration: isGrowing ? 1 : 0.5,
-            ease: "easeInOut",
-          }}
-          className="relative"
-        >
-          <Image
-            src={currentStage.image || "/placeholder.svg"}
-            alt={currentStage.name}
-            width={200}
-            height={200}
-            className="object-contain"
-          />
+    <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative">
+        {currentStage.image && (
+          <motion.div
+            animate={isGrowing ? { scale: [1, 1.05, 1] } : {}}
+            transition={{ duration: 1 }}
+          >
+            <Image
+              src={currentStage.image}
+              alt={currentStage.name}
+              width={200}
+              height={200}
+              className="object-contain"
+            />
+          </motion.div>
+        )}
 
-          {/* Growth Sparkles */}
-          {isGrowing && (
-            <>
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-2 h-2 bg-yellow-400 rounded-full"
-                  style={{
-                    top: `${20 + Math.random() * 60}%`,
-                    left: `${20 + Math.random() * 60}%`,
-                  }}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    opacity: [0, 1, 0],
-                    y: [0, -20, -40],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    delay: i * 0.1,
-                    ease: "easeOut",
-                  }}
-                />
-              ))}
-            </>
-          )}
+        {/* Water Effect */}
+        {showWaterEffect && wateringAnimation && (
+          <div 
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              top: '0%',
+              left: '0%',
+              zIndex: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            <Lottie
+              animationData={wateringAnimation}
+              loop={false}
+              autoplay={true}
+              style={{
+                width: '100%',
+                height: '100%',
+                maxWidth: '250px',
+                maxHeight: '250px',
+              }}
+              onComplete={() => {
+                console.log('Animation completed');
+                setIsGrowing(false);
+              }}
+              onDOMLoaded={() => {
+                console.log('Lottie DOM loaded');
+              }}
+              rendererSettings={{
+                preserveAspectRatio: 'xMidYMid slice'
+              }}
+            />
+          </div>
+        )}
 
-          {/* Water Effect */}
-          {showWaterEffect && (
-            <>
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={`water-${i}`}
-                  className="absolute w-3 h-3 bg-blue-400 rounded-full pointer-events-none"
-                  style={{
-                    top: "50%",
-                    left: "50%",
-                  }}
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    x: 0,
-                    y: 0,
-                  }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    opacity: [0, 1, 0],
-                    x: Math.cos((i * 45 * Math.PI) / 180) * 60,
-                    y: Math.sin((i * 45 * Math.PI) / 180) * 60,
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    delay: i * 0.1,
-                    ease: "easeOut",
-                  }}
-                />
-              ))}
-
-              {/* Water Droplet Emojis */}
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={`water-emoji-${i}`}
-                  className="absolute text-2xl pointer-events-none"
-                  style={{
-                    top: "10%",
-                    left: `${30 + i * 10}%`,
-                  }}
-                  initial={{ opacity: 0, y: 0, scale: 0 }}
-                  animate={{
-                    opacity: [0, 1, 0],
-                    y: -50,
-                    scale: [0, 1.2, 0],
-                  }}
-                  transition={{
-                    duration: 2,
-                    delay: i * 0.2,
-                    ease: "easeOut",
-                  }}
-                >
-                  💧
-                </motion.div>
-              ))}
-            </>
-          )}
-
-          {/* Nutrient Effect - 새싹 주변에만 */}
-          {showNutrientEffect && (
-            <>
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={`nutrient-${i}`}
-                  className="absolute w-2 h-2 bg-purple-400 rounded-full pointer-events-none"
-                  style={{
-                    top: `${30 + Math.random() * 40}%`,
-                    left: `${30 + Math.random() * 40}%`,
-                  }}
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    scale: [0, 1, 0],
-                    opacity: [0, 1, 0],
-                    y: [0, -30],
-                  }}
-                  transition={{
-                    duration: 2,
-                    delay: i * 0.2,
-                    ease: "easeOut",
-                  }}
-                />
-              ))}
-
-              {/* Sparkle Effect around plant */}
-              {[...Array(8)].map((_, i) => (
-                <motion.div
-                  key={`sparkle-${i}`}
-                  className="absolute text-lg pointer-events-none"
-                  style={{
-                    top: `${20 + Math.random() * 60}%`,
-                    left: `${20 + Math.random() * 60}%`,
-                  }}
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{
-                    opacity: [0, 1, 0],
-                    scale: [0, 1, 0],
-                    rotate: [0, 180, 360],
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    delay: i * 0.1,
-                    ease: "easeOut",
-                  }}
-                >
-                  ✨
-                </motion.div>
-              ))}
-            </>
-          )}
-        </motion.div>
+        {/* Nutrient Effect */}
+        {showNutrientEffect && (
+          <motion.div
+            className="absolute inset-0 pointer-events-none"
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1.2 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="absolute inset-0 bg-yellow-400 opacity-20 rounded-full blur-xl" />
+          </motion.div>
+        )}
       </div>
 
       {/* Stage Info */}
       <motion.h2
         className="text-2xl font-bold text-[#388E3C] mb-3"
-        key={`title-${plantState.level}`}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -296,7 +240,6 @@ export function PlantDisplayWithEffects({
 
       <motion.p
         className={`${isDarkMode ? "text-gray-300" : "text-[#4E342E]"} mb-6`}
-        key={`desc-${plantState.level}`}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
