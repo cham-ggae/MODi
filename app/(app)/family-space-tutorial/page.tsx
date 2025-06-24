@@ -8,22 +8,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ArrowLeft, ArrowRight, Users, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useFamily } from '@/hooks/family';
 import { useAuth } from '@/hooks/useAuth';
 import Image from 'next/image';
 
 export default function FamilySpaceTutorialPage() {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isCreating, setIsCreating] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [inviteCode, setInviteCode] = useState('');
-  const [isJoining, setIsJoining] = useState(false);
   const [copied, setCopied] = useState(false);
   const [joinError, setJoinError] = useState('');
   const router = useRouter();
-  const { toast } = useToast();
-  const { createFamily, hasFamily, joinFamily } = useFamily();
+  const { createFamily, joinFamily, hasFamily, isCreating, isJoining } = useFamily();
   const { user } = useAuth();
 
   // 이미 가족이 있는 경우 family-space로 리다이렉트
@@ -62,15 +59,9 @@ export default function FamilySpaceTutorialPage() {
 
   const handleCreateFamily = async () => {
     if (!user?.nickname) {
-      toast({
-        title: '사용자 정보를 불러올 수 없습니다',
-        description: '로그인 상태를 확인해주세요.',
-        variant: 'destructive',
-      });
+      toast.error('사용자 정보를 불러올 수 없습니다. 로그인 상태를 확인해주세요.');
       return;
     }
-
-    setIsCreating(true);
 
     try {
       // 사용자 닉네임을 가족명으로 사용
@@ -85,9 +76,7 @@ export default function FamilySpaceTutorialPage() {
       router.push('/family-space');
     } catch (error) {
       console.error('가족 스페이스 생성 실패:', error);
-      // 에러 토스트는 useCreateFamily 뮤테이션에서 처리됨
-    } finally {
-      setIsCreating(false);
+      // 에러 토스트는 뮤테이션에서 자동으로 처리됨
     }
   };
 
@@ -102,17 +91,11 @@ export default function FamilySpaceTutorialPage() {
       return;
     }
 
-    setIsJoining(true);
     setJoinError(''); // 에러 초기화
 
     try {
       await joinFamily({
         inviteCode: inviteCode.trim().toUpperCase(),
-      });
-
-      toast({
-        title: '가족에 성공적으로 참여했습니다! 🎉',
-        description: '이제 가족들과 함께 식물을 키워보세요.',
       });
 
       setIsJoinModalOpen(false);
@@ -127,8 +110,6 @@ export default function FamilySpaceTutorialPage() {
       } else {
         setJoinError('가족 참여 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
       }
-    } finally {
-      setIsJoining(false);
     }
   };
 
@@ -138,16 +119,10 @@ export default function FamilySpaceTutorialPage() {
     try {
       await navigator.clipboard.writeText(inviteCode);
       setCopied(true);
-      toast({
-        title: '초대 코드가 복사되었습니다!',
-        description: '가족들에게 공유해보세요.',
-      });
+      toast.success('초대 코드가 복사되었습니다! 가족들에게 공유해보세요.');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast({
-        title: '복사에 실패했습니다',
-        variant: 'destructive',
-      });
+      toast.error('복사에 실패했습니다');
     }
   };
 
@@ -172,8 +147,6 @@ export default function FamilySpaceTutorialPage() {
 
   return (
     <>
-
-
       <div className="h-full flex flex-col bg-gradient-to-br from-green-50 to-blue-50">
         {/* Header */}
         <div className="flex items-center justify-center p-4 flex-shrink-0 relative">
