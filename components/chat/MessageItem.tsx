@@ -24,8 +24,12 @@ const MessageItem = ({ role, content, timestamp, cid, isSpeaking, ttsSupported, 
       className={`flex ${role !== "bot" ? 'justify-end' : 'justify-start'}`}
     >
       {role === "bot" && (
-        <div className="w-10 h-10 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
-          <span className="text-green-600 dark:text-green-300 text-lg">🤖</span>
+        <div className="w-10 h-10 mr-3 flex-shrink-0 bg-green-100 dark:bg-green-800 rounded-full">
+          <img
+            src="/bot-avatar.svg"
+            alt="MODI"
+            className="w-full h-full rounded-full object-cover"
+          />
         </div>
       )}
       <div
@@ -64,8 +68,8 @@ const MessageItem = ({ role, content, timestamp, cid, isSpeaking, ttsSupported, 
               variant="ghost"
               size="sm"
               className={`p-1 h-auto ml-2 ${!cid
-                  ? 'opacity-50 cursor-not-allowed'
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-gray-100 dark:hover:bg-gray-600 cursor-pointer'
                 }`}
               disabled={!cid}
               title={!cid ? 'TTS 준비 중...' : '음성으로 들으기'}
