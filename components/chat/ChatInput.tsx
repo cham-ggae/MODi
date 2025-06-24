@@ -24,7 +24,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
     isSupported: sttSupported,
   } = useSpeechRecognition();
 
-  const { message: aiChunk, isStreaming, error, start, stop } =
+  const { message: aiChunk, cid, isStreaming, error, start, stop } =
     useChatStream()
 
   // 이 ref 에 새로 추가한 AI placeholder 메시지의 id 를 저장
@@ -72,6 +72,18 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
     )
   }, [aiChunk, setMessages])
 
+  // 스트리밍이 끝나면 cid를 메시지에 업데이트
+  useEffect(() => {
+    if (!isStreaming && cid && aiMessageIdRef.current) {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === aiMessageIdRef.current ? { ...msg, cid: cid } : msg
+        )
+      );
+      console.log('CID assigned to message:', cid);
+    }
+  }, [isStreaming, cid, setMessages]);
+
   // 중단 버튼 처리: stop() 부르고 placeholder 메시지 유지
   const handleStop = () => {
     stop()
@@ -81,7 +93,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
       <div className="p-4">
         <div className="flex items-center space-x-3">
           {sttSupported && (
-            <SttButton setMessage={setMessage} />
+            <SttButton setMessage={setMessage} sessionId={sessionId} />
           )}
           <Input
             value={message}
