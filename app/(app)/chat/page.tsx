@@ -7,35 +7,40 @@ import ChatInput from '@/components/chat/ChatInput';
 import { ClientMessage } from '@/types/chat.type';
 import { useFamily } from '@/hooks/family';
 
+function createSessionId() {
+  return window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function ChatPage() {
-  const [sessionId] = useState(
-    () => window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
-  );
-  const [familySessionId] = useState(
-    () =>
-      window.crypto?.randomUUID?.() ?? `family-${Date.now()}-${Math.random().toString(36).slice(2)}`
-  );
+  const [sessionId] = useState(createSessionId);
+  const [familySessionId] = useState(createSessionId);
   const [messages, setMessages] = useState<ClientMessage[]>([
     {
-      id: 'welcome',
+      id: 'welcome-individual',
       content:
         '"안녕하세요! 개인 맞춤형 요금제 추천을 위한 MODi 챗봇입니다. 당신의 통신 상황에 맞는 최적의 요금제를 찾아드릴게요!"',
       role: 'bot',
       timestamp: new Date(),
       sessionId: sessionId,
     },
+    {
+      id: 'welcome-family',
+      content: `안녕하세요! 가족 맞춤형 요금제 추천 챗봇 MODi입니다. 현재 가족 정보를 바탕으로 도와드릴게요! 💕`,
+      role: 'bot',
+      timestamp: new Date(),
+      sessionId: familySessionId,
+    },
   ]);
 
   const { memberCount, isLoading, hasFamily } = useFamily();
   const [familyMode, setFamilyMode] = useState(false);
 
-  // 가족 모드 토글 표시 조건 - 항상 표시
-  const shouldShowFamilyToggle = !isLoading; // 로딩이 완료되면 항상 표시
-
+  useEffect(() => {
+    console.log('messages', messages);
+  }, [messages]);
   return (
     <Fragment>
-      {/* 로딩 중이거나 로딩 완료 후 토글 표시 */}
-      {(isLoading || shouldShowFamilyToggle) && (
+      {memberCount > 1 && (
         <FamilyModeToggle
           familyMode={familyMode}
           setFamilyMode={setFamilyMode}
@@ -44,7 +49,11 @@ export default function ChatPage() {
           memberCount={memberCount}
         />
       )}
-      <ChatMessages messages={messages} />
+      <ChatMessages
+        messages={messages.filter(
+          (msg) => msg.sessionId === (familyMode ? familySessionId : sessionId)
+        )}
+      />
       <ChatInput
         setMessages={setMessages}
         sessionId={sessionId}
