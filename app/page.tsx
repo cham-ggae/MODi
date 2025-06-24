@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { Smartphone, Users, MessageCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLayout } from '@/components/layouts/page-layout';
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import KakaoLoginButton from '@/components/login/kakaoLoginButton';
 import { ResponsiveWrapper } from '@/components/responsive-wrapper';
@@ -15,13 +14,6 @@ export default function HomePage() {
   const { user, isAuthenticated, isLoading, login } = useAuth();
   const router = useRouter();
   const isMobile = useIsMobile();
-
-  // 로그인된 사용자가 루트 페이지에 접근하면 자동으로 /chat으로 리다이렉트
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      router.push('/chat');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   const handleStartButton = () => {
     if (isAuthenticated) {
@@ -33,19 +25,22 @@ export default function HomePage() {
     }
   };
 
-  // 로딩 중이거나 인증된 사용자인 경우 로딩 화면 표시
-  if (isLoading || isAuthenticated) {
+  // 로딩 중인 경우 로딩 화면 표시
+  if (isLoading) {
     return (
       <PageLayout variant="gradient" padding="none">
         <div className="flex items-center justify-center min-h-screen">
           <div className="text-center">
             <div className="w-8 h-8 border-4 border-[#81C784] border-t-transparent animate-spin rounded-full mx-auto mb-4"></div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">페이지로 이동하는 중...</p>
+            <p className="text-sm text-gray-600 dark:text-gray-300">로딩 중...</p>
           </div>
         </div>
       </PageLayout>
     );
   }
+
+  // 인증된 사용자의 경우 AuthProvider에서 자동 리다이렉트 처리됨
+  // 여기서는 로그인하지 않은 사용자만 홈페이지 표시
 
   const pageContent = (
     <div className="flex flex-col items-center justify-center h-full p-8 space-y-12">

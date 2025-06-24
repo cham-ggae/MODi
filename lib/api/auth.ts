@@ -84,21 +84,38 @@ export const submitAdditionalInfo = async (
  * JWT 액세스 토큰 갱신
  */
 export const refreshAccessToken = async (): Promise<string> => {
-  const response = await apiClient.post('/refresh', {}, { withCredentials: true });
+  try {
+    const response = await apiClient.post(
+      '/refresh',
+      {},
+      {
+        withCredentials: true,
+        timeout: 15000, // 15초 타임아웃
+      }
+    );
 
-  // 새로운 액세스 토큰이 응답 헤더에 포함되어야 함
-  const authHeader = response.headers.authorization || response.headers.Authorization;
-  const newToken = authHeader?.replace('Bearer ', '');
+    // 새로운 액세스 토큰이 응답 헤더에 포함되어야 함
+    const authHeader = response.headers.authorization || response.headers.Authorization;
+    const newToken = authHeader?.replace('Bearer ', '');
 
-  if (!newToken) {
-    // 바디에서도 확인
-    if (response.data?.accessToken) {
-      return response.data.accessToken;
+    if (!newToken) {
+      // 바디에서도 확인
+      if (response.data?.accessToken) {
+        return response.data.accessToken;
+      }
+      throw new Error('새로운 액세스 토큰을 받지 못했습니다');
     }
-    throw new Error('새로운 액세스 토큰을 받지 못했습니다');
-  }
 
-  return newToken;
+    return newToken;
+  } catch (error: any) {
+    // 401/403 오류는 리프레시 토큰 만료로 간주
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      throw new Error('REFRESH_TOKEN_EXPIRED');
+    }
+
+    // 그 외의 오류는 그대로 전파
+    throw error;
+  }
 };
 
 /**
