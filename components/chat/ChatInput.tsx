@@ -93,7 +93,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize }: ChatInput
       <div className="p-4">
         <div className="flex items-center space-x-3">
           {sttSupported && (
-            <SttButton setMessage={setMessage} />
+            <SttButton setMessage={setMessage} sessionId={sessionId} />
           )}
           <Input
             value={message}

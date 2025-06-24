@@ -6,63 +6,96 @@ import { VoiceService } from "@/lib/api/voice"
 interface UseSpeechProps {
   onResult?: (transcript: string) => void
   onError?: (error: string) => void
+  sessionId?: string
 }
 
-export function useSpeechRecognition({ onResult, onError }: UseSpeechProps = {}) {
+export function useSpeechRecognition({ onResult, onError, sessionId }: UseSpeechProps = {}) {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState("")
-  const [isSupported, setIsSupported] = useState(false)
-  const recognitionRef = useRef<any | null>(null)
-
-  useEffect(() => {
-    // Check if speech recognition is supported
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-    setIsSupported(!!SpeechRecognition)
-  }, [])
+  const [isSupported] = useState(true)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
 
   const startListening = useCallback(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
-
-    if (!SpeechRecognition) {
-      onError?.("음성인식이 지원되지 않는 브라우저입니다.")
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      onError?.("마이크 접근이 지원되지 않는 브라우저입니다.")
       return
     }
 
-    const recognition = new SpeechRecognition()
-
-    recognition.continuous = false
-    recognition.interimResults = false
-    recognition.lang = "ko-KR"
-
-    recognition.onstart = () => {
-      setIsListening(true)
+    if (!sessionId) {
+      onError?.("세션 ID가 필요합니다.")
+      return
     }
 
-    recognition.onresult = (event: any) => {
-      const result = event.results[0][0].transcript
-      setTranscript(result)
-      onResult?.(result)
-    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        setIsListening(true)
+        audioChunksRef.current = []
 
-    recognition.onerror = (event: any) => {
-      setIsListening(false)
-      onError?.(event.error || "음성인식 오류가 발생했습니다.")
-    }
+        const mediaRecorder = new MediaRecorder(stream, {
+          mimeType: 'audio/webm;codecs=opus'
+        })
 
-    recognition.onend = () => {
-      setIsListening(false)
-    }
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            audioChunksRef.current.push(event.data)
+          }
+        }
 
-    recognitionRef.current = recognition
-    recognition.start()
-  }, [onResult, onError])
+        mediaRecorder.onstop = async () => {
+          try {
+            // 오디오 데이터를 Blob으로 변환
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' })
+            
+            console.log('STT API 호출:', '/chat/voice/upload');
+            console.log('오디오 정보:', {
+              blobSize: audioBlob.size,
+              duration: audioChunksRef.current.length,
+              type: audioBlob.type
+            });
+            
+            // 1) 토큰 갱신 트리거
+            const { authenticatedApiClient } = await import('@/lib/api/axios');
+            await authenticatedApiClient.get('/test');
+            
+            // 백엔드 STT API로 전송 (VoiceService static 메서드 사용)
+            const response = await VoiceService.uploadAudio(audioBlob, sessionId)
+            
+            console.log('STT 응답 상세:', response);
+            
+            if (response.success) {
+              const transcribedText = response.data.transcribedText
+              console.log('인식된 텍스트:', transcribedText);
+              setTranscript(transcribedText)
+              onResult?.(transcribedText)
+            } else {
+              onError?.("음성 인식에 실패했습니다.")
+            }
+          } catch (error) {
+            console.error("음성 인식 오류:", error)
+            onError?.("음성 인식 중 오류가 발생했습니다.")
+          } finally {
+            setIsListening(false)
+            // 스트림 정리
+            stream.getTracks().forEach(track => track.stop())
+          }
+        }
+
+        mediaRecorderRef.current = mediaRecorder
+        mediaRecorder.start()
+      })
+      .catch((error) => {
+        console.error("마이크 접근 오류:", error)
+        onError?.("마이크 접근 권한이 필요합니다.")
+        setIsListening(false)
+      })
+  }, [onResult, onError, sessionId])
 
   const stopListening = useCallback(() => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop()
+    if (mediaRecorderRef.current && isListening) {
+      mediaRecorderRef.current.stop()
     }
-    setIsListening(false)
-  }, [])
+  }, [isListening])
 
   return {
     isListening,

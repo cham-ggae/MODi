@@ -6,8 +6,9 @@ import { useToast } from '../ui/use-toast';
 
 interface SttButtonProps {
   setMessage: (text: string) => void;
+  sessionId: string;
 }
-const SttButton = ({ setMessage }: SttButtonProps) => {
+const SttButton = ({ setMessage, sessionId }: SttButtonProps) => {
   const { toast } = useToast();
 
   const {
@@ -25,12 +26,12 @@ const SttButton = ({ setMessage }: SttButtonProps) => {
     },
     onError: (error) => {
       toast({
-
         title: '음성인식 오류',
         description: '다시 시도해주세요.',
         variant: 'destructive',
       });
     },
+    sessionId: sessionId,
   });
 
   // 입력창 음성 관련 핸들러
