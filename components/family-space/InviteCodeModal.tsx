@@ -127,7 +127,7 @@ export function InviteCodeModal({
                   ) : (
                     <div className="flex items-center gap-2 justify-center">
                       <span className="text-xs text-gray-400 dark:text-gray-500">
-                        가족명: {familyName || '우리 가족'}
+                        가족명: {familyName || '가족'}
                       </span>
                       <Button
                         onClick={handleEditFamilyName}

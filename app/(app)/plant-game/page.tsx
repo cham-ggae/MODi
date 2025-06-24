@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { Button } from "@/components/ui/button";
-import { AnimatePresence } from "framer-motion";
-import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus";
-import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
-import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
-import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
-import { ClaimRewardButton } from "@/components/plant-game/ClaimRewardButton";
-import { RewardModal } from "@/components/plant-game/RewardModal";
-import { MissionSheet } from "@/components/plant-game/MissionSheet";
-import { Mission } from "@/types/plant-game.type";
-import { ArrowLeft, UserPlus } from "lucide-react";
-import Link from "next/link";
-import { useFamily, useMessageCardsManager } from "@/hooks/family";
+import { useState, useEffect, useCallback } from 'react';
+import { Button } from '@/components/ui/button';
+import { AnimatePresence } from 'framer-motion';
+import { FamilyWateringStatus } from '@/components/plant-game/FamilyWateringStatus';
+import { PlantImageDisplay } from '@/components/plant-game/PlantImageDisplay';
+import { PlantProgressBar } from '@/components/plant-game/PlantProgressBar';
+import { PlantActionButtons } from '@/components/plant-game/PlantActionButtons';
+import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
+import { RewardModal } from '@/components/plant-game/RewardModal';
+import { MissionSheet } from '@/components/plant-game/MissionSheet';
+import { Mission } from '@/types/plant-game.type';
+import { ArrowLeft, UserPlus } from 'lucide-react';
+import Link from 'next/link';
+import { useFamily, useMessageCardsManager } from '@/hooks/family';
 import {
   useAddPoint,
   useCheckTodayActivity,

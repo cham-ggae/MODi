@@ -64,11 +64,21 @@ export interface FamilyMember {
   uid: number;
 
   /**
+   * 가족 스페이스 ID
+   */
+  fid: number;
+
+  /**
    * 사용자 이름
    * 카카오 로그인 시 제공되는 이름 또는 사용자 입력 이름
    * 최대 15자까지 저장 가능
    */
   name: string;
+
+  /**
+   * 사용자 이메일
+   */
+  email: string;
 
   /**
    * 사용자 나이 (선택적)
@@ -92,6 +102,25 @@ export interface FamilyMember {
    * 자동으로 현재 시간이 설정됨
    */
   joinDate: string;
+
+  /**
+   * 사용자 프로필 이미지 URL (선택적)
+   * 카카오 로그인 시 제공되는 프로필 이미지
+   * 또는 사용자가 업로드한 이미지
+   */
+  profileImage?: string;
+
+  /**
+   * 설문조사 결과 벌레 ID (선택적)
+   * 1: 호박벌형, 2: 무당벌레형, 3: 라바형, 4: 나비형, 5: 장수풍뎅이형
+   */
+  bugId?: number;
+
+  /**
+   * 설문조사 완료 일시 (선택적)
+   * ISO 8601 형식의 문자열
+   */
+  surveyDate?: string;
 
   // 요금제 정보 (Plans 테이블 - LEFT JOIN으로 NULL 가능)
 
@@ -132,11 +161,9 @@ export interface FamilyMember {
   dataUsage?: string;
 
   /**
-   * 사용자 프로필 이미지 URL (선택적)
-   * 카카오 로그인 시 제공되는 프로필 이미지
-   * 또는 사용자가 업로드한 이미지
+   * 추천 요금제 목록 (선택적)
    */
-  profileImage?: string;
+  recommendedPlans?: RecommendedPlan[];
 
   /**
    * 요금제 요약 정보 (선택적)
@@ -145,6 +172,38 @@ export interface FamilyMember {
    * 요금제가 없는 경우: "요금제 없음"
    */
   planSummary?: string;
+
+  /**
+   * 설문조사 상태 요약 (선택적)
+   * 예: "설문조사 완료 (버그 ID: 3)"
+   */
+  surveyStatusSummary?: string;
+}
+
+/**
+ * 추천 요금제 정보
+ */
+export interface RecommendedPlan {
+  /** 추천 순위 */
+  rank: number;
+
+  /** 요금제 ID */
+  planId: number;
+
+  /** 요금제 이름 */
+  planName: string;
+
+  /** 원래 가격 (원) */
+  price: number;
+
+  /** 할인 가격 (원) */
+  discountPrice: number;
+
+  /** 혜택 설명 */
+  benefit: string;
+
+  /** 상세 페이지 링크 */
+  link: string;
 }
 
 /**
@@ -164,6 +223,9 @@ export interface FamilyDashboardResponse {
   /** 식물 정보 */
   plant: PlantInfo;
 
+  /** 추천 요약 정보 */
+  recommendationSummary: RecommendationSummary;
+
   /**
    * 총 가족 구성원 수
    * members.length와 동일하지만 편의성을 위해 제공
@@ -171,10 +233,59 @@ export interface FamilyDashboardResponse {
   totalMembers: number;
 
   /**
+   * 설문조사를 완료한 구성원 수
+   */
+  membersWithSurvey: number;
+
+  /**
    * 요금제를 가입한 구성원 수
    * 할인 계산 및 통계에 사용
    */
   membersWithPlan: number;
+
+  /**
+   * 벌레 매핑이 완료된 구성원 수
+   */
+  membersWithBugMapping: number;
+
+  /**
+   * 설문조사 완료율 (%)
+   */
+  surveyCompletionRate: number;
+
+  /**
+   * 추천 준비 완료 여부
+   */
+  readyForRecommendation: boolean;
+}
+
+/**
+ * 추천 요약 정보
+ */
+export interface RecommendationSummary {
+  /** 추천 가능 여부 */
+  available: boolean;
+
+  /** 최고 추천 요금제 */
+  topPlan: {
+    planName: string;
+    originalPrice: number;
+    discountPrice: number;
+    shortReason: string;
+  };
+
+  /** 결합 정보 */
+  combinationInfo: {
+    combinationName: string;
+    monthlySavings: number;
+    highlight: string;
+  };
+
+  /** 상태 메시지 */
+  statusMessage: string;
+
+  /** 가족 타입 */
+  familyType: string;
 }
 
 /**
@@ -192,9 +303,7 @@ export interface CreateFamilyRequest {
    * 할인 혜택을 결정하는 중요한 값
    */
 
-  combiType: "투게더 결합" | "참쉬운 가족 결합" | "가족 무한 사랑";
-
-
+  combiType: '투게더 결합' | '참쉬운 가족 결합' | '가족 무한 사랑';
 }
 
 /**
@@ -273,18 +382,30 @@ export interface InviteCodeValidationResponse {
 export interface DiscountInfo {
   /**
    * 총 월 할인 금액 (원)
-   * 예: 52000
+   * 예: 42000
    */
   totalMonthly: number;
 
   /**
    * 할인 설명 문구
-   * 예: "투게더 결합 이용 시 한달에 최대 52,000원 아낄 수 있어요!"
+   * 예: "가족사랑 결합 이용 시 한달에 최대 42,000원 아낄 수 있어요!"
    */
   description: string;
 
   /** 할인 계산 기준 구성원 수 */
   memberCount: number;
+
+  /**
+   * 연간 할인 금액 (원)
+   * 예: 504000
+   */
+  yearlyDiscount: number;
+
+  /**
+   * 포맷된 월 할인 금액 (문자열)
+   * 예: "42,000원"
+   */
+  formattedMonthlyDiscount: string;
 
   /**
    * 청소년 할인 대상자 수 (선택적)
@@ -332,23 +453,20 @@ export interface ApiError {
 /**
  * 가족 구성원 역할 타입 (향후 확장용)
  */
-export type FamilyRole = "OWNER" | "MEMBER";
+export type FamilyRole = 'OWNER' | 'MEMBER';
 
 /**
  * 가족 스페이스 상태 타입 (향후 확장용)
  */
-export type FamilyStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
-
+export type FamilyStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 /**
  * 결합 상품 타입 상수
  */
 export const COMBI_TYPES = {
-
-  TOGETHER: "투게더 결합",
-  EASY_FAMILY: "참쉬운 가족 결합",
-  UNLIMITED_LOVE: "가족 무한 사랑",
-
+  TOGETHER: '투게더 결합',
+  EASY_FAMILY: '참쉬운 가족 결합',
+  UNLIMITED_LOVE: '가족 무한 사랑',
 } as const;
 
 /**
@@ -387,11 +505,27 @@ export interface UIFamilyMember {
   /** 프로필 이미지 URL */
   profileImage?: string;
 
-  /** 요금제 정보 */
-  plan: string;
+  /** 벌레 타입 (설문조사 결과) */
+  bugType?: string;
 
-  /** 추천 시스템 사용 여부 */
-  hasRecommendation: boolean;
+  /** 벌레 ID */
+  bugId?: number;
+
+  /** 설문조사 완료 여부 */
+  hasSurveyCompleted: boolean;
+
+  /** 설문조사 완료 일시 (선택적) */
+  surveyDate?: string;
+
+  /** 추천 요금제 목록 */
+  recommendedPlans?: RecommendedPlan[];
+
+  /** 현재 요금제 정보 */
+  currentPlan?: {
+    planName: string;
+    price: number;
+    planSummary: string;
+  };
 }
 
 /**
@@ -413,7 +547,6 @@ export interface PlantInfo {
   /** 생성 차단 사유 (선택적) */
   createBlockReason?: string;
 
-
   /** 식물 완료 여부 */
   isCompleted?: boolean;
 }
@@ -421,5 +554,4 @@ export interface PlantInfo {
 /**
  * 식물 타입
  */
-export type PlantType = "flower" | "tree";
-
+export type PlantType = 'flower' | 'tree';
