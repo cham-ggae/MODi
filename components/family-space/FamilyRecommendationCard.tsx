@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Users, DollarSign, Calendar, Sparkles, UserPlus } from 'lucide-react';
-import { DiscountInfo } from '@/types/family.type';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, Users, DollarSign, Calendar, Sparkles, UserPlus } from "lucide-react";
+import { DiscountInfo } from "@/types/family.type";
 
 interface FamilyRecommendationCardProps {
   // 가족 API 연동을 위한 props
@@ -82,7 +82,7 @@ export function FamilyRecommendationCard({
           <div className="flex items-center space-x-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">가족 결합 요금제</h2>
           </div>
-          <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300 text-xs px-2 py-0.5">
+          <Badge className="bg-gray-50 dark:bg-gray-50 text-gray-600 dark:text-green-300 text-xs px-2 py-0.5">
             <TrendingUp className="w-3 h-3 mr-1" />
             {memberCount}명 가족
           </Badge>
@@ -96,7 +96,7 @@ export function FamilyRecommendationCard({
                 <div className="text-2xl">💝</div>
                 <div>
                   <div className="font-semibold text-gray-900 dark:text-white">
-                    {combiType || '가족 결합 상품'}
+                    {combiType || "가족 결합 상품"}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {memberCount}명 구성원이 함께하는 가족

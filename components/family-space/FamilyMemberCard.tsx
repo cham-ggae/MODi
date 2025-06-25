@@ -1,9 +1,10 @@
-import { Badge } from '@/components/ui/badge';
-import { UIFamilyMember } from '@/types/family.type';
-import { CheckCircle, Clock } from 'lucide-react';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
+import { Badge } from "@/components/ui/badge";
+import { UIFamilyMember } from "@/types/family.type";
+import { CheckCircle, Clock } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { Avatar } from "@radix-ui/react-avatar";
 
 interface FamilyMemberCardProps {
   member: UIFamilyMember;
@@ -12,13 +13,13 @@ interface FamilyMemberCardProps {
 // 벌레 ID에 따른 타입 및 이모티콘 매핑
 const getBugInfo = (bugId: number): { type: string; emoji: string } => {
   const bugInfoMap: Record<number, { type: string; emoji: string }> = {
-    1: { type: '호박벌형', emoji: '🐝' },
-    2: { type: '무당벌레형', emoji: '🐞' },
-    3: { type: '라바형', emoji: '🐛' },
-    4: { type: '나비형', emoji: '🦋' },
-    5: { type: '개미형', emoji: '🐜' },
+    1: { type: "호박벌형", emoji: "🐝" },
+    2: { type: "무당벌레형", emoji: "🐞" },
+    3: { type: "라바형", emoji: "🐛" },
+    4: { type: "나비형", emoji: "🦋" },
+    5: { type: "개미형", emoji: "🐜" },
   };
-  return bugInfoMap[bugId] || { type: '알 수 없음', emoji: '🐣' };
+  return bugInfoMap[bugId] || { type: "알 수 없음", emoji: "🐣" };
 };
 
 // 날짜 포맷팅 함수
@@ -27,7 +28,7 @@ const formatSurveyDate = (dateString: string): string => {
     const date = new Date(dateString);
     return `${date.getMonth() + 1}/${date.getDate()}`;
   } catch {
-    return '';
+    return "";
   }
 };
 
@@ -47,7 +48,7 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
       router.push(`/survey-result?bugId=${member.bugId}`);
     } else {
       // 설문조사 미완료인 경우 - 설문조사 페이지로 이동
-      router.push('/survey');
+      router.push("/survey");
     }
   };
 
@@ -55,12 +56,12 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
   const displayText = () => {
     if (member.hasSurveyCompleted && member.bugId) {
       const bugInfo = getBugInfo(member.bugId);
-      const dateText = member.surveyDate ? ` (📅 ${formatSurveyDate(member.surveyDate)})` : '';
+      const dateText = member.surveyDate ? ` (📅 ${formatSurveyDate(member.surveyDate)})` : "";
       return `${bugInfo.emoji} ${bugInfo.type}${dateText}`;
     } else if (member.currentPlan) {
       return `📱 ${member.currentPlan.planSummary}`;
     } else {
-      return '📵 요금제 없음';
+      return "아직 성향 분석 전이에요 🧐 ";
     }
   };
 
@@ -88,18 +89,25 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
           <div className="flex items-center space-x-2 mb-1">
             <span className="font-semibold text-gray-900 dark:text-white">{member.name}</span>
             {member.hasSurveyCompleted ? (
-              <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300 text-xs px-2 py-0.5">
+              <Badge className="bg-[#ffffff] dark:bg-green-800 text-gray-600 dark:text-green-300 text-xs px-2 py-0.5">
                 <CheckCircle className="w-3 h-3 mr-1" />
                 추천완료
               </Badge>
             ) : (
-              <Badge
-                variant="outline"
-                className="text-xs px-2 py-0.5 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-600"
-              >
-                <Clock className="w-3 h-3 mr-1" />
-                설문미완료
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Avatar />
+                <Badge
+                  variant="outline"
+                  className="text-[11px] px-1.5 py-0.5 text-[#5bc236] dark:text-[#5bc236] border-[#5bc236] dark:border-[#5bc236] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 font-semibold flex items-center gap-[2px] self-center"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push("/survey");
+                  }}
+                >
+                  <Clock className="w-3 h-3" />
+                  <span className="leading-none">성향파악하기</span>
+                </Badge>
+              </div>
             )}
           </div>
 
