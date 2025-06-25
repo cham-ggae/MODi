@@ -26,14 +26,12 @@ import { ActivityType, PlantEventData, RewardHistory } from "@/types/plants.type
 import { useAuth } from "@/hooks/useAuth";
 import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
-import confetti from "canvas-confetti";
 import { CardMatchingGame } from "@/components/plant-game/CardMatchingGame";
 import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFamilyMutations";
 import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
 import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
-import { useKakaoInit } from "@/hooks/useKakaoShare";
-import { useManageMissions } from "@/hooks/plant/useManageMissions";
+import { useKakaoInit, shareKakao } from "@/hooks/useKakaoShare";
 import MissionBtn from '@/components/plant-game/MissionBtn';
 import { usePlantGameStore } from '@/store/usePlantGameStore';
 
@@ -42,11 +40,6 @@ declare global {
     Kakao: any;
   }
 }
-
-// ==========================================
-// 🎮 새싹 키우기 게임 메인 페이지
-// ==========================================
-
 // ==========================================
 // 🌱 새싹 키우기 게임 메인 컴포넌트
 // ==========================================
@@ -61,6 +54,7 @@ export default function PlantGamePage() {
     currentLevel, setCurrentLevel,
     currentProgress, setCurrentProgress,
     handleClaimRewardClick,
+    showQuizPage, setShowQuizPage,
   } = usePlantGameStore();
 
   // ==========================================
@@ -78,16 +72,6 @@ export default function PlantGamePage() {
   const [wateredMemberIds, setWateredMemberIds] = useState<number[]>([]); // 오늘 물주기 완료한 구성원 ID 목록
 
   // ==========================================
-  // 🎯 모달 상태 관리
-  // ==========================================
-  const [showQuizModal, setShowQuizModal] = useState(false); // 퀴즈 모달 표시 여부
-  const [showCardMatchingGame, setShowCardMatchingGame] = useState(false); // 카드 매칭 게임 표시 여부
-  const [showMessageCardCreator, setShowMessageCardCreator] = useState(false); // 메시지 카드 생성기 표시 여부
-  const [showInviteCodeModal, setShowInviteCodeModal] = useState(false); // 초대 코드 모달 표시 여부
-  const [showQuizPage, setShowQuizPage] = useState(false); // 퀴즈 페이지 표시 여부
-  const [copied, setCopied] = useState(false); // 초대 코드 복사 상태
-
-  // ==========================================
   // 🔐 인증 및 사용자 정보
   // ==========================================
   const { user } = useAuth(); // 현재 로그인한 사용자 정보
@@ -96,8 +80,6 @@ export default function PlantGamePage() {
   // 🔌 API 훅 및 데이터
   // ==========================================
   const { familyId, family } = useFamily(); // 가족 정보 및 ID
-  const { mutate: generateNewCode } = useGenerateInviteCode(); // 초대 코드 생성 API
-  const { mutate: updateFamilyName, isPending: isUpdatingFamilyName } = useUpdateFamilyName(); // 가족명 업데이트 API
 
   // 식물 상태 정보
   const {
@@ -113,7 +95,6 @@ export default function PlantGamePage() {
 
   // 포인트 적립 및 보상 수령 API
   const { mutate: addPoint, isPending } = useAddPoint();
-  const { mutate: claimReward, isPending: isClaiming } = useClaimReward();
 
   // 쿼리 클라이언트 (캐시 무효화용)
   const queryClient = useQueryClient();
@@ -314,139 +295,6 @@ export default function PlantGamePage() {
   useEffect(() => {
     setAlreadyFed(!!checkAlreadyFed);
   }, [checkAlreadyFed]);
-
-  // ==========================================
-  // 🎯 미션 시스템
-  // ==========================================
-
-  // 미션 관련 상태 및 핸들러를 커스텀 훅으로 관리
-  const {
-    missionTypes,
-    missionQueries,
-    missionCompletedMap,
-    handleMissionClick,
-  } = useManageMissions({
-    showMissions,
-    setShowMissions,
-    setShowQuizPage,
-    setShowCardMatchingGame,
-    setShowMessageCardCreator,
-    setShowInviteCodeModal,
-  });
-
-  // ==========================================
-  // 🎮 게임 콜백 함수들
-  // ==========================================
-
-  // 메시지 카드 생성 완료 핸들러
-  const handleMessageCardCreated = () => {
-    addPoint({ activityType: "emotion" });
-  };
-
-  // 카드 게임 완료 핸들러
-  const handleCardGameCompleted = () => {
-    addPoint({ activityType: "lastleaf" });
-    toast.success("카드 맞히기 완료! 경험치가 적립되었습니다. 🍃");
-  };
-
-  // 카카오톡 공유 핸들러
-  const handleShareKakao = () => {
-    if (!family?.family?.inviteCode || !family?.family?.name) {
-      toast.error("가족 정보를 불러올 수 없습니다.");
-      return;
-    }
-
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || window.location.origin;
-    const imageUrl = `${baseUrl}/images/modi-logo-small.png`;
-
-    console.log("🔍 카카오 공유 시도:", {
-      windowKakao: !!window.Kakao,
-      isInitialized: window.Kakao?.isInitialized?.(),
-      familyName: family.family.name,
-      inviteCode: family.family.inviteCode,
-      imageUrl,
-    });
-
-    // 카카오톡 공유만 사용하고 브라우저 공유 기능은 제거
-    if (window.Kakao && window.Kakao.isInitialized()) {
-      console.log("✅ 카카오 SDK 초기화됨, 공유 실행");
-      window.Kakao.Link.sendDefault({
-        objectType: "feed",
-        content: {
-          title: `🌱 ${family.family.name} 가족 스페이스에 초대합니다!`,
-          description: `함께 식물을 키우고 요금제도 절약해요!\n초대 코드: ${family.family.inviteCode}`,
-          imageUrl: imageUrl,
-          link: {
-            mobileWebUrl: "https://modi.app",
-            webUrl: "https://modi.app",
-          },
-        },
-        buttons: [
-          {
-            title: "MODi에서 확인",
-            link: {
-              mobileWebUrl: "https://modi.app",
-              webUrl: "https://modi.app",
-            },
-          },
-        ],
-      });
-
-      // 공유 성공 후 포인트 적립
-      addPoint({ activityType: "register" });
-      toast.success("가족을 초대합니다! 경험치가 적립되었습니다. 👨‍👩‍👧‍👦");
-    } else {
-      console.log("❌ 카카오 SDK 초기화 안됨, 클립보드 복사로 대체");
-      // 카카오톡 SDK가 없는 경우 클립보드에 복사
-      const shareText = `🌱 ${family.family.name} 가족 스페이스에 초대합니다!\n\n초대 코드: ${family.family.inviteCode}\n\n함께 식물을 키우고 요금제도 절약해요! 💚\n\nMODi: https://modi.app`;
-      navigator.clipboard.writeText(shareText);
-      toast.success("공유 메시지가 복사되었습니다! 카카오톡에서 붙여넣기 해주세요.");
-
-      // 복사 성공 후 포인트 적립
-      addPoint({ activityType: "register" });
-    }
-  };
-
-  // 초대 코드 복사 핸들러
-  const handleCopyCode = async () => {
-    if (!family?.family?.inviteCode) return;
-
-    try {
-      await navigator.clipboard.writeText(family.family.inviteCode);
-      setCopied(true);
-      toast.success("초대 코드가 복사되었습니다! 가족들에게 공유해보세요.");
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      toast.error("복사에 실패했습니다");
-    }
-  };
-
-  // 새로운 초대 코드 생성 핸들러
-  const handleGenerateNewInviteCode = () => {
-    if (!familyId) return;
-    generateNewCode(familyId);
-  };
-
-  // 가족명 저장 핸들러
-  const handleSaveFamilyName = (name: string) => {
-    if (!familyId) {
-      toast.error("가족 ID를 찾을 수 없습니다.");
-      return;
-    }
-
-    updateFamilyName(
-      { fid: familyId, name },
-      {
-        onSuccess: () => {
-          toast.success(`가족명이 변경되었습니다! ✨ 새로운 가족명: ${name}`);
-        },
-        onError: (error) => {
-          toast.error("가족명 변경에 실패했습니다");
-        },
-      }
-    );
-  };
-
   // ==========================================
   // 🎨 UI 데이터 변환
   // ==========================================
@@ -522,10 +370,7 @@ export default function PlantGamePage() {
       {/* 🎮 게임 컨트롤 영역 */}
       <div className="flex-shrink-0 p-3">
         {currentLevel === 5 ? (
-          <div className="flex flex-col items-center gap-4">
-            <div className="text-xl font-bold text-green-600">5레벨 달성!!!</div>
-            <ClaimRewardButton />
-          </div>
+          <ClaimRewardButton />
         ) : (
           <>
             <PlantProgressBar level={currentLevel} progress={currentProgress} fid={familyId ?? 0} />
@@ -545,10 +390,7 @@ export default function PlantGamePage() {
       {/* 📋 미션 시트 모달 */}
       <AnimatePresence>
         {showMissions && (
-          <MissionSheet
-            onMissionClick={handleMissionClick}
-            completedMap={missionCompletedMap}
-          />
+          <MissionSheet />
         )}
       </AnimatePresence>
 
@@ -564,35 +406,6 @@ export default function PlantGamePage() {
         )}
       </AnimatePresence>
 
-      {/* 🎲 카드 매칭 게임 */}
-      <CardMatchingGame
-        isOpen={showCardMatchingGame}
-        onClose={() => setShowCardMatchingGame(false)}
-        onComplete={handleCardGameCompleted}
-      />
-
-      {/* 💌 메시지 카드 생성기 */}
-      <MessageCardCreator
-        isOpen={showMessageCardCreator}
-        onOpenChange={setShowMessageCardCreator}
-        onCardCreated={handleMessageCardCreated}
-        trigger={null}
-      />
-
-      {/* 👨‍👩‍👧‍👦 초대 코드 모달 */}
-      <InviteCodeModal
-        isOpen={showInviteCodeModal}
-        onOpenChange={setShowInviteCodeModal}
-        inviteCode={family?.family?.inviteCode || ""}
-        familyName={family?.family?.name || "우리 가족"}
-        onGenerateCode={handleGenerateNewInviteCode}
-        onCopyCode={handleCopyCode}
-        onShareKakao={handleShareKakao}
-        onSaveFamilyName={handleSaveFamilyName}
-        copied={copied}
-        trigger={null}
-      />
-
       {/* 🎯 퀴즈 페이지 */}
       {showQuizPage && (
         <div className="fixed inset-0 z-50">
@@ -606,6 +419,11 @@ export default function PlantGamePage() {
           />
         </div>
       )}
+
+      {/* 항상 존재하는 모달 컴포넌트 */}
+      <CardMatchingGame />
+      <MessageCardCreator />
+      <InviteCodeModal />
     </div>
   );
 }

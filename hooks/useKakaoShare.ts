@@ -57,9 +57,10 @@ export function useKakaoInit() {
   return { isLoaded, error };
 }
 
-export function shareKakao(inviteCode: string, familyName: string) {
+export function shareKakao(inviteCode: string, familyName: string, onSuccess?: () => void, onError?: (e: any) => void) {
   if (!window.Kakao || !window.Kakao.isInitialized()) {
-    throw new Error("카카오톡 SDK가 초기화되지 않았습니다.");
+    if (onError) onError(new Error("카카오톡 SDK가 초기화되지 않았습니다."));
+    return;
   }
 
   const baseUrl =
@@ -87,6 +88,8 @@ export function shareKakao(inviteCode: string, familyName: string) {
         },
       },
     ],
+    success: onSuccess,
+    fail: onError,
   });
 }
 

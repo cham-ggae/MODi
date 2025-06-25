@@ -14,6 +14,8 @@ import {
 import { Plus, Heart, Star, Gift, Coffee, Sun } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMessageCardsManager } from "@/hooks/family";
+import { usePlantGameStore } from '@/store/usePlantGameStore';
+import { useAddPoint } from '@/hooks/plant';
 
 const cardTemplates = [
   { id: "heart", icon: Heart, color: "bg-pink-100 text-pink-600", name: "사랑" },
@@ -24,29 +26,20 @@ const cardTemplates = [
 ];
 
 interface MessageCardCreatorProps {
-  isOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
   onCardCreated?: () => void;
-  trigger?: React.ReactNode;
 }
 
-export function MessageCardCreator({
-  isOpen,
-  onOpenChange,
-  onCardCreated,
-  trigger,
-}: MessageCardCreatorProps = {}) {
-  const [internalIsOpen, setIsOpen] = useState(false);
+export function MessageCardCreator({ onCardCreated }: MessageCardCreatorProps) {
+  const isOpen = usePlantGameStore(s => s.showMessageCardCreator);
+  const setIsOpen = usePlantGameStore(s => s.setShowMessageCardCreator);
   const [content, setContent] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("heart");
   const { toast } = useToast();
 
   const { createMessageCard, isCreating } = useMessageCardsManager();
+  const { mutate: addPoint } = useAddPoint();
 
-  // 외부 제어 또는 내부 제어
-  const isControlled = isOpen !== undefined;
-  const open = isControlled ? isOpen : internalIsOpen;
-  const setOpen = isControlled ? onOpenChange : setIsOpen;
+  if (!isOpen) return null;
 
   const handleSubmit = () => {
     if (!content.trim()) {
@@ -64,10 +57,11 @@ export function MessageCardCreator({
 
     createMessageCard(cardData, {
       onSuccess: () => {
+        addPoint({ activityType: 'emotion' });
         // 폼 초기화
         setContent("");
         setSelectedTemplate("heart");
-        setOpen?.(false);
+        setIsOpen(false);
         // 콜백 호출
         onCardCreated?.();
       },
@@ -75,19 +69,7 @@ export function MessageCardCreator({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {!isControlled && trigger !== null && (
-        <DialogTrigger asChild>
-          {trigger || (
-            <Button
-              size="sm"
-              className="bg-green-500 text-white hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-10 h-10 p-0"
-            >
-              <Plus className="w-5 h-5" />
-            </Button>
-          )}
-        </DialogTrigger>
-      )}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
         <DialogHeader>
           <DialogTitle className="dark:text-white">메시지 카드 만들기</DialogTitle>
@@ -105,11 +87,10 @@ export function MessageCardCreator({
                   <button
                     key={template.id}
                     onClick={() => setSelectedTemplate(template.id)}
-                    className={`p-3 rounded-xl transition-all ${
-                      selectedTemplate === template.id
-                        ? `${template.color} ring-2 ring-offset-2 ring-green-500`
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
-                    }`}
+                    className={`p-3 rounded-xl transition-all ${selectedTemplate === template.id
+                      ? `${template.color} ring-2 ring-offset-2 ring-green-500`
+                      : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                      }`}
                   >
                     <Icon className="w-5 h-5" />
                   </button>
@@ -162,14 +143,6 @@ export function MessageCardCreator({
 
           {/* 버튼 */}
           <div className="flex gap-2">
-            <Button
-              onClick={() => setOpen?.(false)}
-              variant="outline"
-              className="flex-1 hover:bg-gray-100 dark:hover:bg-gray-600"
-              disabled={isCreating}
-            >
-              취소
-            </Button>
             <Button
               onClick={handleSubmit}
               className="flex-1 bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"

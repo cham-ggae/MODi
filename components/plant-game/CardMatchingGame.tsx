@@ -6,6 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { Leaf, TreePine, Flower, Sprout, Sun, Cloud, Star, Heart, Zap, X } from "lucide-react";
 import { planDetails } from "@/lib/survey-result-data";
+import { usePlantGameStore } from '@/store/usePlantGameStore';
+import { useAddPoint } from '@/hooks/plant';
 
 interface CardItem {
   id: number;
@@ -25,13 +27,10 @@ const cardIcons = [
   { icon: Heart, name: "하트" },
 ];
 
-interface CardMatchingGameProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onComplete: () => void;
-}
-
-export function CardMatchingGame({ isOpen, onClose, onComplete }: CardMatchingGameProps) {
+export function CardMatchingGame() {
+  const isOpen = usePlantGameStore(s => s.showCardMatchingGame);
+  const setIsOpen = usePlantGameStore(s => s.setShowCardMatchingGame);
+  const { mutate: addPoint } = useAddPoint();
   const [cards, setCards] = useState<CardItem[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [matchedPairs, setMatchedPairs] = useState<number>(0);
@@ -119,8 +118,9 @@ export function CardMatchingGame({ isOpen, onClose, onComplete }: CardMatchingGa
   };
 
   const handleComplete = () => {
-    onComplete();
-    onClose();
+    addPoint({ activityType: 'lastleaf' });
+    setIsOpen(false);
+    // 필요하다면 추가 로직 실행
   };
 
   // 랜덤 요금제 선택
@@ -135,8 +135,7 @@ export function CardMatchingGame({ isOpen, onClose, onComplete }: CardMatchingGa
   // 포인트 적립 핸들러
   const handleGetPoint = () => {
     setIsModalOpen(false);
-    onComplete();
-    onClose();
+    handleComplete();
   };
 
   if (!isOpen) return null;
@@ -163,13 +162,12 @@ export function CardMatchingGame({ isOpen, onClose, onComplete }: CardMatchingGa
               whileTap={{ scale: 0.95 }}
             >
               <Card
-                className={`h-full cursor-pointer transition-all duration-300 ${
-                  card.isMatched
-                    ? "bg-green-100 border-green-300"
-                    : card.isFlipped
+                className={`h-full cursor-pointer transition-all duration-300 ${card.isMatched
+                  ? "bg-green-100 border-green-300"
+                  : card.isFlipped
                     ? "bg-blue-100 border-blue-300"
                     : "bg-gray-100 border-gray-300 hover:bg-gray-200"
-                }`}
+                  }`}
                 onClick={() => handleCardClick(index)}
               >
                 <CardContent className="p-2 h-full flex items-center justify-center">
@@ -203,7 +201,7 @@ export function CardMatchingGame({ isOpen, onClose, onComplete }: CardMatchingGa
         </div>
 
         <div className="flex gap-2">
-          <Button onClick={onClose} variant="outline" className="flex-1">
+          <Button onClick={handleComplete} variant="outline" className="flex-1">
             나가기
           </Button>
           <Button onClick={initializeGame} className="flex-1 bg-blue-600 hover:bg-blue-700">

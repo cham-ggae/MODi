@@ -1,16 +1,66 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ActivityType } from "@/types/plants.type";
 import { usePlantGameStore } from '@/store/usePlantGameStore';
 import { MISSIONS } from '@/data/missions';
+import { toast } from 'sonner';
+import { useCheckTodayActivity } from '@/hooks/plant';
 
-interface Props {
-  onMissionClick: (activityType: ActivityType) => void;
-  completedMap: Partial<Record<ActivityType, boolean>>;
-}
-
-export function MissionSheet({ onMissionClick, completedMap }: Props) {
+export function MissionSheet() {
   const setShowMissions = usePlantGameStore((s) => s.setShowMissions);
+  const setShowQuizPage = usePlantGameStore((s) => s.setShowQuizPage);
+  const setShowCardMatchingGame = usePlantGameStore((s) => s.setShowCardMatchingGame);
+  const setShowMessageCardCreator = usePlantGameStore((s) => s.setShowMessageCardCreator);
+  const setShowInviteCodeModal = usePlantGameStore((s) => s.setShowInviteCodeModal);
+
+  // 미션별 오늘 완료 여부 (직접 훅 사용)
+  const missionTypes = MISSIONS.map(m => m.activityType);
+  const missionQueries = missionTypes.map((type) => useCheckTodayActivity(type, { staleTime: 0 }));
+  const missionCompletedMap = Object.fromEntries(
+    missionTypes.map((type, idx) => [type, !!missionQueries[idx].data])
+  );
+
+  // 미션 클릭 핸들러 (zustand setter 직접 사용)
+  const handleMissionClick = (activityType: string) => {
+    if (missionCompletedMap && missionCompletedMap[activityType]) {
+      toast("내일 다시");
+      setShowMissions(false);
+      return;
+    }
+    switch (activityType) {
+      case "attendance":
+        toast.success("출석 완료! 경험치가 적립되었습니다. ✏️");
+        break;
+      case "quiz":
+        setShowQuizPage(true);
+        setTimeout(() => {
+          console.log("[디버그] showQuizPage:", usePlantGameStore.getState().showQuizPage);
+        }, 0);
+        break;
+      case "lastleaf":
+        setShowCardMatchingGame(true);
+        setTimeout(() => {
+          console.log("[디버그] showCardMatchingGame:", usePlantGameStore.getState().showCardMatchingGame);
+        }, 0);
+        break;
+      case "emotion":
+        setShowMessageCardCreator(true);
+        setTimeout(() => {
+          console.log("[디버그] showMessageCardCreator:", usePlantGameStore.getState().showMessageCardCreator);
+        }, 0);
+        break;
+      case "register":
+        setShowInviteCodeModal(true);
+        setTimeout(() => {
+          console.log("[디버그] showInviteCodeModal:", usePlantGameStore.getState().showInviteCodeModal);
+        }, 0);
+        break;
+      case "survey":
+        window.location.href = "/survey?mission=true";
+        break;
+      default:
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -36,7 +86,7 @@ export function MissionSheet({ onMissionClick, completedMap }: Props) {
           </h2>
           <div className="space-y-4">
             {MISSIONS.map((m) => {
-              const completed = completedMap[m.activityType];
+              const completed = missionCompletedMap && missionCompletedMap[m.activityType];
               return (
                 <div
                   key={m.id}
@@ -55,7 +105,7 @@ export function MissionSheet({ onMissionClick, completedMap }: Props) {
                     <Button
                       size="sm"
                       className="bg-blue-500 text-white hover:bg-blue-600 rounded-full px-3 py-1 text-xs"
-                      onClick={() => onMissionClick(m.activityType)}
+                      onClick={() => handleMissionClick(m.activityType)}
                       disabled={completed}
                     >
                       {m.reward}

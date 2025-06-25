@@ -1,3 +1,5 @@
+import { usePlantGameStore } from '@/store/usePlantGameStore';
+import { useFamily } from '@/hooks/family';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,53 +14,28 @@ import {
 import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
 import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
 
-interface InviteCodeModalProps {
-  isOpen?: boolean;
-  onOpenChange?: (isOpen: boolean) => void;
-  inviteCode: string;
-  familyName: string;
-  onGenerateCode: () => void;
-  onCopyCode: () => void;
+export function InviteCodeModal({ copied, onGenerateCode, onCopyCode, onShareKakao, onSaveFamilyName }: {
+  copied?: boolean;
+  onGenerateCode?: () => void;
+  onCopyCode?: () => void;
   onShareKakao?: () => void;
-  onSaveFamilyName: (name: string) => void;
-  copied: boolean;
-  isLoading?: boolean;
-  isUpdatingName?: boolean;
-  canInvite?: boolean;
-  trigger?: React.ReactNode;
-}
-
-export function InviteCodeModal({
-  isOpen: isOpenProp,
-  onOpenChange: onOpenChangeProp,
-  inviteCode,
-  familyName,
-  onGenerateCode,
-  onCopyCode,
-  onShareKakao: onShareKakaoProp,
-  onSaveFamilyName,
-  copied,
-  isLoading = false,
-  isUpdatingName = false,
-  canInvite = true,
-  trigger,
-}: InviteCodeModalProps) {
-  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  onSaveFamilyName?: (name: string) => void;
+}) {
+  const isOpen = usePlantGameStore(s => s.showInviteCodeModal);
+  const setIsOpen = usePlantGameStore(s => s.setShowInviteCodeModal);
+  const { family, familyId } = useFamily();
   const [isEditingName, setIsEditingName] = useState(false);
   const [tempFamilyName, setTempFamilyName] = useState('');
-
-  const isOpen = isOpenProp ?? internalIsOpen;
-  const onOpenChange = onOpenChangeProp ?? setInternalIsOpen;
 
   useKakaoInit();
 
   const handleEditFamilyName = () => {
-    setTempFamilyName(familyName);
+    setTempFamilyName(family?.family?.name || '');
     setIsEditingName(true);
   };
 
   const handleSaveFamilyName = () => {
-    if (tempFamilyName.trim() && !isUpdatingName) {
+    if (tempFamilyName.trim() && onSaveFamilyName) {
       onSaveFamilyName(tempFamilyName.trim());
       setIsEditingName(false);
     }
@@ -70,27 +47,28 @@ export function InviteCodeModal({
   };
 
   const handleShareKakao = () => {
-    if (onShareKakaoProp) {
-      onShareKakaoProp();
+    if (onShareKakao) {
+      onShareKakao();
     } else {
-      shareKakao(inviteCode, familyName);
+      shareKakao(family?.family?.inviteCode || '', family?.family?.name || '');
     }
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
         <DialogHeader>
           <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {inviteCode ? (
+          {family?.family?.inviteCode ? (
             <>
               <div className="text-center">
                 <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">초대 코드</div>
                 <Badge className="bg-green-500 text-white text-lg px-4 py-2 font-mono mb-3">
-                  {inviteCode}
+                  {family?.family?.inviteCode}
                 </Badge>
 
                 <div className="mb-4">
@@ -112,13 +90,8 @@ export function InviteCodeModal({
                         size="sm"
                         variant="ghost"
                         className="p-1"
-                        disabled={isUpdatingName}
                       >
-                        {isUpdatingName ? (
-                          <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Save className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        )}
+                        <Save className="w-4 h-4 text-green-600 dark:text-green-400" />
                       </Button>
                       <Button onClick={handleCancelEdit} size="sm" variant="ghost" className="p-1">
                         <X className="w-3 h-3 text-gray-400" />
@@ -127,7 +100,7 @@ export function InviteCodeModal({
                   ) : (
                     <div className="flex items-center gap-2 justify-center">
                       <span className="text-xs text-gray-400 dark:text-gray-500">
-                        가족명: {familyName || '가족'}
+                        가족명: {family?.family?.name || '우리 가족'}
                       </span>
                       <Button
                         onClick={handleEditFamilyName}

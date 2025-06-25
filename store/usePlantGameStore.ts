@@ -20,6 +20,14 @@ interface PlantGameState {
     }) => void;
     confetti: (opts: any) => void;
   }) => void;
+  showQuizPage: boolean;
+  setShowQuizPage: (v: boolean) => void;
+  showCardMatchingGame: boolean;
+  setShowCardMatchingGame: (v: boolean) => void;
+  showMessageCardCreator: boolean;
+  setShowMessageCardCreator: (v: boolean) => void;
+  showInviteCodeModal: boolean;
+  setShowInviteCodeModal: (v: boolean) => void;
 }
 
 export const usePlantGameStore = create<PlantGameState>((set) => ({
@@ -48,4 +56,12 @@ export const usePlantGameStore = create<PlantGameState>((set) => ({
       });
     }
   },
+  showQuizPage: false,
+  setShowQuizPage: (v) => set({ showQuizPage: v }),
+  showCardMatchingGame: false,
+  setShowCardMatchingGame: (v) => set({ showCardMatchingGame: v }),
+  showMessageCardCreator: false,
+  setShowMessageCardCreator: (v) => set({ showMessageCardCreator: v }),
+  showInviteCodeModal: false,
+  setShowInviteCodeModal: (v) => set({ showInviteCodeModal: v }),
 })); 
