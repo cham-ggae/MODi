@@ -8,7 +8,6 @@ import SttButton from './SttButton';
 import { ClientMessage } from '@/types/chat.type';
 import { useChatStream } from '@/hooks/useChatStream';
 import { v4 as uuidv4 } from 'uuid'
-import SuggestedKeywords from './SuggestedKeywords';
 
 interface ChatInputProps {
   sessionId: string;
@@ -16,24 +15,8 @@ interface ChatInputProps {
   familyMode: boolean;
   familySize: number;
   familySessionId: string;
-  messages: ClientMessage[];
 }
-
-const KEYWORDS = [
-  '저렴한 요금제',
-  '데이터 무제한',
-  '가성비 좋은',
-  '혜택이 많은',
-  '알뜰폰 요금제',
-  '다양한 요금제',
-];
-
-function getRandomKeywords() {
-  const shuffled = [...KEYWORDS].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, 3);
-}
-
-const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessionId, messages }: ChatInputProps) => {
+const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessionId }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const {
     isListening,
@@ -47,11 +30,6 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
 
   // 이 ref 에 새로 추가한 AI placeholder 메시지의 id 를 저장
   const aiMessageIdRef = useRef<string | null>(null)
-
-  // 사용자가 첫 메시지를 보냈는지 여부
-  const [hasSentFirst, setHasSentFirst] = useState(false);
-  // 추천 키워드 3개 (초기값 빈 배열)
-  const [suggestedKeywords, setSuggestedKeywords] = useState<string[]>([]);
 
   // 사용자가 전송 버튼 클릭했을 때
   const handleSend = () => {
@@ -81,7 +59,6 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
     // 3) 스트리밍 시작
     start(message, familyMode ? familySessionId : sessionId, familyMode ? familySize : 1)
     setMessage('')
-    setSuggestedKeywords(getRandomKeywords()); // 메시지 보낼 때만 키워드 생성
   }
 
   // aiChunk가 갱신될 때마다 placeholder 메시지의 content만 업데이트
@@ -112,23 +89,9 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
   const handleStop = () => {
     stop()
   }
-
-  // 키워드 버튼 클릭 시 Input에 입력
-  const handleKeywordClick = (keyword: string) => {
-    setMessage(keyword);
-  }
-
-  // 현재 모드의 세션ID에 해당하는 메시지 중 사용자가 보낸 메시지가 1개 이상일 때만 키워드 노출
-  const currentSessionId = familyMode ? familySessionId : sessionId;
-  const hasUserMessagesInCurrentMode = messages.filter(msg => msg.sessionId === currentSessionId && msg.role === 'user').length > 0;
-
   return (
     <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex-shrink-0">
       <div className="p-4">
-        {/* 현재 모드에 사용자가 보낸 메시지가 있을 때만 키워드 추천 노출 */}
-        {hasUserMessagesInCurrentMode && suggestedKeywords.length > 0 && (
-          <SuggestedKeywords keywords={suggestedKeywords} onSelect={handleKeywordClick} />
-        )}
         <div className="flex items-center space-x-3">
           {sttSupported && (
             <SttButton setMessage={setMessage} sessionId={sessionId} />
@@ -138,7 +101,7 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
             onChange={(e) => setMessage(e.target.value)}
             placeholder={isListening ? '음성을 인식하고 있습니다...' : '메시지를 입력하세요...'}
             onKeyPress={(e) => (e.key === 'Enter' && !isStreaming) && handleSend()}
-            className="flex-1 rounded-full border-gray-300 dark:border-gray-600 px-4 py-3 focus:border-green-500 focus:ring-green-500 dark:bg-gray-700 dark:text-white"
+            className="flex-1 rounded-full border-gray-300 dark:border-gray-600 px-4 py-3 focus:outline-none focus:border-gray-300 dark:bg-gray-700 dark:text-white"
             disabled={isListening}
           />
           {isStreaming ? (
@@ -147,9 +110,9 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
             </Button>
           ) :
             <Button
-              onClick={handleSend} // 메시지 전송은 page에서 props로 내려받아 처리할 수 있음
+              onClick={handleSend}
               size="icon"
-              className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
+              className="bg-[#5bc236] hover:bg-gray-600 dark:hover:bg-gray-400 rounded-full w-12 h-12"
             >
               <Send className="w-5 h-5" />
             </Button>

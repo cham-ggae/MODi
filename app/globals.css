@@ -144,3 +144,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Hide scrollbar for auto-scrolling elements */
+.overflow-y-auto {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.overflow-y-auto::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}

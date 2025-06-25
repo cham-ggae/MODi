@@ -38,6 +38,7 @@ import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
 import { useKakaoInit } from "@/hooks/useKakaoShare";
 import { ModernPlantPage } from "@/components/plant-game/modern-plant-page";
+import { FullScreenLoading } from '@/components/ui/loading';
 
 declare global {
   interface Window {
@@ -669,11 +670,7 @@ export default function PlantGamePage() {
   // 🚀 로딩 상태 처리
   // ==========================================
   if (isPlantLoading || !plantStatus) {
-    return (
-      <div className="flex justify-center items-center h-[100dvh] bg-white text-gray-700 text-lg">
-        🌱 식물 상태 불러오는 중...
-      </div>
-    );
+    return <FullScreenLoading message='식물 상태를 불러오는 중...' />;
   }
 
   // ==========================================

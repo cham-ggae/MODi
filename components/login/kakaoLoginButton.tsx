@@ -1,6 +1,7 @@
 'use client'
 import { useAuth } from '@/hooks/useAuth'
 import Image from 'next/image'
+import { Loading } from '@/components/ui/loading'
 
 export default function KakaoLoginButton() {
     const {
@@ -12,12 +13,7 @@ export default function KakaoLoginButton() {
     } = useAuth()
 
     if (isLoading) {
-        return (
-            <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
-                <span className="ml-2 text-gray-600">로딩 중...</span>
-            </div>
-        )
+        return <Loading size="sm" />;
     }
 
     if (isAuthenticated) {

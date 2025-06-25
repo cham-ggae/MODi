@@ -32,6 +32,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { mypageApi } from "@/lib/api/mypage";
 import { useRouter } from "next/navigation";
+import { FullScreenLoading } from "@/components/ui/loading";
 
 interface UserInfo {
   name: string;
@@ -166,7 +167,7 @@ export default function MyPage() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-full">로딩 중...</div>;
+    return <FullScreenLoading />;
   }
 
   // userInfo가 없으면 카카오 프로필/이름만 보여줌
@@ -349,32 +350,30 @@ export default function MyPage() {
                 const isRecommended = idx === 0;
                 return (
                   <SwiperSlide key={plan.planId}>
-                    <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between transition-colors duration-200 hover:bg-blue-500 hover:text-white group">
+                    <div className="w-full min-h-[260px] flex-shrink-0 rounded-2xl border border-gray-200 bg-white shadow-sm p-6 flex flex-col justify-between transition-all duration-200 hover:border-2 hover:border-blue-500 group">
                       <div className="flex flex-col gap-2 mb-4">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400 font-medium group-hover:text-blue-100">
+                          <span className="text-xs text-gray-400 font-medium">
                             {plan.description || ""}
                           </span>
                           {isRecommended && (
-                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 font-semibold group-hover:bg-white group-hover:text-blue-500">
+                            <span className="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 font-semibold">
                               추천
                             </span>
                           )}
                         </div>
-                        <div className="text-lg font-bold text-gray-900 group-hover:text-white">
+                        <div className="text-lg font-bold text-gray-900">
                           {plan.planName}
                         </div>
                       </div>
-                      <div className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-white">
+                      <div className="text-2xl font-bold text-gray-900 mb-4">
                         {plan.price ? `월 ${plan.price.toLocaleString()}원` : ""}
                       </div>
                       <a
                         href={plan.link || "#"}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={
-                          "block w-full border border-blue-500 text-blue-500 text-center rounded-lg py-2 font-semibold transition hover:bg-white hover:text-blue-500 group-hover:bg-white group-hover:text-blue-500"
-                        }
+                        className="block w-full border border-blue-500 text-blue-500 text-center rounded-lg py-2 font-semibold transition hover:bg-blue-500 hover:text-white"
                       >
                         요금제 자세히 보기
                       </a>

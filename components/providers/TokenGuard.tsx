@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { FullScreenLoading } from '@/components/ui/loading';
 
 export function withTokenGuard<P extends object>(
   Component: React.ComponentType<P>,
@@ -17,11 +18,7 @@ export function withTokenGuard<P extends object>(
     }, [isLoading, accessToken, router, redirectTo]);
 
     if (isLoading) {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-[#81C784] border-t-transparent animate-spin rounded-full"></div>
-        </div>
-      );
+      return <FullScreenLoading />;
     }
 
     if (!accessToken) {

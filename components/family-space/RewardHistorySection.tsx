@@ -10,6 +10,7 @@ import { Gift, Calendar, CheckCircle, Package, ChevronDown } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion";
 import { RewardHistory } from "@/types/plants.type";
 import { toast } from "sonner";
+import { Loading } from '@/components/ui/loading';
 
 export function RewardHistorySection() {
   const { data: rewards, isLoading, error } = useFamilyRewardHistory();
@@ -49,8 +50,7 @@ export function RewardHistorySection() {
             </div>
           </div>
           <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-500 mx-auto mb-4"></div>
-            <p className="text-gray-600">보상 히스토리를 불러오는 중...</p>
+            <Loading message="보상 히스토리를 불러오는 중..." />
           </div>
         </CardContent>
       </Card>

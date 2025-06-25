@@ -9,6 +9,7 @@ import KakaoLoginButton from '@/components/login/kakaoLoginButton';
 import { ResponsiveWrapper } from '@/components/responsive-wrapper';
 import { useIsMobile } from '@/hooks/use-mobile';
 import Image from 'next/image';
+import { FullScreenLoading } from '@/components/ui/loading';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading, login } = useAuth();
@@ -29,12 +30,7 @@ export default function HomePage() {
   if (isLoading) {
     return (
       <PageLayout variant="gradient" padding="none">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="w-8 h-8 border-4 border-[#81C784] border-t-transparent animate-spin rounded-full mx-auto mb-4"></div>
-            <p className="text-sm text-gray-600 dark:text-gray-300">로딩 중...</p>
-          </div>
-        </div>
+        <FullScreenLoading />
       </PageLayout>
     );
   }
