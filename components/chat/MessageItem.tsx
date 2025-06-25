@@ -111,13 +111,6 @@ const MessageItem = ({
               </Button>
             )}
           </div>
-          {id === "welcome-individual" && (
-            <>
-              <WelcomeActionButtons />
-              {/* 연령대별 추천 요금제 카드: 가족스페이스 버튼 아래에, 초록색 강조 */}
-              <AgePlanRecommendationCard userAge={user?.age} />
-            </>
-          )}
         </div>
       </motion.div>
     </>
