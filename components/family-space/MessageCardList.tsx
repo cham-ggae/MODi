@@ -24,6 +24,12 @@ import { MessageCardComment } from "@/types/message-card.type";
 import Image from "next/image";
 import { useMessageCardCommentCount } from "@/hooks/family/useFamilyQueries";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 const cardTemplates = [
   { id: "heart", icon: Heart, color: "bg-pink-100 text-pink-600", name: "사랑" },
@@ -240,13 +246,35 @@ export function MessageCardList() {
       )}
 
       {/* 카드 상세 모달 */}
-      <Dialog open={!!selectedCard} onOpenChange={() => setSelectedCard(null)}>
-        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
-          {selectedCard && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="text-center">메시지 카드</DialogTitle>
-              </DialogHeader>
+      <AnimatePresence>
+        {selectedCard && (
+          <>
+            {/* Overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedCard(null)}
+              className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            />
+            
+            {/* Content */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="fixed left-0 right-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl p-6 pt-4 max-w-md mx-auto"
+              style={{ borderRadius: "20px" }}
+            >
+              {/* Handle bar */}
+              <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+              
+              <div className="text-center mb-4">
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  메시지 카드
+                </h2>
+              </div>
 
               <div className="space-y-4">
                 {/* 작성자 정보 */}
@@ -280,115 +308,81 @@ export function MessageCardList() {
                 </div>
 
                 {/* 댓글 목록 */}
-                <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-3">
-                    댓글 ({commentsManager.totalCount})
-                  </h4>
-                  <div className="space-y-3 max-h-40 overflow-y-auto">
-                    {commentsManager.isLoading ? (
-                      <div className="text-center py-4">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-500 mx-auto"></div>
-                      </div>
-                    ) : commentsManager.comments.length > 0 ? (
-                      commentsManager.comments.map((comment) => (
-                        <div
-                          key={comment.commentId}
-                          className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg"
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 mb-2">
-                              {comment.authorProfileImage ? (
-                                <Image
-                                  src={comment.authorProfileImage}
-                                  alt={`${comment.authorName}의 프로필`}
-                                  width={24}
-                                  height={24}
-                                  className="w-6 h-6 rounded-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-xs">
-                                  {comment.authorName.charAt(0)}
-                                </div>
-                              )}
-                              <span className="text-sm font-medium text-gray-900 dark:text-white">
-                                {comment.authorName}
-                              </span>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium text-gray-900 dark:text-white">댓글</h3>
+                    <span className="text-sm text-gray-500">
+                      {commentsManager.comments.length}개의 댓글
+                    </span>
+                  </div>
+
+                  {/* 댓글 입력 */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="댓글을 입력하세요..."
+                      className="flex-1"
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter" && !e.shiftKey) {
+                          e.preventDefault();
+                          handleAddComment();
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={handleAddComment}
+                      disabled={!newComment.trim() || commentsManager.isCreating}
+                      className="bg-green-500 hover:bg-green-600 text-white"
+                    >
+                      {commentsManager.isCreating ? "..." : "작성"}
+                    </Button>
+                  </div>
+
+                  {/* 댓글 목록 */}
+                  <div className="space-y-3 max-h-[40vh] overflow-y-auto">
+                    {commentsManager.comments.map((comment) => (
+                      <div
+                        key={comment.commentId}
+                        className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
+                      >
+                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-sm">
+                          {comment.authorName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {comment.authorName}
+                            </p>
+                            <div className="flex items-center gap-2">
                               <span className="text-xs text-gray-400">
                                 {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
                               </span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              {comment.canModify && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="p-1 h-auto"
-                                  onClick={() =>
-                                    setEditingComment({
-                                      id: comment.commentId,
-                                      content: comment.content,
-                                    })
-                                  }
-                                >
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              )}
                               {comment.canDelete && (
                                 <Button
-                                  size="sm"
                                   variant="ghost"
-                                  className="p-1 h-auto text-red-500 hover:text-red-700"
+                                  size="sm"
+                                  className="h-auto p-1 text-red-500 hover:text-red-700"
                                   onClick={() => handleDeleteComment(comment.commentId)}
-                                  disabled={commentsManager.isDeleting}
                                 >
                                   <Trash2 className="w-3 h-3" />
                                 </Button>
                               )}
                             </div>
                           </div>
-                          <p className="text-sm text-gray-700 dark:text-gray-300">
+                          <p className="text-gray-700 dark:text-gray-300 break-words">
                             {comment.content}
                           </p>
                         </div>
-                      ))
-                    ) : (
-                      <div className="text-center py-4 text-gray-500 dark:text-gray-400">
-                        아직 댓글이 없어요
                       </div>
-                    )}
+                    ))}
                   </div>
                 </div>
-
-                {/* 댓글 입력 */}
-                <div className="flex gap-2">
-                  <Input
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="댓글을 입력하세요..."
-                    className="flex-1 dark:bg-gray-700 dark:text-white"
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && !commentsManager.isCreating && handleAddComment()
-                    }
-                    disabled={commentsManager.isCreating}
-                  />
-                  <Button
-                    onClick={handleAddComment}
-                    size="icon"
-                    className="bg-green-500 hover:bg-green-600"
-                    disabled={commentsManager.isCreating || !newComment.trim()}
-                  >
-                    {commentsManager.isCreating ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <Send className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
               </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* 댓글 수정 모달 */}
       <Dialog open={!!editingComment} onOpenChange={() => setEditingComment(null)}>
