@@ -37,6 +37,7 @@ import { MessageCardCreator } from "@/components/family-space/MessageCardCreator
 import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
 import { useKakaoInit } from "@/hooks/useKakaoShare";
+import { useManageMissions } from "@/hooks/plant/useManageMissions";
 
 declare global {
   interface Window {
@@ -139,9 +140,8 @@ function ChoiceModal({
           {options.map((opt) => (
             <button
               key={opt}
-              className={`px-4 py-2 rounded-lg border ${
-                selected === opt ? "bg-blue-500 text-white" : "bg-gray-100"
-              }`}
+              className={`px-4 py-2 rounded-lg border ${selected === opt ? "bg-blue-500 text-white" : "bg-gray-100"
+                }`}
               onClick={() => setSelected(opt)}
             >
               {opt}
@@ -460,69 +460,20 @@ export default function PlantGamePage() {
   // 🎯 미션 시스템
   // ==========================================
 
-  // 미션별 오늘 완료 여부 (서버에서 확인)
-  const missionTypes: ActivityType[] = [
-    "attendance",
-    "emotion",
-    "quiz",
-    "lastleaf",
-    "register",
-    "survey",
-  ];
-  const missionQueries = missionTypes.map((type) => useCheckTodayActivity(type, { staleTime: 0 }));
-  const missionCompletedMap = Object.fromEntries(
-    missionTypes.map((type, idx) => [type, missionQueries[idx].data])
-  ) as Partial<Record<ActivityType, boolean>>;
-
-  // 미션 시트가 열릴 때마다 refetch
-  useEffect(() => {
-    if (showMissions) {
-      missionQueries.forEach((q) => q.refetch && q.refetch());
-    }
-  }, [showMissions]);
-
-  /**
-   * 미션 클릭 핸들러
-   * 미션 타입에 따라 적절한 모달을 열거나 포인트를 적립
-   */
-  const handleMissionClick = (activityType: ActivityType) => {
-    if (missionCompletedMap[activityType]) {
-      toast("내일 다시");
-      setShowMissions(false);
-      return;
-    }
-
-    switch (activityType) {
-      case "attendance":
-        addPoint({ activityType });
-        toast.success("출석 완료! 경험치가 적립되었습니다. ✏️");
-        setShowMissions(false);
-        break;
-      case "quiz":
-        setShowMissions(false);
-        setShowQuizPage(true);
-        break;
-      case "lastleaf":
-        setShowMissions(false);
-        setShowCardMatchingGame(true);
-        break;
-      case "emotion":
-        setShowMissions(false);
-        setShowMessageCardCreator(true);
-        break;
-      case "register":
-        setShowMissions(false);
-        setShowInviteCodeModal(true);
-        break;
-      case "survey":
-        setShowMissions(false);
-        router.push("/survey?mission=true");
-        break;
-      default:
-        addPoint({ activityType });
-        setShowMissions(false);
-    }
-  };
+  // 미션 관련 상태 및 핸들러를 커스텀 훅으로 관리
+  const {
+    missionTypes,
+    missionQueries,
+    missionCompletedMap,
+    handleMissionClick,
+  } = useManageMissions({
+    showMissions,
+    setShowMissions,
+    setShowQuizPage,
+    setShowCardMatchingGame,
+    setShowMessageCardCreator,
+    setShowInviteCodeModal,
+  });
 
   // ==========================================
   // 🎮 게임 콜백 함수들
@@ -685,9 +636,7 @@ export default function PlantGamePage() {
 
       {/* 👨‍👩‍👧‍👦 가족 구성원 상태 */}
       {currentLevel !== 5 && (
-        <div className="flex-shrink-0 mb-4">
-          <FamilyWateringStatus members={transformedMembers} />
-        </div>
+        <FamilyWateringStatus members={transformedMembers} />
       )}
 
       {/* 🎯 미션하기 버튼 */}
