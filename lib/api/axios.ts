@@ -1,6 +1,14 @@
 import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { config } from '@/lib/config';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_ADDR || 'http://localhost:8090';
+const API_BASE_URL = config.getApiUrl();
+const API_CONFIG = config.getCurrentApiConfig();
+
+// 현재 사용 중인 API URL 로그 출력
+if (typeof window !== 'undefined' && config.isDevelopment()) {
+  console.log('🌐 API Base URL:', API_BASE_URL);
+  console.log('🔧 API Config:', API_CONFIG);
+}
 
 // 재시도 설정
 const REFRESH_RETRY_ATTEMPTS = 3;
@@ -118,14 +126,14 @@ const refreshAccessToken = async (attempt: number = 1): Promise<string> => {
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: API_CONFIG.timeout,
 });
 
 /** 인증 필요한 API 클라이언트 */
 export const authenticatedApiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10000,
+  timeout: API_CONFIG.timeout,
 });
 
 let isRefreshing = false;
