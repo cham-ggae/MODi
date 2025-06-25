@@ -422,12 +422,10 @@ export default function FamilySpacePage() {
             isLoading={isLoadingMessageCards}
             onMessageCardCreated={handleMessageCardCreated}
           />
-
           {/* Reward History Section */}
           <RewardHistorySection />
         </div>
       </div>
-
       {showMessageModal && (
         <MessageCardModal onSendCard={handleSendCard}>
           <></>

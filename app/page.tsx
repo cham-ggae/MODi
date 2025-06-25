@@ -2,13 +2,13 @@
 
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Smartphone, Users, MessageCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { PageLayout } from '@/components/layouts/page-layout';
 import { useRouter } from 'next/navigation';
 import KakaoLoginButton from '@/components/login/kakaoLoginButton';
 import { ResponsiveWrapper } from '@/components/responsive-wrapper';
 import { useIsMobile } from '@/hooks/use-mobile';
+import Image from 'next/image';
 
 export default function HomePage() {
   const { user, isAuthenticated, isLoading, login } = useAuth();
@@ -43,58 +43,46 @@ export default function HomePage() {
   // 여기서는 로그인하지 않은 사용자만 홈페이지 표시
 
   const pageContent = (
-    <div className="flex flex-col items-center justify-center h-full p-8 space-y-12">
+    <div className="flex flex-col items-center justify-center h-full p-8 space-y-8">
+      {/* 로고 섹션 */}
       <div className="text-center">
-        <div className="inline-block p-4 bg-white rounded-full shadow-lg">
-          <span className="text-4xl font-bold text-green-500">M</span>
+        <div className="inline-block p-4 bg-white rounded-full">
+          <Image
+            src="/images/modi-logo.png"
+            alt="MODi Logo"
+            width={220}
+            height={220}
+            className="rounded-full"
+          />
         </div>
-        <h1 className="text-4xl font-bold mt-4">MODi</h1>
-        <p className="text-lg mt-2 text-gray-600 dark:text-gray-300">
+        {/* <h1 className="text-4xl font-bold mt-4">MODi</h1> */}
+        <p className="text-m mt-2 text-gray-600 dark:text-gray-300">
           가족과 함께하는
           <br />
           스마트한 요금제 관리
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 w-full max-w-sm">
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl text-center">
-          <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-            <Smartphone className="w-6 h-6 text-green-600 dark:text-green-400" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">요금제 분석</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">맞춤형 추천</p>
-        </div>
-
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl text-center">
-          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-            <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">가족 결합</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">할인 혜택</p>
-        </div>
-
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl text-center">
-          <div className="w-12 h-12 bg-purple-100 dark:bg-purple-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">AI 상담</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">24시간 지원</p>
-        </div>
-
-        <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl text-center">
-          <div className="w-12 h-12 bg-orange-100 dark:bg-orange-800 rounded-xl mx-auto mb-3 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-          </div>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm">비용 절약</h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">최적화</p>
-        </div>
+      {/* 비디오 섹션 */}
+      <div className="w-full max-w-md aspect-video">
+        <video
+          className="w-full h-full object-contain"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/videos/modi-intro.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       </div>
 
-      <div className="w-full max-w-sm">
-        <div className="flex justify-center">
+      {/* 로그인 섹션 */}
+      <div className="w-full max-w-sm mt-12">
+        <div className="flex justify-center mt-4">
           <KakaoLoginButton />
         </div>
-        <p className="text-xs text-center text-gray-500 mt-4">
+        <p className="text-xs text-center text-gray-500 mt-7">
           카카오 로그인으로 서비스 약관 및 개인정보처리방침에
           <br />
           동의하는 것으로 간주합니다.
@@ -105,7 +93,7 @@ export default function HomePage() {
 
   if (isMobile) {
     return (
-      <div className="h-full w-full flex items-center justify-center bg-gradient-to-b from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900">
+      <div className="h-full w-full flex items-center justify-center bg-white">
         <div className="w-full max-w-md mx-auto">{pageContent}</div>
       </div>
     );

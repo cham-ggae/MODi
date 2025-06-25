@@ -1,8 +1,8 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TrendingUp, Users, DollarSign, Calendar, Sparkles, UserPlus } from 'lucide-react';
-import { DiscountInfo } from '@/types/family.type';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TrendingUp, Users, DollarSign, Calendar, Sparkles, UserPlus } from "lucide-react";
+import { DiscountInfo } from "@/types/family.type";
 
 interface FamilyRecommendationCardProps {
   // 가족 API 연동을 위한 props
@@ -82,7 +82,7 @@ export function FamilyRecommendationCard({
           <div className="flex items-center space-x-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">가족 결합 요금제</h2>
           </div>
-          <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300 text-xs px-2 py-0.5">
+          <Badge className="bg-gray-50 dark:bg-gray-50 text-gray-600 dark:text-green-300 text-xs px-2 py-0.5 hover:bg-gray-200 dark:hover:bg-gray-300">
             <TrendingUp className="w-3 h-3 mr-1" />
             {memberCount}명 가족
           </Badge>
@@ -95,38 +95,42 @@ export function FamilyRecommendationCard({
               <div className="flex items-center space-x-3">
                 <div className="text-2xl">💝</div>
                 <div>
-                  <div className="font-semibold text-gray-900 dark:text-white">
-                    {combiType || '가족 결합 상품'}
+                  <div className="font-semibold text-gray-700 dark:text-gray-700">
+                    {combiType || "가족 결합 상품"}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {memberCount}명 구성원이 함께하는 가족
                   </div>
                 </div>
               </div>
-              <Button
-                size="sm"
-                onClick={onViewRecommendation}
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-full text-xs"
+              <a
+                href="https://www.lguplus.com/mobile/combined/together"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#ffffff] border border-gray-300 text-gray-800 px-3 py-1.5 rounded-full text-xs hover:bg-gray-50 shadow-m inline-flex items-center justify-center"
+                style={{ minWidth: "64px", textAlign: "center" }}
               >
                 상세보기
-              </Button>
+              </a>
             </div>
           </div>
 
           {/* 할인 정보 */}
           <div className="space-y-3">
             {/* 월 할인 정보 */}
-            <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-100 dark:border-green-800">
+            <div className="p-4 bg-white-50 dark:bg-green-900/20 rounded-xl border border-gray-200 dark:border-green-800">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <span className="font-bold text-lg text-green-700 dark:text-green-300">
-                    월 {discountInfo.formattedMonthlyDiscount} 절약
+                  {/* <MdCurrencyWon className="w-5 h-5 text-gray-700 dark:text-gray-700" /> */}
+                  <span className="font-bold text-lg text-gray-700 dark:text-gray-700">
+                    월{" "}
+                    <span className="text-[#5bc236]">{discountInfo.formattedMonthlyDiscount}</span>{" "}
+                    절약
                   </span>
                 </div>
-                <Users className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <Users className="w-5 h-5 text-gray-700 dark:text-gray-700" />
               </div>
-              <p className="text-sm text-green-600 dark:text-green-400 leading-relaxed">
+              <p className="text-sm text-gray-700 dark:text-gray-700 leading-relaxed">
                 {discountInfo.description}
               </p>
             </div>
@@ -141,21 +145,13 @@ export function FamilyRecommendationCard({
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-green-600 dark:text-green-400">
+                  <div className="text-lg font-bold text-gray-700 dark:text-gray-700">
                     {discountInfo.yearlyDiscount.toLocaleString()}원
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">1년간 총 절약</div>
                 </div>
               </div>
             </div>
-
-            {/* 행동 유도 버튼 */}
-            <Button
-              onClick={onViewRecommendation}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-3 rounded-full flex items-center justify-center gap-2"
-            >
-              💰 지금 바로 절약하러 가기
-            </Button>
           </div>
         </div>
       </CardContent>

@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { usePlantGameStore } from '@/store/usePlantGameStore';
 import { useFamily } from '@/hooks/family';
 import { useState } from 'react';
@@ -42,7 +46,7 @@ export function InviteCodeModal({ copied, onGenerateCode, onCopyCode, onShareKak
   };
 
   const handleCancelEdit = () => {
-    setTempFamilyName('');
+    setTempFamilyName("");
     setIsEditingName(false);
   };
 
@@ -152,10 +156,10 @@ export function InviteCodeModal({ copied, onGenerateCode, onCopyCode, onShareKak
                   초대 코드 생성하기
                 </Button>
               </div>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+        </motion.div>
+      </>
+      )}
+    </>
   );
 }

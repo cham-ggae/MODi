@@ -1,10 +1,10 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { FamilyMemberCard } from './FamilyMemberCard';
-import { InviteCodeModal } from './InviteCodeModal';
-import { UIFamilyMember } from '@/types/family.type';
-import { Button } from '@/components/ui/button';
-import { UserPlus } from 'lucide-react';
-import { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { FamilyMemberCard } from "./FamilyMemberCard";
+import { InviteCodeModal } from "./InviteCodeModal";
+import { UIFamilyMember } from "@/types/family.type";
+import { Button } from "@/components/ui/button";
+import { UserPlus } from "lucide-react";
+import { useState } from "react";
 
 interface FamilyMemberSectionProps {
   members: UIFamilyMember[];
@@ -43,7 +43,7 @@ export function FamilyMemberSection({
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">
-              {familyName || '우리 가족'}
+              {familyName || "우리 가족"}
             </h2>
             {memberCount > 0 && (
               <p className="text-sm text-gray-500 dark:text-gray-400">{memberCount}명의 구성원</p>
@@ -52,10 +52,9 @@ export function FamilyMemberSection({
           <Button
             onClick={() => setIsInviteModalOpen(true)}
             disabled={!canInvite}
-            className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full flex items-center gap-2"
+            className="bg-gray-100 border-gray-400  hover:bg-gray-200 text-gray-700 w-10 h-10 rounded-full flex items-center justify-center"
           >
-            <UserPlus className="w-4 h-4" />
-            초대하기
+            <UserPlus className="w-4 h-4 block leading-none shrink-0 translate-x-[2px]" />
           </Button>
         </div>
         <div className="space-y-4">

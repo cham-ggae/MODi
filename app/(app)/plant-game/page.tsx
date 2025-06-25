@@ -31,6 +31,8 @@ import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFa
 import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
 import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
+import { useKakaoInit } from "@/hooks/useKakaoShare";
+import { ModernPlantPage } from "@/components/plant-game/modern-plant-page";
 import { useKakaoInit, shareKakao } from "@/hooks/useKakaoShare";
 import MissionBtn from '@/components/plant-game/MissionBtn';
 import { usePlantGameStore } from '@/store/usePlantGameStore';
@@ -209,6 +211,7 @@ export default function PlantGamePage() {
     }
 
     setIsWatering(true);
+    console.log('Water effect started');
 
     addPoint(
       { activityType: "water" },
@@ -216,15 +219,20 @@ export default function PlantGamePage() {
         onSuccess: () => {
           toast.success("물주기 완료!");
           setAlreadyWatered(true);
-          setTimeout(() => setIsWatering(false), 2000);
           queryClient.invalidateQueries({ queryKey: ["activity", "check-today", "water"] });
           // 식물 상태 업데이트를 위해 쿼리 무효화
           queryClient.invalidateQueries({ queryKey: ["plant-status", familyId] });
           // 물주기 완료된 구성원 목록 업데이트
           fetchWateredMembers();
+          // 애니메이션이 끝나고 나서 상태를 false로 변경
+          setTimeout(() => {
+            console.log('Water effect ended');
+            setIsWatering(false);
+          }, 3000);
         },
         onError: (error) => {
           setIsWatering(false);
+          console.log('Water effect error');
         },
       }
     );
