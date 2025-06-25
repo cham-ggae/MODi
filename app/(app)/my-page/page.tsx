@@ -32,6 +32,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { mypageApi } from "@/lib/api/mypage";
 import { useRouter } from "next/navigation";
+import { FullScreenLoading } from "@/components/ui/loading";
 
 interface UserInfo {
   name: string;
@@ -166,7 +167,7 @@ export default function MyPage() {
   }, []);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-full">로딩 중...</div>;
+    return <FullScreenLoading />;
   }
 
   // userInfo가 없으면 카카오 프로필/이름만 보여줌

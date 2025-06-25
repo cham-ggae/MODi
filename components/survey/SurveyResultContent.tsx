@@ -44,6 +44,7 @@ import { useFamily } from "@/hooks/family";
 import { useKakaoInit, shareSurveyResult } from "@/hooks/useKakaoShare";
 import { useAddPoint } from "@/hooks/plant";
 import { toast } from "sonner";
+import { FullScreenLoading } from '@/components/ui/loading';
 
 // bugId에 따른 추천 이유 매핑
 const getRecommendationReason = (bugId: number): string => {
@@ -136,11 +137,7 @@ export default function SurveyResultContent() {
 
   // isLoading은 Suspense의 fallback으로 처리되므로, surveyResult가 아직 없을 때 로딩 처리
   if (!surveyResult) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-emerald-500"></div>
-      </div>
-    );
+    return <FullScreenLoading size="lg" />;
   }
 
   const displayName = bugIdToNameMap[bugId] || "개미형";
