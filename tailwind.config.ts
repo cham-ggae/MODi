@@ -102,5 +102,17 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/typography')],
+  extend: {
+    '.hide-scrollbar': {
+      /* IE and Edge */
+      '-ms-overflow-style': 'none',
+      /* Firefox */
+      'scrollbar-width': 'none',
+      /* Safari and Chrome */
+      '&::-webkit-scrollbar': {
+        display: 'none'
+      }
+    }
+  }
 };
 export default config;

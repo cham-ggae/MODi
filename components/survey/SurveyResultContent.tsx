@@ -186,7 +186,7 @@ export default function SurveyResultContent() {
   };
 
   return (
-    <div className="bg-gradient-to-b from-blue-100 to-blue-50 min-h-screen w-full">
+    <div className="bg-gradient-to-b from-blue-100 to-blue-50 min-h-screen w-full survey-result-page">
       <div className="max-w-md mx-auto">
         <div className="p-4">
           <Button
