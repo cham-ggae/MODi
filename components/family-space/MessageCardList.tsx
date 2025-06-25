@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,14 +47,13 @@ function CommentCount({ fcid }: { fcid: number }) {
 
 export function MessageCardList() {
   const [selectedCard, setSelectedCard] = useState<MessageCard | null>(null);
+  const [editingCard, setEditingCard] = useState<{ content: string } | null>(null);
   const [newComment, setNewComment] = useState("");
-  const [editingComment, setEditingComment] = useState<{ id: number; content: string } | null>(
-    null
-  );
+  const [editingComment, setEditingComment] = useState<{ id: number; content: string } | null>(null);
   const [showAll, setShowAll] = useState(false);
   const { toast } = useToast();
 
-  const { messageCards, totalCount, isLoading, isDeleting, deleteMessageCard, refetch } =
+  const { messageCards, totalCount, isLoading, isDeleting, deleteMessageCard, updateMessageCard, refetch } =
     useMessageCardsManager();
 
   // 선택된 카드의 댓글 관리
@@ -131,6 +130,44 @@ export function MessageCardList() {
     setNewComment("");
     setEditingComment(null);
   };
+
+  const handleUpdateCard = async () => {
+    if (!editingCard || !selectedCard) return;
+
+    try {
+      await updateMessageCard({
+        fcid: selectedCard.fcid,
+        data: { 
+          content: editingCard.content.trim(),
+          imageType: selectedCard.imageType
+        }
+      });
+      setEditingCard(null);
+      // 카드 목록 새로고침
+      refetch();
+      toast({
+        title: "메시지 카드가 수정되었습니다! ✏️",
+      });
+    } catch (error) {
+      toast({
+        title: "메시지 카드 수정 실패",
+        description: "잠시 후 다시 시도해주세요.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setSelectedCard(null);
+        setEditingCard(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, []);
 
   if (isLoading) {
     return (
@@ -254,7 +291,10 @@ export function MessageCardList() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedCard(null)}
+              onClick={() => {
+                setSelectedCard(null);
+                setEditingCard(null);
+              }}
               className="fixed inset-0 bg-black bg-opacity-30 z-40"
             />
             
@@ -304,7 +344,46 @@ export function MessageCardList() {
 
                 {/* 카드 내용 */}
                 <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl">
-                  <p className="text-gray-700 dark:text-gray-300">{selectedCard.content}</p>
+                  {editingCard ? (
+                    <div className="space-y-3">
+                      <Input
+                        value={editingCard.content}
+                        onChange={(e) => setEditingCard({ content: e.target.value })}
+                        placeholder="메시지를 입력하세요..."
+                        className="w-full"
+                      />
+                      <div className="flex gap-2 justify-end">
+                        <Button
+                          variant="outline"
+                          onClick={() => setEditingCard(null)}
+                          className="text-sm"
+                        >
+                          취소
+                        </Button>
+                        <Button
+                          onClick={handleUpdateCard}
+                          disabled={!editingCard.content.trim()}
+                          className="bg-[#5bc236] hover:bg-[#4ca52d] text-white text-sm"
+                        >
+                          수정
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-gray-700 dark:text-gray-300 flex-1">{selectedCard.content}</p>
+                      {selectedCard.canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-auto p-1 text-gray-500 hover:text-gray-700"
+                          onClick={() => setEditingCard({ content: selectedCard.content })}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* 댓글 목록 */}
@@ -333,7 +412,7 @@ export function MessageCardList() {
                     <Button
                       onClick={handleAddComment}
                       disabled={!newComment.trim() || commentsManager.isCreating}
-                      className="bg-green-500 hover:bg-green-600 text-white"
+                      className="bg-[#5bc236] hover:bg-green-600 text-white"
                     >
                       {commentsManager.isCreating ? "..." : "작성"}
                     </Button>
@@ -359,20 +438,69 @@ export function MessageCardList() {
                                 {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
                               </span>
                               {comment.canDelete && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-auto p-1 text-red-500 hover:text-red-700"
-                                  onClick={() => handleDeleteComment(comment.commentId)}
-                                >
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                                <div className="flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-auto p-1 text-gray-500 hover:text-gray-700"
+                                    onClick={() => setEditingComment({ id: comment.commentId, content: comment.content })}
+                                  >
+                                    <Edit className="w-3 h-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-auto p-1 text-red-500 hover:text-red-700"
+                                    onClick={() => handleDeleteComment(comment.commentId)}
+                                  >
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </div>
                               )}
                             </div>
                           </div>
-                          <p className="text-gray-700 dark:text-gray-300 break-words">
-                            {comment.content}
-                          </p>
+                          {editingComment?.id === comment.commentId ? (
+                            <div className="mt-2">
+                              <div className="relative">
+                                <Input
+                                  value={editingComment.content}
+                                  onChange={(e) =>
+                                    setEditingComment((prev) => (prev ? { ...prev, content: e.target.value } : null))
+                                  }
+                                  placeholder="댓글을 입력하세요..."
+                                  className="pr-[140px]"
+                                  onKeyPress={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      handleUpdateComment();
+                                    }
+                                  }}
+                                />
+                                <div className="absolute right-1 top-1 flex items-center gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setEditingComment(null)}
+                                    className="h-7 text-xs px-2"
+                                  >
+                                    취소
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={handleUpdateComment}
+                                    disabled={!editingComment.content.trim()}
+                                    className="h-7 text-xs px-2 bg-[#5bc236] hover:bg-[#4ca52d] text-white"
+                                  >
+                                    수정
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-gray-700 dark:text-gray-300 break-words">
+                              {comment.content}
+                            </p>
+                          )}
                         </div>
                       </div>
                     ))}
@@ -383,41 +511,6 @@ export function MessageCardList() {
           </>
         )}
       </AnimatePresence>
-
-      {/* 댓글 수정 모달 */}
-      <Dialog open={!!editingComment} onOpenChange={() => setEditingComment(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>댓글 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              value={editingComment?.content || ""}
-              onChange={(e) =>
-                setEditingComment((prev) => (prev ? { ...prev, content: e.target.value } : null))
-              }
-              placeholder="댓글을 입력하세요..."
-              className="dark:bg-gray-700 dark:text-white"
-              onKeyPress={(e) => e.key === "Enter" && handleUpdateComment()}
-            />
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                onClick={() => setEditingComment(null)}
-                disabled={commentsManager.isUpdating}
-              >
-                취소
-              </Button>
-              <Button
-                onClick={handleUpdateComment}
-                disabled={commentsManager.isUpdating || !editingComment?.content.trim()}
-              >
-                수정
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
