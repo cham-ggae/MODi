@@ -12,6 +12,14 @@ interface PlantGameState {
   setCurrentLevel: (v: number) => void;
   currentProgress: number;
   setCurrentProgress: (v: number) => void;
+  handleClaimRewardClick: (params: {
+    currentLevel: number;
+    claimReward: (args: any, options: {
+      onSuccess: (rewardData: RewardHistory) => void;
+      onError: (error: any) => void;
+    }) => void;
+    confetti: (opts: any) => void;
+  }) => void;
 }
 
 export const usePlantGameStore = create<PlantGameState>((set) => ({
@@ -25,4 +33,19 @@ export const usePlantGameStore = create<PlantGameState>((set) => ({
   setCurrentLevel: (v) => set({ currentLevel: v }),
   currentProgress: 0,
   setCurrentProgress: (v) => set({ currentProgress: v }),
+  handleClaimRewardClick: ({ currentLevel, claimReward, confetti }) => {
+    if (currentLevel === 5) {
+      claimReward(undefined, {
+        onSuccess: (rewardData) => {
+          set({ rewardData, showRewardModal: true });
+          confetti({
+            particleCount: 150,
+            spread: 80,
+            origin: { y: 0.6 },
+          });
+        },
+        onError: () => { },
+      });
+    }
+  },
 })); 

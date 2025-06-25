@@ -60,6 +60,7 @@ export default function PlantGamePage() {
     rewardData, setRewardData,
     currentLevel, setCurrentLevel,
     currentProgress, setCurrentProgress,
+    handleClaimRewardClick,
   } = usePlantGameStore();
 
   // ==========================================
@@ -315,34 +316,6 @@ export default function PlantGamePage() {
   }, [checkAlreadyFed]);
 
   // ==========================================
-  // 🎁 보상 시스템
-  // ==========================================
-
-  /**
-   * 보상 수령 버튼 클릭 핸들러
-   * 5레벨 달성 시 보상 수령 및 confetti 효과
-   */
-  const handleClaimRewardClick = () => {
-    if (currentLevel === 5) {
-      claimReward(undefined, {
-        onSuccess: (rewardData) => {
-          setRewardData(rewardData);
-          setShowRewardModal(true);
-          // 🎉 confetti 효과 추가
-          confetti({
-            particleCount: 150,
-            spread: 80,
-            origin: { y: 0.6 }, // 화면 중간쯤에서 터짐
-          });
-        },
-        onError: (error) => {
-          // 에러 토스트는 useClaimReward 훅에서 처리됨
-        },
-      });
-    }
-  };
-
-  // ==========================================
   // 🎯 미션 시스템
   // ==========================================
 
@@ -551,11 +524,7 @@ export default function PlantGamePage() {
         {currentLevel === 5 ? (
           <div className="flex flex-col items-center gap-4">
             <div className="text-xl font-bold text-green-600">5레벨 달성!!!</div>
-            <ClaimRewardButton
-              onClick={handleClaimRewardClick}
-              disabled={isClaiming}
-              isLoading={isClaiming}
-            />
+            <ClaimRewardButton />
           </div>
         ) : (
           <>

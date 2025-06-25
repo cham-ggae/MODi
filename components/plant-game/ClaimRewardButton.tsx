@@ -3,18 +3,29 @@
 import { Button } from "@/components/ui/button";
 import { Gift, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { usePlantGameStore } from '@/store/usePlantGameStore';
+import { useClaimReward, usePlantStatus } from '@/hooks/plant';
+import confetti from 'canvas-confetti';
+import { useFamily } from '@/hooks/family';
 
-interface ClaimRewardButtonProps {
-  onClick: () => void;
-  disabled?: boolean;
-  isLoading?: boolean;
-}
+export function ClaimRewardButton() {
+  const {
+    currentLevel,
+    handleClaimRewardClick,
+    showRewardModal,
+  } = usePlantGameStore();
+  const { familyId } = useFamily();
+  const { mutate: claimReward, isPending: isLoading } = useClaimReward();
+  const { data: plantStatus } = usePlantStatus(familyId ?? 0);
 
-export function ClaimRewardButton({
-  onClick,
-  disabled = false,
-  isLoading = false,
-}: ClaimRewardButtonProps) {
+  const handleClick = () => {
+    handleClaimRewardClick({
+      currentLevel,
+      claimReward,
+      confetti,
+    });
+  };
+
   return (
     <div className="px-6 mb-8">
       <motion.div
@@ -24,8 +35,8 @@ export function ClaimRewardButton({
         className="w-full"
       >
         <Button
-          onClick={onClick}
-          disabled={disabled || isLoading}
+          onClick={handleClick}
+          disabled={isLoading || showRewardModal || currentLevel !== 5}
           className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white py-4 rounded-2xl text-lg font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
         >
           {isLoading ? (
