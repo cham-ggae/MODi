@@ -12,19 +12,36 @@ pnpm install
 
 ### 환경 변수 설정
 
-프로젝트 루트에 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
+#### 자동 환경 설정
+
+프로젝트는 개발/프로덕션 환경을 자동으로 감지하여 적절한 API 서버에 연결됩니다:
+
+- **개발 환경** (`NODE_ENV=development`): `http://localhost:8090`
+- **프로덕션 환경** (`NODE_ENV=production`): `https://modi-backend-th1n.onrender.com`
+
+#### 수동 환경 변수 설정 (선택사항)
+
+특정 API 서버를 사용하고 싶다면 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
 
 ```env
-# API 서버 주소
+# API 서버 주소 (이 값이 설정되면 자동 환경 감지보다 우선됩니다)
 NEXT_PUBLIC_ADDR=http://localhost:8090
+# 또는
+NEXT_PUBLIC_API_URL=https://modi-backend-th1n.onrender.com
 
 # 카카오 OAuth 설정
 NEXT_PUBLIC_KAKAO_CLIENT_ID=your_kakao_client_id
 NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://localhost:3000/login/callback
 
 #새싹 키우기 소켓
-NEXT_PUBLIC_SOCKET_URL=ws://localhost:8090 
+NEXT_PUBLIC_SOCKET_URL=ws://localhost:8090
 ```
+
+#### 사용 가능한 환경 변수
+
+- `NEXT_PUBLIC_ADDR`: API 서버 주소 (최우선)
+- `NEXT_PUBLIC_API_URL`: API 서버 주소 (차선책)
+- 설정하지 않으면 `NODE_ENV`에 따라 자동 결정
 
 ### 개발 서버 실행
 
