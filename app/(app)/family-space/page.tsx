@@ -18,6 +18,7 @@ import { MessageCardModal } from '@/components/message-card-modal';
 import { useAddPoint } from '@/hooks/plant';
 import { usePlantStatus } from '@/hooks/plant/usePlantStatus';
 import { useUpdateFamilyName } from '@/hooks/family/useFamilyMutations';
+import { FullScreenLoading } from '@/components/ui/loading';
 
 declare global {
   interface Window {
@@ -345,26 +346,12 @@ export default function FamilySpacePage() {
   // 🎨 로딩 상태 처리
   // ==========================================
   if (isLoading) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">가족 정보를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoading message="가족 정보를 불러오는 중..." />;
   }
 
   // 가족이 없는 경우 로딩 화면 표시 (리다이렉트 중)
   if (!hasFamily) {
-    return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">페이지로 이동하는 중...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoading message="페이지로 이동하는 중..." />;
   }
 
   return (
