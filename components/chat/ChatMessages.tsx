@@ -7,10 +7,11 @@ import { useTextToSpeech } from "@/hooks/use-speech";
 import { useToast } from "../ui/use-toast";
 import MessageItem from "./MessageItem";
 
-interface ChatMessages {
+interface ChatMessagesProps {
   messages: ClientMessage[];
+  afterMessageComponent?: (msg: ClientMessage) => React.ReactNode;
 }
-const ChatMessages = ({ messages }: ChatMessages) => {
+const ChatMessages = ({ messages, afterMessageComponent }: ChatMessagesProps) => {
   const { isSpeaking, speak, stopSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const { toast } = useToast();
 
@@ -41,7 +42,7 @@ const ChatMessages = ({ messages }: ChatMessages) => {
     // <div className="flex-1 overflow-y-auto">
     <div className="flex-1 overflow-y-auto">
       <div className="p-4 space-y-4">
-        {messages.map((msg) => (
+        {messages.map((msg) => [
           <MessageItem
             key={msg.id}
             role={msg.role}
@@ -52,8 +53,11 @@ const ChatMessages = ({ messages }: ChatMessages) => {
             ttsSupported={ttsSupported}
             handleSpeakMessage={handleSpeakMessage}
             id={msg.id}
-          />
-        ))}
+          />,
+          afterMessageComponent && msg.id === "welcome-individual" ? (
+            <React.Fragment key={msg.id + "-after"}>{afterMessageComponent(msg)}</React.Fragment>
+          ) : null,
+        ])}
         <div ref={messagesEndRef} />
       </div>
     </div>
