@@ -28,7 +28,7 @@ const AgePlanRecommendationCard: React.FC<AgePlanRecommendationCardProps> = ({ u
   const age = toKoreanAgeGroup(userAge);
   if (!age || !ageMockPlanMap[age]) return null;
   return (
-    <div className="mt-4 flex flex-col items-stretch">
+    <div className="mt-4 flex flex-col items-stretch ml-2.5rem">
       {ageMockPlanMap[age].map(
         (plan: { name: string; price: string; link: string }, idx: number) => {
           const today = new Date();
@@ -36,7 +36,7 @@ const AgePlanRecommendationCard: React.FC<AgePlanRecommendationCardProps> = ({ u
           return (
             <div
               key={plan.name}
-              className={`flex items-center justify-between p-4 bg-gray-50 rounded-xl ${
+              className={`flex items-center justify-between p-4 bg-[#cccccc] rounded-xl ${
                 idx !== ageMockPlanMap[age].length - 1 ? "mb-3" : ""
               }`}
             >

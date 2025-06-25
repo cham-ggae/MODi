@@ -9,25 +9,25 @@ interface PlanRecommendationCardProps {
 
 // 임시 아이콘 경로 (public/images/에 적절한 아이콘을 넣어주세요)
 const ICONS = {
-  data: "/images/bee.png", // 데이터 아이콘
   call: "/images/ant.png", // 음성통화 아이콘
-  message: "/images/butterfly.png", // 문자서비스 아이콘
+  message: "/images/bee.png", // 문자서비스 아이콘
+  benefit: "/images/butterfly.png", // 기본혜택 아이콘
 };
 
 function parseBenefits(benefit: string) {
-  // "음성통화: 집/이동전화 무제한(+부가통화 300분)\n문자메시지: 기본제공\n기본혜택: ..." 형식에서 주요 3개만 추출
+  // 항상 음성통화, 문자서비스, 기본혜택 순서로 추출
   const lines = benefit.split("\n");
-  const data = lines.find((l) => l.includes("데이터")) || "데이터: -";
   const call = lines.find((l) => l.includes("음성통화")) || "음성통화: -";
   const message = lines.find((l) => l.includes("문자")) || "문자서비스: -";
+  const extra = lines.find((l) => l.includes("기본혜택")) || "기본혜택: -";
   return [
-    { icon: ICONS.data, label: data.split(":")[0], value: data.split(":")[1]?.trim() || "-" },
     { icon: ICONS.call, label: call.split(":")[0], value: call.split(":")[1]?.trim() || "-" },
     {
       icon: ICONS.message,
       label: message.split(":")[0],
       value: message.split(":")[1]?.trim() || "-",
     },
+    { icon: ICONS.benefit, label: extra.split(":")[0], value: extra.split(":")[1]?.trim() || "-" },
   ];
 }
 
