@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { handleKakaoCallback } from '@/lib/api/auth';
+import { FullScreenLoading } from '@/components/ui/loading';
 
 /**
  * 카카오 OAuth 콜백 처리 페이지
@@ -76,28 +77,12 @@ export default function KakaoCallbackPage() {
 
   // 로딩 상태
   if (status === 'loading') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto"></div>
-          <h2 className="mt-4 text-xl font-semibold">로그인 처리 중...</h2>
-          <p className="mt-2 text-gray-600">잠시만 기다려주세요.</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoading message="로그인 처리 중..." size="lg" className="bg-white dark:bg-gray-900" />;
   }
 
   // 성공 상태
   if (status === 'success') {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-green-500 text-6xl mb-4">✓</div>
-          <h2 className="text-xl font-semibold text-green-600">로그인 성공!</h2>
-          <p className="mt-2 text-gray-600">페이지로 이동 중...</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoading message="로그인 성공! 페이지로 이동 중..." size="lg" className="bg-white dark:bg-gray-900" />;
   }
 
   // 에러 상태
