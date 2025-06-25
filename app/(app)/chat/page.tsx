@@ -60,6 +60,7 @@ export default function ChatPage() {
         familyMode={familyMode}
         familySize={memberCount || 1}
         familySessionId={familySessionId}
+        messages={messages}
       />
     </Fragment>
   );
