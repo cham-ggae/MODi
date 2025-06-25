@@ -38,6 +38,8 @@ import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
 import { useKakaoInit } from "@/hooks/useKakaoShare";
 import { useManageMissions } from "@/hooks/plant/useManageMissions";
+import MissionBtn from '@/components/plant-game/MissionBtn';
+import { usePlantGameStore } from '@/store/usePlantGameStore';
 
 declare global {
   interface Window {
@@ -170,11 +172,13 @@ export default function PlantGamePage() {
   // ==========================================
   // 🎮 게임 상태 관리
   // ==========================================
-  const [showMissions, setShowMissions] = useState(false); // 미션 시트 표시 여부
-  const [showRewardModal, setShowRewardModal] = useState(false); // 보상 모달 표시 여부
-  const [rewardData, setRewardData] = useState<RewardHistory | null>(null); // 보상 데이터
-  const [currentLevel, setCurrentLevel] = useState(1); // 현재 식물 레벨
-  const [currentProgress, setCurrentProgress] = useState(0); // 현재 경험치 진행률
+  const {
+    showMissions, setShowMissions,
+    showRewardModal, setShowRewardModal,
+    rewardData, setRewardData,
+    currentLevel, setCurrentLevel,
+    currentProgress, setCurrentProgress,
+  } = usePlantGameStore();
 
   // ==========================================
   // 🌱 활동 상태 관리
@@ -641,14 +645,7 @@ export default function PlantGamePage() {
 
       {/* 🎯 미션하기 버튼 */}
       {currentLevel !== 5 && (
-        <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
-          <Button
-            className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
-            onClick={() => setShowMissions(true)}
-          >
-            미션하기
-          </Button>
-        </div>
+        <MissionBtn />
       )}
 
       {/* 🌱 식물 이미지 영역 */}
