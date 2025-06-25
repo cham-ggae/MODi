@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,19 +13,25 @@ import {
   Calendar,
   TrendingUp,
   FileText,
+  ChevronDown,
+  Users,
+  Shield,
+  Zap,
+  ArrowLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { authenticatedApiClient } from "@/lib/api/axios";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthStore } from "@/store/useAuthStore";
-import { planDetails } from "@/lib/survey-result-data";
+import { planDetails, userTypes } from "@/lib/survey-result-data";
 import { motion } from "framer-motion";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import { mypageApi } from "@/lib/api/mypage";
+import { useRouter } from "next/navigation";
 
 interface UserInfo {
   name: string;
@@ -86,48 +92,13 @@ const bugIdToName: Record<number, string> = {
   5: "개미형",
 };
 
-// bugId별 특징 데이터 매핑
-const bugIdToFeatureMap: Record<number, { title: string; features: string[] }> = {
-  1: {
-    title: "데이터와 통화의 필수적인 선택",
-    features: [
-      "🍯 출퇴근길 유튜브·릴스 루틴이 필수라면?",
-      "🎬 무제한 데이터에 유튜브/디즈니+ 혜택까지!",
-      "📱 스트리밍족을 위한 완벽한 조합이에요",
-    ],
-  },
-  2: {
-    title: "통화가 일상인 당신에게 꼭 맞는 요금제예요",
-    features: [
-      "☎️ 하루 통화량이 많다면 무제한 음성통화는 기본!",
-      "💬 50GB/14GB 데이터로 메시지도 걱정 없이.",
-      "📞 통화가 일상인 당신에게 꼭 맞는 요금제예요",
-    ],
-  },
-  3: {
-    title: "혜택도 좋지만.. 요금부터 봅시다",
-    features: [
-      "🪙 이벤트, 할인, 결합 쓸 수 있는 건 다 써봄.",
-      "💸 가격 먼저 보고 혜택은 보너스로 생각함.",
-      "🧾 청구서 보고 '이번달도 잘 막았다'는 뿌듯함 느끼는 타입",
-    ],
-  },
-  4: {
-    title: "멤버십, 제휴 할인 그래서 뭐가 있죠?",
-    features: [
-      "🎁 제휴 혜택, 멤버십 적립 다 외우고 다님.",
-      "💡 '이거 포인트 적립돼요?' 입에 달고 다님.",
-      "🛍️ 혜택 보자마자 '어머 이건 사야 돼' 모드 돌입",
-    ],
-  },
-  5: {
-    title: "가족 요금제? 아빠만 아는 비밀",
-    features: [
-      "👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.",
-      "🧑‍💼 누가 요금제 뭐쓰냐하면 '몰라? 아빠가 알걸' 이라고 함.",
-      "📱 데이터 부족하면 가족한테 달라고 함.",
-    ],
-  },
+// bugId별 userTypes key 매핑
+const bugIdToUserTypeKey: Record<number, string> = {
+  1: "호박벌형",
+  2: "무당벌레형",
+  3: "라바형",
+  4: "나비형",
+  5: "개미형",
 };
 
 export default function MyPage() {
@@ -136,6 +107,9 @@ export default function MyPage() {
   const [recommendHistory, setRecommendHistory] = useState<SurveyResult[]>([]);
   const [recommendHistoryList, setRecommendHistoryList] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(2);
+  const [showCount, setShowCount] = useState(3);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -159,6 +133,38 @@ export default function MyPage() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    async function fetchHistory() {
+      try {
+        const rawHistory = await mypageApi.getHistory();
+        console.log("히스토리 API 응답:", rawHistory);
+
+        // 프론트에서 매핑 처리
+        const processed = rawHistory
+          .map((item: any) => ({
+            planId: item.planId,
+            planName: item.planName,
+            price: item.price,
+            discountPrice: item.discountPrice,
+            link: item.link,
+            benefit: item.benefit,
+            createdAt: item.createdAt,
+          }))
+          .sort(
+            (a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+        console.log("처리된 히스토리:", processed);
+        setRecommendHistoryList(processed);
+      } catch (e) {
+        console.error("히스토리 불러오기 실패:", e);
+        setRecommendHistoryList([]);
+      }
+    }
+
+    fetchHistory();
+  }, []);
+
   if (loading) {
     return <div className="flex items-center justify-center h-full">로딩 중...</div>;
   }
@@ -167,7 +173,7 @@ export default function MyPage() {
   if (!userInfo) {
     return (
       <div className="h-full flex flex-col">
-        <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
+        <div className="bg-white dark:bg-gray-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">마이페이지</h1>
           <ThemeToggle />
         </div>
@@ -190,15 +196,22 @@ export default function MyPage() {
 
   // bugId가 있으면 곤충 캐릭터 이미지, 없으면 프로필 이미지
   const profileImgSrc =
-    userInfo.bugId && bugIdToImage[userInfo.bugId]
+    userInfo.bugId !== undefined && bugIdToImage[userInfo.bugId]
       ? bugIdToImage[userInfo.bugId]
       : userInfo.profileImage || "/images/modi.png";
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header - 고정, 맨 위 */}
-      <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between flex-shrink-0">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">마이페이지</h1>
+    <div className="h-full lex flex-col">
+      {/* Header - 고정, 맨  */}
+      <div className="bg-white dark:bg-gray-800 px-3 py-4 flex items-center justify-between flex-shrnk-0">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="p-2 rounded-full transition"
+          aria-label="뒤로가기"
+        >
+          <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-200" />
+        </button>
         <ThemeToggle />
       </div>
       {/* Family-style Recommendation Card Section (상단) */}
@@ -221,8 +234,8 @@ export default function MyPage() {
               <img
                 src={profileImgSrc}
                 alt="프로필 이미지"
-                className="h-20"
-                style={{ maxWidth: "80px", objectFit: "contain" }}
+                className="h-24"
+                style={{ maxWidth: "96px", objectFit: "contain" }}
               />
             </motion.div>
             <div className="font-bold text-lg text-gray-900 dark:text-white mt-2">
@@ -231,6 +244,43 @@ export default function MyPage() {
             <div className="text-xs text-gray-500 dark:text-gray-400">
               {userInfo.bugId ? bugIdToName[userInfo.bugId] : userInfo.userType}
             </div>
+            {/* Personality Traits Badges - moved here */}
+            {(() => {
+              const badgeMap = {
+                1: ["영상 헤비유저", "데이터형", "스트리밍형"],
+                2: ["통화중심형", "전화매니아", "연결지향형"],
+                3: ["가성비최고", "알뜰소비형", "요금절약형"],
+                4: ["혜택러버", "구독혜택형", "멤버십형"],
+                5: ["가족 의존형", "절약형", "실용형"],
+              };
+              const badges = badgeMap[userInfo.bugId as keyof typeof badgeMap] || [];
+              const badgeColors = [
+                "bg-blue-100 text-blue-800 hover:bg-blue-200",
+                "bg-green-100 text-green-800 hover:bg-green-200",
+                "bg-purple-100 text-purple-800 hover:bg-purple-200",
+              ];
+              const badgeIcons = [
+                <Users className="w-3 h-3 mr-1" key="icon1" />,
+                <Shield className="w-3 h-3 mr-1" key="icon2" />,
+                <Zap className="w-3 h-3 mr-1" key="icon3" />,
+              ];
+              return (
+                <div className="flex flex-wrap gap-1 mt-0.5 mb-1 justify-end">
+                  {badges.map((label: string, idx: number) => (
+                    <Badge
+                      key={label}
+                      variant="secondary"
+                      className={
+                        badgeColors[idx % badgeColors.length] + " text-[11px] px-1.5 py-0.5 h-6"
+                      }
+                    >
+                      {badgeIcons[idx % badgeIcons.length]}
+                      {label}
+                    </Badge>
+                  ))}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -245,19 +295,21 @@ export default function MyPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
             <CardContent className="pb-4 px-6">
               {userInfo.bugId ? (
-                <div className="flex flex-col items-center text-center w-full">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">
-                    {bugIdToFeatureMap[userInfo.bugId]?.title || "유형 정보"}
+                <div className="flex flex-col items-center text-center w-full min-h-[260px]">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                    "{userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.title || "유형 정보"}"
                   </h3>
-                  <div className="bg-blue-50 rounded-xl px-4 py-3 w-full text-left max-w-sm space-y-2">
-                    {bugIdToFeatureMap[userInfo.bugId]?.features.map((feature, idx) => (
-                      <div
-                        key={idx}
-                        className="text-sm text-gray-800 leading-relaxed flex items-start"
-                      >
-                        <span>{feature}</span>
-                      </div>
-                    ))}
+                  <div className="bg-blue-50 rounded-xl px-6 py-5 w-full mb-2 min-h-[220px] flex flex-col justify-center space-y-2">
+                    {userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.description
+                      .split("\n")
+                      .map((feature: string, idx: number) => (
+                        <div
+                          key={idx}
+                          className="text-m text-gray-800 leading-relaxed flex items-start mb-2"
+                        >
+                          <span>{feature}</span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               ) : (
@@ -350,99 +402,81 @@ export default function MyPage() {
                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                   지난 요금제 추천 기록
                 </h3>
-                {/* <FileText className="w-5 h-5 text-gray-400" /> */}
               </div>
               <div className="space-y-3">
-                {recommendHistory.filter(isHistoryItem).map((result, index) => (
-                  <div key={index} className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-                    <div className="flex items-center justify-between mb-2">
-                      <Badge className="bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-xs">
-                        {result.type}
-                      </Badge>
-                      <span className="text-xs text-gray-400">{result.date}</span>
+                {recommendHistoryList.length > 0 ? (
+                  <>
+                    {recommendHistoryList.slice(0, showCount).map((plan: any, idx: number) => (
+                      <div
+                        key={`${plan.planId}-${idx}`}
+                        className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl mb-2"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                            {plan.planName}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {plan.createdAt
+                              ? new Date(plan.createdAt).toLocaleDateString("ko-KR")
+                              : ""}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-800 dark:text-gray-200">
+                            월 {plan.discountPrice?.toLocaleString()}원
+                          </span>
+                          <a
+                            href={plan.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-blue-600 dark:text-blue-400 underline ml-2"
+                          >
+                            자세히
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex justify-center mt-2">
+                      {showCount < recommendHistoryList.length ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowCount((prev) => prev + 3)}
+                          className="text-sm text-black-300 hover:bg-transparent hover:text-blue-500 dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-green-400"
+                        >
+                          <ChevronDown className="w-4 h-4 mr-1" />
+                          추천 요금제 {Math.min(3, recommendHistoryList.length - showCount)}개
+                          더보기
+                        </Button>
+                      ) : recommendHistoryList.length > 3 &&
+                        showCount >= recommendHistoryList.length ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => setShowCount(3)}
+                          className="text-sm text-gray-500 hover:bg-transparent hover:text-green-600 dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-green-400"
+                        >
+                          <ChevronDown
+                            className="w-4 h-4 mr-1"
+                            style={{ transform: "rotate(180deg)" }}
+                          />
+                          숨기기
+                        </Button>
+                      ) : null}
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                      {result.description}
-                    </p>
-                    <p className="text-sm font-medium text-green-600 dark:text-green-400">
-                      추천: {result.recommendedPlan}
-                    </p>
+                  </>
+                ) : (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    추천 기록이 없습니다.
                   </div>
-                ))}
+                )}
               </div>
             </CardContent>
           </Card>
 
-          {/* Menu Items */}
-          <div className="space-y-3">
-            <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
-              <CardContent className="p-0">
-                <Link
-                  href="/settings"
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <Settings className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">설정</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">
-                        알림, 개인정보 설정
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
-              <CardContent className="p-0">
-                <Link
-                  href="/notifications"
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <Bell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">알림</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">푸시 알림 관리</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
-              <CardContent className="p-0">
-                <Link
-                  href="/help"
-                  className="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                      <HelpCircle className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                    </div>
-                    <div>
-                      <div className="font-medium text-gray-900 dark:text-white">도움말</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">자주 묻는 질문</div>
-                    </div>
-                  </div>
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
           {/* App Info */}
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
             <CardContent className="p-6 text-center">
-              <div className="w-16 h-16 bg-green-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <div className="text-white text-2xl">🌱</div>
+              <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <img src="/images/MODi.png" alt="MODI 마스코트" className="w-12 h-12 mx-auto" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                 모디 (MODI)
