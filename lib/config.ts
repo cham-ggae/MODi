@@ -1,3 +1,5 @@
+import { getBackendUrl } from './cors-helper';
+
 // 환경 설정 관리
 export const config = {
   // API 설정
@@ -5,12 +7,12 @@ export const config = {
     // 개발 환경
     development: {
       baseUrl: 'http://localhost:8090',
-      timeout: 10000,
+      timeout: 30000, // 30초로 증가
     },
     // 프로덕션 환경 (배포된 백엔드)
     production: {
       baseUrl: 'https://modi-backend-th1n.onrender.com',
-      timeout: 15000, // 배포 서버는 조금 더 긴 타임아웃
+      timeout: 60000, // 60초로 증가 (배포 서버는 더 오래 걸릴 수 있음)
     },
   },
 
@@ -31,8 +33,8 @@ export const config = {
       return process.env.NEXT_PUBLIC_API_URL;
     }
 
-    // 환경에 따른 기본 설정 사용
-    return this.getCurrentApiConfig().baseUrl;
+    // CORS 헬퍼 사용
+    return getBackendUrl();
   },
 
   // 개발 모드 여부 확인

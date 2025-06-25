@@ -23,6 +23,17 @@ const nextConfig = {
         ? 'https://modi-backend-th1n.onrender.com'
         : 'http://localhost:8090',
   },
+  // CORS 문제 해결을 위한 리라이트 설정
+  async rewrites() {
+    return process.env.NODE_ENV === 'development'
+      ? [
+          {
+            source: '/api/backend/:path*',
+            destination: 'https://modi-backend-th1n.onrender.com/:path*',
+          },
+        ]
+      : [];
+  },
 };
 
 export default nextConfig;
