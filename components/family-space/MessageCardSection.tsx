@@ -1,11 +1,11 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { MessageCardList } from './MessageCardList';
-import { MessageCardCreator } from './MessageCardCreator';
-import { UIFamilyMember } from '@/types/family.type';
-import { MessageCard } from '@/types/message-card.type';
-import { useState } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { MessageCardList } from "./MessageCardList";
+import { MessageCardCreator } from "./MessageCardCreator";
+import { UIFamilyMember } from "@/types/family.type";
+import { MessageCard } from "@/types/message-card.type";
+import { useState } from "react";
 
 interface MessageCardSectionProps {
   // 가족 API 연동을 위한 props
@@ -46,10 +46,10 @@ export function MessageCardSection({
             </div>
             <Button
               size="sm"
-              className="bg-green-500 text-white hover:bg-green-600 rounded-full w-10 h-10 p-0"
+              className="bg-[#f5f6f7] w-10 h-10 rounded-full flex items-center justify-center p-0 shadow-none border-none"
               onClick={() => setShowMessageCardCreator(true)}
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 text-gray-700" />
             </Button>
           </div>
           <MessageCardList />

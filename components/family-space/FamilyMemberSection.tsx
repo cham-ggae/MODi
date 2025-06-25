@@ -52,7 +52,7 @@ export function FamilyMemberSection({
           <Button
             onClick={() => setIsInviteModalOpen(true)}
             disabled={!canInvite}
-            className="bg-gray-100 border-gray-400  hover:bg-gray-200 text-[#5bc236] w-10 h-10 rounded-full flex items-center justify-center"
+            className="bg-gray-100 border-gray-400  hover:bg-gray-200 text-gray-700 w-10 h-10 rounded-full flex items-center justify-center"
           >
             <UserPlus className="w-4 h-4 block leading-none shrink-0 translate-x-[2px]" />
           </Button>

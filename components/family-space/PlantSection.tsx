@@ -112,12 +112,12 @@ export function PlantSection({
 
       {(familyNutrial > 0 || familyDaysAfterCreation > 0) && (
         <div className="flex justify-center gap-4 mt-4">
-          {familyNutrial > 0 && (
+          {/* {familyNutrial > 0 && (
             <Badge className="bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-300">
               <Leaf className="w-3 h-3 mr-1" />
               영양제 {familyNutrial}개
             </Badge>
-          )}
+          )} */}
           {familyDaysAfterCreation > 0 && (
             <Badge className="bg-purple-100 dark:bg-purple-800 text-purple-800 dark:text-purple-300">
               {familyDaysAfterCreation}일째 함께
@@ -128,18 +128,19 @@ export function PlantSection({
 
       {hasPlant && plantType && (
         <div className="text-center mt-3">
-          <Badge className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-100 text-gray-500 dark:text-gray-500">
+          {/* <Badge className="bg-gray-100 hover:bg-gray-200 dark:bg-gray-100 text-gray-500 dark:text-gray-500">
             {plantType === "flower" ? (
               <>
-                <Flower className="w-3 h-3 mr-1" />꽃 키우는 중
+                <Flower className="w-3 h-3 mr-1" />
+                꽃이 피어나고 있어요
               </>
             ) : (
               <>
                 <TreePine className="w-3 h-3 mr-1" />
-                나무 키우는 중
+                나무가 자라나고 있어요
               </>
             )}
-          </Badge>
+          </Badge> */}
         </div>
       )}
     </div>

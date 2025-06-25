@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar } from "@radix-ui/react-avatar";
+import { typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
 
 interface FamilyMemberCardProps {
   member: UIFamilyMember;
@@ -26,7 +27,7 @@ const getBugInfo = (bugId: number): { type: string; emoji: string } => {
 const formatSurveyDate = (dateString: string): string => {
   try {
     const date = new Date(dateString);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+    return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}.`;
   } catch {
     return "";
   }
@@ -56,23 +57,37 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
   const displayText = () => {
     if (member.hasSurveyCompleted && member.bugId) {
       const bugInfo = getBugInfo(member.bugId);
-      const dateText = member.surveyDate ? ` (📅 ${formatSurveyDate(member.surveyDate)})` : "";
-      return `${bugInfo.emoji} ${bugInfo.type}${dateText}`;
+      return (
+        <>
+          <span>{bugInfo.type}</span>
+          {member.surveyDate && (
+            <span className="ml-2 text-gray-400">{formatSurveyDate(member.surveyDate)}</span>
+          )}
+        </>
+      );
     } else if (member.currentPlan) {
       return `📱 ${member.currentPlan.planSummary}`;
     } else {
-      return "아직 성향 분석 전이에요 🧐 ";
+      return "아직 성향 분석 전이에요";
     }
   };
 
   return (
     <div
-      className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+      className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700 cursor-pointer transition-colors"
       onClick={handleCardClick}
     >
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center text-xl overflow-hidden ring-2 ring-green-100 dark:ring-green-800">
-          {member.profileImage ? (
+        <div className="w-12 h-12 bg-white dark:bg-white rounded-full flex items-center justify-center text-xl overflow-hidden">
+          {member.hasSurveyCompleted && member.bugId ? (
+            <Image
+              src={typeImageMap[bugIdToNameMap[member.bugId]]}
+              alt={getBugInfo(member.bugId).type + " 프로필"}
+              width={48}
+              height={48}
+              className="w-full h-full object-cover"
+            />
+          ) : member.profileImage ? (
             <Image
               src={member.profileImage}
               alt={`${member.name}의 프로필`}
@@ -89,16 +104,16 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
           <div className="flex items-center space-x-2 mb-1">
             <span className="font-semibold text-gray-900 dark:text-white">{member.name}</span>
             {member.hasSurveyCompleted ? (
-              <Badge className="bg-[#ffffff] dark:bg-green-800 text-gray-600 dark:text-green-300 text-xs px-2 py-0.5">
+              <Badge className="bg-[#ffffff] dark:bg-green-800 text-gray-700 text-[11px] px-1.5 py-0.5 font-semibold flex items-center gap-[2px] self-center hover:bg-green-50 dark:hover:bg-green-900">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                추천완료
+                <span className="leading-none">추천완료</span>
               </Badge>
             ) : (
               <div className="flex items-center gap-2">
                 <Avatar />
                 <Badge
                   variant="outline"
-                  className="text-[11px] px-1.5 py-0.5 text-[#5bc236] dark:text-[#5bc236] border-[#5bc236] dark:border-[#5bc236] cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900 font-semibold flex items-center gap-[2px] self-center"
+                  className="text-[11px] px-1.5 py-0.5 text-[#5bc236] dark:text-[#5bc236] border-[#5bc236] dark:border-[#5bc236] cursor-pointer hover:bg-[#e6fdd7] dark:hover:bg-green-900 font-semibold flex items-center gap-[2px] self-center"
                   onClick={(e) => {
                     e.stopPropagation();
                     router.push("/survey");
@@ -111,7 +126,25 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
             )}
           </div>
 
-          <div className="text-sm text-gray-600 dark:text-gray-400">{displayText()}</div>
+          {/* 버그 타입과 날짜를 한 줄에 좌우 정렬, 둘 다 text-xs로 */}
+          {member.hasSurveyCompleted && member.bugId ? (
+            <div className="flex items-center justify-between w-full">
+              <span className="text-xs text-gray-600 dark:text-gray-400">
+                {getBugInfo(member.bugId).type}
+              </span>
+              {member.surveyDate && (
+                <span className="text-xs text-gray-400">{formatSurveyDate(member.surveyDate)}</span>
+              )}
+            </div>
+          ) : member.currentPlan ? (
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              📱 {member.currentPlan.planSummary}
+            </span>
+          ) : (
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              아직 성향 분석 전이에요🧐
+            </span>
+          )}
         </div>
       </div>
     </div>
