@@ -39,22 +39,22 @@ export function PlanRecommendationCard({
 }: PlanRecommendationCardProps) {
   const benefits = parseBenefits(benefit);
   return (
-    <div className="relative bg-[#E5E5E5]/30 rounded-2xl p-6 w-[313px] h-[230px] flex flex-col shadow-none border-none">
+    <div className="relative bg-[#E5E5E5]/30 rounded-2xl p-4 w-full min-w-0 flex flex-col shadow-none border-none">
       {/* 자세히보기 */}
       <a
         href={link}
         target="_blank"
         rel="noopener noreferrer"
-        className="absolute right-6 top-6 text-xs text-gray-400 font-semibold hover:underline"
+        className="absolute right-6 top-6 text-xs text-gray-400 font-semibold hover:underline mb-3"
       >
         자세히보기
       </a>
       {/* 요금제명 */}
-      <div className="font-bold text-[17px] text-black mb-1 mt-2">{name}</div>
+      <div className="font-bold text-[17px] text-black mb-1 mt-8">{name}</div>
       {/* 가격 */}
       <div className="font-bold text-[20px] text-[#14ae5c] mb-4">월 {price}</div>
       {/* 혜택 3줄 */}
-      <div className="flex flex-col gap-3 mt-2">
+      <div className="flex flex-col gap-1 mt-2">
         {benefits.map((b, i) => (
           <div key={i} className="flex items-center gap-3 text-[15px] font-semibold text-black">
             <img src={b.icon} alt={b.label} className="w-5 h-5" />

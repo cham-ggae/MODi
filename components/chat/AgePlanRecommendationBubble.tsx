@@ -46,8 +46,8 @@ export default function AgePlanRecommendationBubble({
     };
   }, [api]);
   return (
-    <div className="flex justify-start">
-      <div className="max-w-xs px-4 py-3 rounded-2xl ml-[3rem] bg-white text-gray-900 border border-gray-200 mt-2 mb-2">
+    <div className="flex justify-start w-full max-w-md mx-auto">
+      <div className="w-full min-w-0 px-4 py-3 rounded-2xl ml-[3rem] sm:mr-4 bg-white text-gray-900 border border-gray-200 mt-2 mb-2 overflow-x-auto">
         {/* Title */}
         <div className="font-bold text-base mb-2 text-left text-black">{age} 추천 요금제</div>
         {/* Divider */}
@@ -57,12 +57,14 @@ export default function AgePlanRecommendationBubble({
           <CarouselContent>
             {plans.map((plan, idx) => (
               <CarouselItem key={plan.name} className="basis-full flex justify-center">
-                <PlanRecommendationCard
-                  name={plan.name}
-                  price={plan.price}
-                  benefit={plan.benefit}
-                  link={plan.link}
-                />
+                <div className="w-full max-w-[313px]">
+                  <PlanRecommendationCard
+                    name={plan.name}
+                    price={plan.price}
+                    benefit={plan.benefit}
+                    link={plan.link}
+                  />
+                </div>
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -79,7 +81,7 @@ export default function AgePlanRecommendationBubble({
           ))}
         </div>
         {/* 안내 텍스트 - 흰색 배경, 버튼 아님 */}
-        <div className="text-xs text-gray-500 bg-white rounded-md px-3 py-2 text-center mb-3 border border-gray-100">
+        <div className="text-xs text-gray-500 bg-white rounded-md px-3 py-2 text-center mb-3">
           더 정확한 요금제를 추천 받고 싶다면?
         </div>
         {/* 버튼 */}
