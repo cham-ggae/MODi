@@ -1,16 +1,17 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from 'lucide-react';
-import { useKakaoInit, shareKakao } from '@/hooks/useKakaoShare';
+} from "@/components/ui/dialog";
+import { UserPlus, Copy, Check, Share2, Edit2, Save, X } from "lucide-react";
+import { useKakaoInit, shareKakao } from "@/hooks/useKakaoShare";
+import { motion } from "framer-motion";
 
 interface InviteCodeModalProps {
   isOpen?: boolean;
@@ -45,7 +46,7 @@ export function InviteCodeModal({
 }: InviteCodeModalProps) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [tempFamilyName, setTempFamilyName] = useState('');
+  const [tempFamilyName, setTempFamilyName] = useState("");
 
   const isOpen = isOpenProp ?? internalIsOpen;
   const onOpenChange = onOpenChangeProp ?? setInternalIsOpen;
@@ -65,7 +66,7 @@ export function InviteCodeModal({
   };
 
   const handleCancelEdit = () => {
-    setTempFamilyName('');
+    setTempFamilyName("");
     setIsEditingName(false);
   };
 
@@ -78,111 +79,57 @@ export function InviteCodeModal({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-md mx-auto dark:bg-gray-800">
-        <DialogHeader>
-          <DialogTitle className="dark:text-white">가족 초대하기</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          {inviteCode ? (
-            <>
-              <div className="text-center">
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">초대 코드</div>
-                <Badge className="bg-green-500 text-white text-lg px-4 py-2 font-mono mb-3">
-                  {inviteCode}
-                </Badge>
-
-                <div className="mb-4">
-                  {isEditingName ? (
-                    <div className="flex items-center gap-2 justify-center">
-                      <Input
-                        value={tempFamilyName}
-                        onChange={(e) => setTempFamilyName(e.target.value)}
-                        className="text-center text-sm max-w-32 dark:bg-gray-600 dark:text-white"
-                        placeholder="가족명 입력"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            handleSaveFamilyName();
-                          }
-                        }}
-                      />
-                      <Button
-                        onClick={handleSaveFamilyName}
-                        size="sm"
-                        variant="ghost"
-                        className="p-1"
-                        disabled={isUpdatingName}
-                      >
-                        {isUpdatingName ? (
-                          <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                          <Save className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        )}
-                      </Button>
-                      <Button onClick={handleCancelEdit} size="sm" variant="ghost" className="p-1">
-                        <X className="w-3 h-3 text-gray-400" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 justify-center">
-                      <span className="text-xs text-gray-400 dark:text-gray-500">
-                        가족명: {familyName || '가족'}
-                      </span>
-                      <Button
-                        onClick={handleEditFamilyName}
-                        size="sm"
-                        variant="ghost"
-                        className="p-1"
-                      >
-                        <Edit2 className="w-3 h-3 text-gray-400" />
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex gap-2">
-                  <Button
-                    onClick={onCopyCode}
-                    variant="outline"
-                    size="sm"
-                    className="flex-1 hover:bg-gray-100 dark:hover:bg-gray-600"
-                  >
-                    {copied ? (
-                      <Check className="w-4 h-4 mr-2" />
-                    ) : (
-                      <Copy className="w-4 h-4 mr-2" />
-                    )}
-                    {copied ? '복사됨' : '복사'}
-                  </Button>
-                  <Button
-                    onClick={handleShareKakao}
-                    size="sm"
-                    className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
-                  >
-                    카톡 공유
-                  </Button>
-                </div>
+    <>
+      {isOpen && (
+        <>
+          {/* Overlay for closing on click */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-30 z-40"
+            onClick={() => onOpenChange && onOpenChange(false)}
+          />
+          <motion.div
+            initial={{ y: "100%" }}
+            animate={{ y: 0 }}
+            exit={{ y: "100%" }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="fixed left-0 right-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl p-6 pt-4 max-w-md mx-auto"
+            style={{ borderRadius: "20px" }}
+          >
+            <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+            <div className="text-center">
+              <div className="font-semibold text-lg mb-2">초대 링크</div>
+              <div className="bg-gray-50 rounded-xl p-4 mb-4 text-center break-all font-mono text-lg font-bold text-black select-all">
+                {inviteCode}
               </div>
-            </>
-          ) : (
-            <>
-              <div className="text-center">
-                <div className="text-4xl mb-3">🔗</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  아직 초대 코드가 없어요
-                </div>
+              <div className="text-sm text-gray-700 mb-2">
+                채팅방의 초대 링크를 공유할 수 있습니다. 누구나 채팅방에 참여 요청을 할 수 있으니
+                주의해 주세요.
+              </div>
+              {/* <a href="#" className="text-xs text-gray-500 underline mb-4 inline-block">
+                초대 링크 설정 보기
+              </a> */}
+              <div className="flex gap-2 mt-4">
                 <Button
-                  onClick={onGenerateCode}
-                  className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"
+                  onClick={onCopyCode}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1 hover:bg-gray-100 dark:hover:bg-gray-600"
                 >
-                  초대 코드 생성하기
+                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? "복사됨" : "복사하기"}
+                </Button>
+                <Button
+                  onClick={handleShareKakao}
+                  size="sm"
+                  className="flex-1 bg-[#FEE500] hover:bg-[#FFEB3B] text-black"
+                >
+                  공유하기
                 </Button>
               </div>
-            </>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </>
   );
 }

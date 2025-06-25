@@ -20,6 +20,7 @@ import {
 import { toast } from 'sonner';
 import { useFamily } from '@/hooks/family';
 import { motion } from 'framer-motion';
+import { PageLayout } from '@/components/layouts/page-layout';
 
 export default function FamilyRecommendationPage() {
   const router = useRouter();
@@ -106,62 +107,70 @@ export default function FamilyRecommendationPage() {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">추천 정보를 불러오는 중...</p>
+      <PageLayout variant="white" maxWidth="xl" padding="lg">
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#388E3C] mx-auto mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">추천 정보를 불러오는 중...</p>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   if (!family || !dashboard) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 dark:text-gray-400">가족 정보를 찾을 수 없습니다.</p>
-          <Button onClick={() => router.push('/family-space')} className="mt-4">
-            가족 스페이스로 돌아가기
-          </Button>
+      <PageLayout variant="white" maxWidth="xl" padding="lg">
+        <div className="h-96 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-gray-600 dark:text-gray-400">가족 정보를 찾을 수 없습니다.</p>
+            <Button
+              onClick={() => router.push('/family-space')}
+              className="mt-4 bg-[#388E3C] hover:bg-[#2E7D32] text-white"
+            >
+              가족 스페이스로 돌아가기
+            </Button>
+          </div>
         </div>
-      </div>
+      </PageLayout>
     );
   }
 
   const discount = dashboard.discount;
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4">
-        <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.back()}
-            className="flex items-center space-x-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>돌아가기</span>
-          </Button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">가족 요금제 추천</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {family.family.name} 가족을 위한 최적 요금제
-            </p>
-          </div>
-        </div>
+  const header = (
+    <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center space-x-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => router.back()}
+          className="flex items-center space-x-2 text-gray-600 dark:text-gray-400"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>돌아가기</span>
+        </Button>
       </div>
+      <div className="text-center">
+        <h1 className="text-xl font-bold text-[#388E3C]">가족 요금제 추천</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {family.family.name} 가족을 위한 최적 요금제
+        </p>
+      </div>
+      <div className="w-20"></div>
+    </div>
+  );
 
-      <div className="px-6 py-8 max-w-4xl mx-auto">
+  return (
+    <PageLayout variant="white" maxWidth="xl" header={header}>
+      <div className="p-6 space-y-8">
         {/* 할인 혜택 요약 */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
         >
-          <Card className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 rounded-2xl overflow-hidden">
+          <Card className="bg-gradient-to-r from-[#388E3C] to-[#81C784] text-white border-0 rounded-xl">
             <CardContent className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
@@ -209,14 +218,14 @@ export default function FamilyRecommendationPage() {
 
         {/* 추천 요금제 목록 */}
         <div className="space-y-6">
-          <div className="text-center mb-8">
+          <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">추천 요금제</h2>
             <p className="text-gray-600 dark:text-gray-400">
               {family.family.name} 가족에게 최적화된 요금제를 선택해보세요
             </p>
           </div>
 
-          <div className="grid gap-6">
+          <div className="space-y-4">
             {recommendedPlans.map((plan, index) => (
               <motion.div
                 key={plan.id}
@@ -225,11 +234,11 @@ export default function FamilyRecommendationPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Card
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
                     plan.isRecommended
-                      ? 'border-green-500 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
+                      ? 'border-[#81C784] bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20'
                       : 'border-gray-200 dark:border-gray-700'
-                  } ${selectedPlan === plan.id ? 'ring-2 ring-green-500 dark:ring-green-400' : ''}`}
+                  } ${selectedPlan === plan.id ? 'ring-2 ring-[#388E3C]' : ''}`}
                   onClick={() => setSelectedPlan(plan.id)}
                 >
                   <CardHeader className="pb-4">
@@ -243,7 +252,7 @@ export default function FamilyRecommendationPage() {
                         </p>
                       </div>
                       {plan.isRecommended && (
-                        <Badge className="bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-300">
+                        <Badge className="bg-[#81C784] text-white">
                           <Sparkles className="w-3 h-3 mr-1" />
                           추천
                         </Badge>
@@ -253,7 +262,7 @@ export default function FamilyRecommendationPage() {
 
                   <CardContent className="space-y-4">
                     {/* 가격 정보 */}
-                    <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
                       <div>
                         <div className="flex items-center space-x-2">
                           <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
@@ -268,7 +277,7 @@ export default function FamilyRecommendationPage() {
                             %
                           </Badge>
                         </div>
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <div className="text-2xl font-bold text-[#388E3C]">
                           월 {plan.discountedPrice.toLocaleString()}원
                         </div>
                         <div className="text-xs text-gray-500 dark:text-gray-400">
@@ -281,21 +290,21 @@ export default function FamilyRecommendationPage() {
                     <div className="grid grid-cols-2 gap-2">
                       {plan.features.map((feature, idx) => (
                         <div key={idx} className="flex items-center space-x-2 text-sm">
-                          <feature.icon className="w-4 h-4 text-green-600 dark:text-green-400" />
+                          <feature.icon className="w-4 h-4 text-[#388E3C]" />
                           <span className="text-gray-700 dark:text-gray-300">{feature.text}</span>
                         </div>
                       ))}
                     </div>
 
                     {/* 혜택 목록 */}
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
                         포함 혜택
                       </p>
-                      <div className="grid grid-cols-1 gap-1">
+                      <div className="space-y-1">
                         {plan.benefits.slice(0, 3).map((benefit, idx) => (
                           <div key={idx} className="flex items-center space-x-2 text-xs">
-                            <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
+                            <div className="w-1.5 h-1.5 bg-[#388E3C] rounded-full"></div>
                             <span className="text-gray-600 dark:text-gray-400">{benefit}</span>
                           </div>
                         ))}
@@ -306,73 +315,13 @@ export default function FamilyRecommendationPage() {
                         )}
                       </div>
                     </div>
-
-                    {/* 선택 버튼 */}
-                    <Button
-                      className={`w-full ${
-                        plan.isRecommended
-                          ? 'bg-green-600 hover:bg-green-700 text-white'
-                          : 'bg-gray-100 hover:bg-gray-200 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-300'
-                      }`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedPlan(plan.id);
-                        toast.success(`${plan.name}이 선택되었습니다!`);
-                      }}
-                    >
-                      {selectedPlan === plan.id ? '선택됨' : '이 요금제 선택'}
-                    </Button>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
         </div>
-
-        {/* 하단 CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          className="mt-12 text-center"
-        >
-          <Card className="bg-gray-50 dark:bg-gray-800 border-0">
-            <CardContent className="p-8">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                지금 바로 시작하세요!
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                선택한 요금제로 가족과 함께 더 많이 절약하고, 더 풍부한 혜택을 누려보세요.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button
-                  size="lg"
-                  className="bg-green-600 hover:bg-green-700 text-white"
-                  disabled={!selectedPlan}
-                  onClick={() => {
-                    if (selectedPlan) {
-                      // 실제로는 요금제 신청 페이지로 이동
-                      window.open('https://www.lguplus.com/mobile/plan', '_blank');
-                    }
-                  }}
-                >
-                  요금제 신청하기
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => {
-                    // 상담 신청 페이지로 이동
-                    window.open('https://www.lguplus.com/support/counsel', '_blank');
-                  }}
-                >
-                  전문가 상담받기
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
-    </div>
+    </PageLayout>
   );
 }
