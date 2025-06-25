@@ -32,6 +32,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { mypageApi } from "@/lib/api/mypage";
 import { useRouter } from "next/navigation";
+import { familyApi } from "@/lib/api/family";
+import { LeaveFamilyModal } from "@/components/family-space/LeaveFamilyModal";
 
 interface UserInfo {
   name: string;
@@ -43,6 +45,7 @@ interface UserInfo {
   completedMissions: number;
   familyMembers: number;
   bugId?: number;
+  fid?: number;
 }
 
 interface PlanCard {
@@ -110,6 +113,8 @@ export default function MyPage() {
   const [visibleCount, setVisibleCount] = useState(2);
   const [showCount, setShowCount] = useState(3);
   const router = useRouter();
+  const [familyId, setFamilyId] = useState<number | null>(null);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -165,6 +170,18 @@ export default function MyPage() {
     fetchHistory();
   }, []);
 
+  useEffect(() => {
+    async function fetchFamilyId() {
+      try {
+        const data = await familyApi.getMyFamily();
+        setFamilyId(data?.family?.fid ?? null);
+      } catch {
+        setFamilyId(null);
+      }
+    }
+    fetchFamilyId();
+  }, []);
+
   if (loading) {
     return <div className="flex items-center justify-center h-full">로딩 중...</div>;
   }
@@ -199,6 +216,29 @@ export default function MyPage() {
     userInfo.bugId !== undefined && bugIdToImage[userInfo.bugId]
       ? bugIdToImage[userInfo.bugId]
       : userInfo.profileImage || "/images/modi.png";
+
+  const handleLeaveFamily = async () => {
+    if (!familyId) {
+      alert("가족 ID를 찾을 수 없습니다.");
+      return;
+    }
+    setShowLeaveModal(true);
+  };
+
+  const handleLeaveFamilyConfirm = async () => {
+    if (typeof familyId !== "number") {
+      alert("가족 ID를 찾을 수 없습니다.");
+      return;
+    }
+    try {
+      await familyApi.leaveFamily(familyId);
+      // 성공 시 튜토리얼로 이동
+      window.location.href = "/family-space-tutorial";
+    } catch (e) {
+      console.error("가족 탈퇴 실패:", e instanceof Error ? e.message : String(e));
+      alert("가족스페이스 탈퇴에 실패했습니다. 다시 시도해 주세요.");
+    }
+  };
 
   return (
     <div className="h-full lex flex-col">
@@ -484,8 +524,25 @@ export default function MyPage() {
               <p className="text-sm text-gray-500 dark:text-gray-400">버전 1.0.0</p>
             </CardContent>
           </Card>
+
+          {/* 가족스페이스 나가기 - width 맞춤 */}
+          <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
+            <CardContent className="px-6 py-2">
+              <button
+                className="w-full py-3 text-red-500 font-semibold  border-gray-200"
+                onClick={handleLeaveFamily}
+              >
+                가족 스페이스 탈퇴하기
+              </button>
+            </CardContent>
+          </Card>
         </div>
       </div>
+      <LeaveFamilyModal
+        open={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        onConfirm={handleLeaveFamilyConfirm}
+      />
     </div>
   );
 }
