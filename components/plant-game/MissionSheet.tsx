@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { Mission } from "@/types/plant-game.type";
 import { ActivityType } from "@/types/plants.type";
+import { usePlantGameStore } from '@/store/usePlantGameStore';
+import { MISSIONS } from '@/data/missions';
 
 interface Props {
-  missions: Mission[];
-  onClose: () => void;
   onMissionClick: (activityType: ActivityType) => void;
   completedMap: Partial<Record<ActivityType, boolean>>;
 }
 
-export function MissionSheet({ missions, onClose, onMissionClick, completedMap }: Props) {
+export function MissionSheet({ onMissionClick, completedMap }: Props) {
+  const setShowMissions = usePlantGameStore((s) => s.setShowMissions);
   return (
     <>
       <motion.div
@@ -18,7 +18,7 @@ export function MissionSheet({ missions, onClose, onMissionClick, completedMap }
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 bg-black bg-opacity-50 z-40"
-        onClick={onClose}
+        onClick={() => setShowMissions(false)}
       />
       <motion.div
         initial={{ y: "100%" }}
@@ -35,7 +35,7 @@ export function MissionSheet({ missions, onClose, onMissionClick, completedMap }
             미션하고 다양한 혜택 챙겨가요!
           </h2>
           <div className="space-y-4">
-            {missions.map((m) => {
+            {MISSIONS.map((m) => {
               const completed = completedMap[m.activityType];
               return (
                 <div

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
 import { AnimatePresence } from 'framer-motion';
 import { FamilyWateringStatus } from '@/components/plant-game/FamilyWateringStatus';
 import { PlantImageDisplay } from '@/components/plant-game/PlantImageDisplay';
@@ -10,7 +9,6 @@ import { PlantActionButtons } from '@/components/plant-game/PlantActionButtons';
 import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
 import { RewardModal } from '@/components/plant-game/RewardModal';
 import { MissionSheet } from '@/components/plant-game/MissionSheet';
-import { Mission } from '@/types/plant-game.type';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Link from 'next/link';
 import { useFamily, useMessageCardsManager } from '@/hooks/family';
@@ -28,8 +26,6 @@ import { ActivityType, PlantEventData, RewardHistory } from "@/types/plants.type
 import { useAuth } from "@/hooks/useAuth";
 import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
-import { Sprout, TreePine } from "lucide-react";
-import { useRouter } from "next/navigation";
 import confetti from "canvas-confetti";
 import { CardMatchingGame } from "@/components/plant-game/CardMatchingGame";
 import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFamilyMutations";
@@ -50,120 +46,6 @@ declare global {
 // ==========================================
 // 🎮 새싹 키우기 게임 메인 페이지
 // ==========================================
-/**
- * 새싹 키우기 게임 메인 페이지
- *
- * 주요 기능:
- * - 실시간 가족 구성원 물주기 상태 표시
- * - 식물 레벨별 성장 시각화 (1~5레벨)
- * - 하루 한번 제한된 물주기/영양제 활동
- * - 소켓을 통한 실시간 동기화
- * - 미션 시스템 연동 (출석, 메시지, 퀴즈, 카드게임, 가족등록, 설문)
- * - 5레벨 달성 시 보상 시스템
- */
-
-// ==========================================
-// 🎯 미션 데이터 정의
-// ==========================================
-const MISSIONS: Mission[] = [
-  {
-    id: 1,
-    title: "1일 1회 출석하기",
-    description: "매일 밤 12시에 다시 시작됩니다.",
-    icon: "✏️",
-    reward: "출석하기",
-    activityType: "attendance",
-  },
-  {
-    id: 2,
-    title: "가족에게 메세지 남기기",
-    description: "사랑하는 가족에게 작은 한마디",
-    icon: "💌",
-    reward: "메세지 작성",
-    activityType: "emotion",
-  },
-  {
-    id: 3,
-    title: "요금제 퀴즈 풀기",
-    description: "더 많은 할인이 기다릴지도?",
-    icon: "🎯",
-    reward: "퀴즈 풀기",
-    activityType: "quiz",
-  },
-  {
-    id: 4,
-    title: "골라 골라 오늘의 요금제",
-    description: "카들르 맞히고 요금제를 알아봐!!",
-    icon: "🎲",
-    reward: "카드 맞히기",
-    activityType: "lastleaf",
-  },
-  {
-    id: 5,
-    title: "가족 등록",
-    description: "가족 등록하고 더 많은 보상을 받아보세요!",
-    icon: "👨‍👩‍👧‍👦",
-    reward: "초대하기",
-    activityType: "register",
-  },
-  {
-    id: 6,
-    title: "통신 성향 검사",
-    description: "나에게 맞는 통신 캐릭터는?",
-    icon: "💬",
-    reward: "검사하기",
-    activityType: "survey",
-  },
-];
-
-// ==========================================
-// 🎲 선택형 모달 컴포넌트
-// ==========================================
-function ChoiceModal({
-  title,
-  options,
-  onSubmit,
-  onClose,
-  direction = "row",
-}: {
-  title: string;
-  options: string[];
-  onSubmit: (choice: string) => void;
-  onClose: () => void;
-  direction?: "row" | "col";
-}) {
-  const [selected, setSelected] = useState<string | null>(null);
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-xl p-6 w-80 flex flex-col items-center">
-        <div className="text-lg font-bold mb-4">{title}</div>
-        <div className={`flex mb-4 gap-2 ${direction === "row" ? "flex-row" : "flex-col"}`}>
-          {options.map((opt) => (
-            <button
-              key={opt}
-              className={`px-4 py-2 rounded-lg border ${selected === opt ? "bg-blue-500 text-white" : "bg-gray-100"
-                }`}
-              onClick={() => setSelected(opt)}
-            >
-              {opt}
-            </button>
-          ))}
-        </div>
-        <button
-          className="w-full bg-blue-500 text-white py-2 rounded-lg disabled:bg-gray-300"
-          disabled={!selected}
-          onClick={() => selected && onSubmit(selected)}
-        >
-          확인
-        </button>
-        <button className="mt-2 text-xs text-gray-400" onClick={onClose}>
-          닫기
-        </button>
-      </div>
-    </div>
-  );
-}
 
 // ==========================================
 // 🌱 새싹 키우기 게임 메인 컴포넌트
@@ -609,11 +491,6 @@ export default function PlantGamePage() {
   }));
 
   // ==========================================
-  // 🔄 라우터 및 기타
-  // ==========================================
-  const router = useRouter();
-
-  // ==========================================
   // 🚀 로딩 상태 처리
   // ==========================================
   if (isPlantLoading || !plantStatus) {
@@ -700,8 +577,6 @@ export default function PlantGamePage() {
       <AnimatePresence>
         {showMissions && (
           <MissionSheet
-            missions={MISSIONS}
-            onClose={() => setShowMissions(false)}
             onMissionClick={handleMissionClick}
             completedMap={missionCompletedMap}
           />
