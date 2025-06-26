@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, PanInfo } from "framer-motion";
 import { Mission } from "@/types/plant-game.type";
 import { ActivityType } from "@/types/plants.type";
 
@@ -11,6 +11,13 @@ interface Props {
 }
 
 export function MissionSheet({ missions, onClose, onMissionClick, completedMap }: Props) {
+  // 드래그로 닫기 핸들러
+  const handleDragEnd = (event: any, info: PanInfo) => {
+    if (info.offset.y > 100) {
+      onClose();
+    }
+  };
+
   return (
     <>
       <motion.div
@@ -26,8 +33,12 @@ export function MissionSheet({ missions, onClose, onMissionClick, completedMap }
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 500 }}
         className="fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl z-50 max-w-md mx-auto"
+        drag="y"
+        dragConstraints={{ top: 0, bottom: 0 }}
+        dragElastic={0.2}
+        onDragEnd={handleDragEnd}
       >
-        <div className="flex justify-center pt-4 pb-2">
+        <div className="flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">
           <div className="w-12 h-1 bg-gray-300 rounded-full"></div>
         </div>
         <div className="px-6 pb-8">

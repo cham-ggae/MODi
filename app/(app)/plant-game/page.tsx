@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { AnimatePresence } from 'framer-motion';
-import { FamilyWateringStatus } from '@/components/plant-game/FamilyWateringStatus';
-import { PlantImageDisplay } from '@/components/plant-game/PlantImageDisplay';
-import { PlantProgressBar } from '@/components/plant-game/PlantProgressBar';
-import { PlantActionButtons } from '@/components/plant-game/PlantActionButtons';
-import { ClaimRewardButton } from '@/components/plant-game/ClaimRewardButton';
-import { RewardModal } from '@/components/plant-game/RewardModal';
-import { MissionSheet } from '@/components/plant-game/MissionSheet';
-import { Mission } from '@/types/plant-game.type';
-import { ArrowLeft, UserPlus } from 'lucide-react';
-import Link from 'next/link';
-import { useFamily, useMessageCardsManager } from '@/hooks/family';
+import { useState, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { AnimatePresence } from "framer-motion";
+import { FamilyWateringStatus } from "@/components/plant-game/FamilyWateringStatus";
+import { PlantImageDisplay } from "@/components/plant-game/PlantImageDisplay";
+import { PlantProgressBar } from "@/components/plant-game/PlantProgressBar";
+import { PlantActionButtons } from "@/components/plant-game/PlantActionButtons";
+import { ClaimRewardButton } from "@/components/plant-game/ClaimRewardButton";
+import { RewardModal } from "@/components/plant-game/RewardModal";
+import { MissionSheet } from "@/components/plant-game/MissionSheet";
+import { Mission } from "@/types/plant-game.type";
+import { ArrowLeft, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { useFamily, useMessageCardsManager } from "@/hooks/family";
 import {
   useAddPoint,
   useCheckTodayActivity,
@@ -38,7 +38,7 @@ import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
 import { useKakaoInit } from "@/hooks/useKakaoShare";
 import { ModernPlantPage } from "@/components/plant-game/modern-plant-page";
-import { FullScreenLoading } from '@/components/ui/loading';
+import { FullScreenLoading } from "@/components/ui/loading";
 
 declare global {
   interface Window {
@@ -92,7 +92,7 @@ const MISSIONS: Mission[] = [
   {
     id: 4,
     title: "골라 골라 오늘의 요금제",
-    description: "카들르 맞히고 요금제를 알아봐!!",
+    description: "카드를 맞히고 요금제를 알아봐!!",
     icon: "🎲",
     reward: "카드 맞히기",
     activityType: "lastleaf",
@@ -343,7 +343,7 @@ export default function PlantGamePage() {
     }
 
     setIsWatering(true);
-    console.log('Water effect started');
+    console.log("Water effect started");
 
     addPoint(
       { activityType: "water" },
@@ -358,13 +358,13 @@ export default function PlantGamePage() {
           fetchWateredMembers();
           // 애니메이션이 끝나고 나서 상태를 false로 변경
           setTimeout(() => {
-            console.log('Water effect ended');
+            console.log("Water effect ended");
             setIsWatering(false);
           }, 3000);
         },
         onError: (error) => {
           setIsWatering(false);
-          console.log('Water effect error');
+          console.log("Water effect error");
         },
       }
     );
@@ -670,7 +670,7 @@ export default function PlantGamePage() {
   // 🚀 로딩 상태 처리
   // ==========================================
   if (isPlantLoading || !plantStatus) {
-    return <FullScreenLoading message='식물 상태를 불러오는 중...' />;
+    return <FullScreenLoading message="식물 상태를 불러오는 중..." />;
   }
 
   // ==========================================
@@ -698,7 +698,7 @@ export default function PlantGamePage() {
       {currentLevel !== 5 && (
         <div className="flex justify-end mb-2 flex-shrink-0 mr-8">
           <Button
-            className="bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-full px-6 py-2 text-sm"
+            className="bg-white text-gray-700 hover:bg-gray-50 rounded-full px-6 py-2 text-sm border border-gray-200"
             onClick={() => setShowMissions(true)}
           >
             미션하기
