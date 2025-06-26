@@ -15,6 +15,10 @@ const nextConfig = {
       process.env.NODE_ENV === 'production'
         ? 'https://modi-backend-th1n.onrender.com'
         : 'http://localhost:8090',
+    NEXT_PUBLIC_SOCKET_URL:
+      process.env.NODE_ENV === 'production'
+        ? 'wss://modi-backend-th1n.onrender.com'
+        : 'ws://localhost:8090',
   },
   // 환경 변수 정의
   publicRuntimeConfig: {
