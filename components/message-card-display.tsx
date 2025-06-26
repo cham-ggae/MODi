@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, CardContent } from "@/components/ui/card"
-import { useTheme } from "@/contexts/theme-context"
+import { useTheme } from "next-themes"
 
 interface MessageCardDisplayProps {
   design: string
@@ -68,14 +68,15 @@ export function MessageCardDisplay({
   className,
   onClick,
 }: MessageCardDisplayProps) {
-  const { isDarkMode } = useTheme()
+  const { theme } = useTheme()
+  const isDarkMode = theme === "dark"
   const cardDesign = cardDesigns[design as keyof typeof cardDesigns] || cardDesigns.flower
 
   return (
     <Card
       className={`
         ${isDarkMode ? cardDesign.darkGradient : cardDesign.gradient}
-        border-2 border-[#81C784] shadow-md relative overflow-hidden
+        border-2 border-primary shadow-md relative overflow-hidden
         ${onClick ? "cursor-pointer hover:shadow-lg transition-shadow" : ""}
         ${className}
       `}

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Sun, Moon } from "lucide-react"
-import { useTheme } from "@/contexts/theme-context"
+import { useTheme } from "next-themes"
 
 interface ThemeToggleProps {
   variant?: "default" | "outline" | "ghost"
@@ -11,13 +11,14 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ variant = "outline", size = "sm", className = "" }: ThemeToggleProps) {
-  const { isDarkMode, toggleTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
+  const isDarkMode = theme === "dark"
 
   return (
     <Button
       variant={variant}
       size={size}
-      onClick={toggleTheme}
+      onClick={() => setTheme(isDarkMode ? "light" : "dark")}
       className={`${className} ${
         isDarkMode
           ? "bg-white text-gray-900 border-white hover:bg-gray-100"

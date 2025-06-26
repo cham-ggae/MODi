@@ -1,8 +1,11 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { ArrowLeft, CheckCircle2, XCircle, Brain, Trophy, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface QuizPageProps {
   onBack: () => void;
@@ -269,37 +272,54 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
         </div>
 
         {/* 결과 화면 */}
-        <div className="flex-1 flex flex-col items-center justify-center p-6">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-lg">
-            <Trophy className="w-10 h-10 text-yellow-500" />
-          </div>
+        <div className="flex-1 flex flex-col items-center px-6 pt-8">
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-lg"
+          >
+            <Trophy className="w-12 h-12 text-yellow-500" />
+          </motion.div>
 
-          <h2 className="text-xl font-bold text-gray-900 mb-2">퀴즈 완료!</h2>
-          <p className={`text-base font-medium mb-4 ${resultMessage.color}`}>
-            {resultMessage.message}
-          </p>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-center mb-8"
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">퀴즈 완료!</h2>
+            <p className={`text-lg font-medium ${resultMessage.color}`}>
+              {resultMessage.message}
+            </p>
+          </motion.div>
 
-          <div className="bg-white rounded-2xl p-4 w-full max-w-xs shadow-lg mb-4">
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className="bg-white rounded-2xl p-8 w-full max-w-xs shadow-lg mb-10"
+          >
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600 mb-2">
+              <div className="text-4xl font-bold text-blue-600 mb-4">
                 {correctAnswers}/{quizQuestions.length}
               </div>
-              <div className="text-gray-600 mb-3 text-sm">정답 개수</div>
+              <div className="text-gray-600 mb-6 text-base">정답 개수</div>
 
-              <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
+              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-500"
                   style={{ width: `${scorePercentage}%` }}
                 ></div>
               </div>
-              <div className="text-xs text-gray-500">{scorePercentage}% 정답률</div>
+              <div className="text-base text-gray-500">{scorePercentage}% 정답률</div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="space-y-2 w-full max-w-xs">
+          <div className="space-y-4 w-full max-w-xs">
             <Button
               onClick={handleCompleteQuiz}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-medium text-sm"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-xl font-medium text-lg"
             >
               미션 완료하기
             </Button>
@@ -307,9 +327,9 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
             <Button
               onClick={handleRestartQuiz}
               variant="outline"
-              className="w-full py-2 rounded-xl font-medium border-gray-300 hover:bg-gray-50 text-sm"
+              className="w-full py-4 rounded-xl font-medium border-gray-300 hover:bg-gray-50 text-base"
             >
-              <RotateCcw className="w-3 h-3 mr-2" />
+              <RotateCcw className="w-5 h-5 mr-2" />
               다시 도전하기
             </Button>
           </div>
@@ -336,106 +356,112 @@ export function QuizPage({ onBack, onQuizComplete }: QuizPageProps) {
       </div>
 
       {/* 진행률 및 타이머 */}
-      <div className="px-4 pb-3 flex-shrink-0">
+      <div className="px-6 pb-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-gray-600">
-            {currentQuestionIndex + 1}/{quizQuestions.length}
+          <span className="text-sm text-gray-600">
+            {currentQuestionIndex + 1} / {quizQuestions.length}
           </span>
           <div
             className={`flex items-center space-x-1 ${
               timeLeft <= 10 ? "text-red-600" : "text-gray-600"
             }`}
           >
-            <span className="text-xs font-medium">{timeLeft}초</span>
+            <span className="text-sm font-medium">{timeLeft}초</span>
           </div>
         </div>
-        <Progress value={progress} className="h-1.5 bg-white/50" />
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div
+            className="bg-blue-500 h-2 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
       </div>
 
       {/* 퀴즈 내용 */}
-      <div className="flex-1 p-4 overflow-y-auto">
-        <Card className="bg-white shadow-lg border-0">
-          <CardContent className="p-4">
-            <h2 className="text-base font-semibold text-gray-900 mb-4 leading-relaxed">
-              {currentQuestion.question}
-            </h2>
+      <div className="flex-1 px-6 overflow-y-auto">
+        <motion.div
+          key={currentQuestionIndex}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="w-full h-full flex flex-col"
+        >
+          <h2 className="text-xl font-bold text-gray-900 mb-8 text-center pt-4">
+            {currentQuestion.question}
+          </h2>
 
-            <div className="space-y-2">
-              {currentQuestion.options.map((option, index) => {
-                let buttonClass =
-                  "w-full p-3 text-left rounded-lg border-2 transition-all duration-200 text-sm ";
+          <div className="space-y-3">
+            {currentQuestion.options.map((option, index) => (
+              <motion.button
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleAnswerSelect(index)}
+                disabled={showResult}
+                className={`w-full p-5 bg-white border-2 rounded-2xl flex items-center justify-between hover:border-blue-400 transition-all duration-200 ${
+                  showResult
+                    ? index === currentQuestion.correctAnswer
+                      ? "border-green-500 bg-green-50"
+                      : index === selectedAnswer
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 bg-gray-50"
+                    : selectedAnswer === index
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                <span className="text-base font-medium text-gray-900">{option}</span>
+                {showResult && (
+                  <div className="flex-shrink-0">
+                    {index === currentQuestion.correctAnswer ? (
+                      <CheckCircle2 className="w-5 h-5 text-green-600" />
+                    ) : index === selectedAnswer ? (
+                      <XCircle className="w-5 h-5 text-red-600" />
+                    ) : null}
+                  </div>
+                )}
+              </motion.button>
+            ))}
+          </div>
 
-                if (showResult) {
-                  if (index === currentQuestion.correctAnswer) {
-                    buttonClass += "border-green-500 bg-green-50 text-green-700";
-                  } else if (index === selectedAnswer && index !== currentQuestion.correctAnswer) {
-                    buttonClass += "border-red-500 bg-red-50 text-red-700";
-                  } else {
-                    buttonClass += "border-gray-200 bg-gray-50 text-gray-500";
-                  }
-                } else {
-                  if (selectedAnswer === index) {
-                    buttonClass += "border-blue-500 bg-blue-50 text-blue-700";
-                  } else {
-                    buttonClass +=
-                      "border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50 text-gray-700";
-                  }
-                }
-
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(index)}
-                    disabled={showResult}
-                    className={buttonClass}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{option}</span>
-                      {showResult && index === currentQuestion.correctAnswer && (
-                        <CheckCircle2 className="w-4 h-4 text-green-600" />
-                      )}
-                      {showResult &&
-                        index === selectedAnswer &&
-                        index !== currentQuestion.correctAnswer && (
-                          <XCircle className="w-4 h-4 text-red-600" />
-                        )}
-                    </div>
-                  </button>
-                );
-              })}
+          {/* 시간 초과 메시지 */}
+          {showResult && selectedAnswer === -1 && (
+            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-xl">
+              <p className="text-yellow-700 text-sm font-medium text-center">⏰ 시간 초과되었습니다!</p>
             </div>
+          )}
 
-            {/* 시간 초과 메시지 */}
-            {showResult && selectedAnswer === -1 && (
-              <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-yellow-700 text-xs font-medium">⏰ 시간 초과되었습니다!</p>
-              </div>
-            )}
+          {/* 정답 설명 */}
+          {showResult && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 p-4 bg-gray-50 rounded-xl"
+            >
+              <h4 className="font-medium text-gray-900 mb-2 text-sm">💡 설명</h4>
+              <p className="text-sm text-gray-700 leading-relaxed">{currentQuestion.explanation}</p>
+            </motion.div>
+          )}
 
-            {/* 정답 설명 */}
-            {showResult && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                <h4 className="font-medium text-gray-900 mb-1 text-sm">💡 설명</h4>
-                <p className="text-xs text-gray-700 leading-relaxed">
-                  {currentQuestion.explanation}
-                </p>
-              </div>
-            )}
-
-            {/* 다음 버튼 */}
-            {showResult && (
-              <div className="mt-4 flex justify-center">
-                <Button
-                  onClick={handleNextQuestion}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm"
-                >
-                  {currentQuestionIndex < quizQuestions.length - 1 ? "다음 문제" : "결과 보기"}
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          {/* 다음 버튼 */}
+          {showResult && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-6 flex justify-center"
+            >
+              <Button
+                onClick={handleNextQuestion}
+                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-base"
+              >
+                {currentQuestionIndex < quizQuestions.length - 1 ? "다음 문제" : "결과 보기"}
+              </Button>
+            </motion.div>
+          )}
+        </motion.div>
       </div>
     </div>
   );
 }
+
