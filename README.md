@@ -1,7 +1,7 @@
 # MODi - 스마트한 통신 생활의 시작
 
 <div align="center">
-<img src="https://github.com/user-attachments/assets/ddc1a49e-8b39-434c-b35c-c8cef307dda0"/>
+<img src="https://github.com/user-attachments/assets/ddc1a49e-8b39-434c-b35c-c8cef307dda0" style="width: 300px"/>
 </div>
 
 # 🌱 프로젝트 소개
@@ -67,18 +67,18 @@ MODi는 단순한 비용 절약을 넘어, 가족 간 정서적 유대감을 강
   </tbody>
 </table>
 
-## 🔧 기술 스택
+# 🌎 TEAMS
 
-## 🔧 기술 스택
+# 🔧 기술 스택
 
-| 구분                 | 사용 기술                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Frontend**         | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                       |
-| **Styling**          | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white) ![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-000000?style=for-the-badge&logo=vercel&logoColor=white)                                                                                              |
-| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-FF4154?style=for-the-badge&logo=react&logoColor=white)                                                                                                                                                                                                                                                                                                                                              |
-| **API Client**       | ![Tanstack Query](https://img.shields.io/badge/Tanstack_Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white) ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                                                                                                                                                                                                                        |
-| **Backend**          | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=for-the-badge&logo=apache&logoColor=white) ![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white) ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=for-the-badge&logo=socket.io&logoColor=white) |
-| **Authentication**   | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Kakao OAuth](https://img.shields.io/badge/Kakao_OAuth-FFCD00?style=for-the-badge&logo=kakaotalk&logoColor=black)                                                                                                                                                                                                                           |
+| 구분                 | 사용 기술                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Frontend**         | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                                                                                                                                                  |
+| **Styling**          | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white) ![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-000000?style=for-the-badge&logo=vercel&logoColor=white)                                                                                                                                                                                                                         |
+| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-FF4154?style=for-the-badge&logo=react&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **API Client**       | ![Tanstack Query](https://img.shields.io/badge/Tanstack_Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white) ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                                                                                                                                                                                                                                                                                                                                                   |
+| **Backend**          | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=for-the-badge&logo=apache&logoColor=white) ![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white) ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=for-the-badge&logo=socket.io&logoColor=white) |
+| **Authentication**   | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Kakao OAuth](https://img.shields.io/badge/Kakao_OAuth-FFCD00?style=for-the-badge&logo=kakaotalk&logoColor=black)                                                                                                                                                                                                                                                                                                                                                      |
 
 ## 📁 프로젝트 구조
 
@@ -125,14 +125,18 @@ MODi/
 └── types/                 # TypeScript 타입 정의
 ```
 
-## 🤝 기여하기
+# 🖥 SCREENS
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+|           화면           |                                                  이미지                                                  |
+| :----------------------: | :------------------------------------------------------------------------------------------------------: |
+|     **메인 페이지**      |     ![메인 페이지](https://github.com/user-attachments/assets/20fbcab3-3bc0-4e51-a74f-da818c78ec49)      |
+|    **챗봇 일반모드**     |    ![챗봇 일반모드](https://github.com/user-attachments/assets/57aa454e-98cc-4c4b-8651-d55bb24aa8f8)     |
+|    **챗봇 가족모드**     |    ![챗봇 가족모드](https://github.com/user-attachments/assets/fb8ea4d4-f971-47c1-9fd9-4a9e5642552b)     |
+|    **가족 스페이스**     |    ![가족 스페이스](https://github.com/user-attachments/assets/ccce6f11-0287-4004-b6b9-ad61173342b4)     |
+| **새싹 키우기 - 물주기** | ![새싹 키우기 - 물주기](https://github.com/user-attachments/assets/225194fb-6d02-4e66-9b72-39ff37e94058) |
+| **새싹 키우기 - 레벨업** | ![새싹 키우기 - 레벨업](https://github.com/user-attachments/assets/a3cc7d34-0163-4197-9e58-fb0902937008) |
+|      **보상 받기**       |      ![보상 받기](https://github.com/user-attachments/assets/488dfa5d-d40a-4e99-961d-e646bd0987eb)       |
 
-## 📄 라이선스
+---
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+2025 MIT License
