@@ -44,7 +44,7 @@ import { useFamily } from "@/hooks/family";
 import { useKakaoInit, shareSurveyResult } from "@/hooks/useKakaoShare";
 import { useAddPoint } from "@/hooks/plant";
 import { toast } from "sonner";
-import { FullScreenLoading } from '@/components/ui/loading';
+import { FullScreenLoading } from "@/components/ui/loading";
 
 // bugId에 따른 추천 이유 매핑
 const getRecommendationReason = (bugId: number): string => {
@@ -189,8 +189,8 @@ export default function SurveyResultContent() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => router.back()}
-            aria-label="이전으로 가기"
+            onClick={() => router.push("/chat")}
+            aria-label="챗봇으로 이동"
             className="hover:bg-transparent focus:bg-transparent"
           >
             <ArrowLeft className="w-6 h-6" style={{ color: "#000" }} />

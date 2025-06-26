@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -6,21 +6,21 @@ import { useState, useEffect } from "react";
 interface LoadingProps {
   message?: string;
   className?: string;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   videoSrc?: string;
 }
 
 const sizeMap = {
-  sm: 'w-48',  // 192px
-  md: 'w-64',  // 256px
-  lg: 'w-96'   // 384px
+  sm: "w-48", // 192px
+  md: "w-64", // 256px
+  lg: "w-96", // 384px
 };
 
-export function Loading({ 
-  message = "로딩 중...", 
-  className, 
-  size = 'md',
-  videoSrc = "/videos/loading_video.mp4"
+export function Loading({
+  message = "로딩 중...",
+  className,
+  size = "md",
+  videoSrc = "/videos/loading_video.mp4",
 }: LoadingProps) {
   const [videoError, setVideoError] = useState(false);
 
@@ -40,7 +40,7 @@ export function Loading({
               <source src={videoSrc} type="video/mp4" />
             </video>
           ) : (
-            <div 
+            <div
               className={cn(
                 "border-4 border-[#81C784] border-t-transparent animate-spin rounded-full mx-auto",
                 sizeMap[size]
@@ -54,10 +54,15 @@ export function Loading({
   );
 }
 
-export function FullScreenLoading({ message = "로딩 중...", className, size = 'md', videoSrc }: LoadingProps) {
+export function FullScreenLoading({
+  message = "로딩 중...",
+  className,
+  size = "md",
+  videoSrc,
+}: LoadingProps) {
   return (
     <div className={cn("min-h-screen w-full flex items-center justify-center", className)}>
       <Loading message={message} size={size} videoSrc={videoSrc} />
     </div>
   );
-} 
+}

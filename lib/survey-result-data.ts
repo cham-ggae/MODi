@@ -118,9 +118,11 @@ export const userTypes: Record<string, UserType> = {
     type: "호박벌형",
     emoji: "🐝",
     title: "데이터 없으면 그냥 벽돌폰 아닌가요?",
-    description: `📶와이파이? 느려서 못 씀. LTE로 바로 튐.
-🚆출퇴근길엔 무조건 유튜브, 인스타 릴스 루틴 있음.
-📱데이터 소진 알림 뜨면 약간 식은땀 남. 
+    description: `📶 “와이파이? 느려서 못 써요”
+LTE로 바로 튀는 데이터 본능형
+
+🚆 출퇴근은 유튜브, 인스타 릴스 루틴
+데이터 소진 알림 뜨면 식은땀 남 
         `,
     recommendations: ["5G 프리미어 에센셜", "5G 프리미어 레귤러"],
     savings: 25000,
@@ -130,9 +132,14 @@ export const userTypes: Record<string, UserType> = {
     type: "개미형",
     emoji: "🐜",
     title: "가족 요금제? 아빠만 아는 비밀",
-    description: `👨‍👩‍👧‍👦 가족과 같이 쓰지만 서로 뭘 쓰는지 모름.
-🤷‍♂️ 누가 요금제 뭐쓰냐하면 "몰라? 아빠가 알걸" 이라고 함.
-📱 데이터 부족하면 가족한테 달라고 함.`,
+    description: `🧑‍👩‍👧‍👦 “요금제 뭐 써?”  
+🙄 “몰라, 아빠가 알아서 했을걸?”
+
+📡 가족 요금제 같이 쓰지만  
+정작 누가 뭘 쓰는진 아무도 모름.
+
+📲 데이터 부족하면?  
+가족 단톡방에 “누구 좀 줘봐~”`,
     recommendations: ["U+투게더 결합", "참 쉬운 가족 결합"],
     savings: 45000,
     message: `이젠 당신도 한 번쯤 챙겨볼 타이밍.
@@ -142,9 +149,11 @@ export const userTypes: Record<string, UserType> = {
     type: "무당벌레형",
     emoji: "🐞",
     title: "카톡보단 전화로 해줘..",
-    description: `📞 전화는 3초 안에 받는 게 예의.
-💬 카톡으로 톡하느니 전화로 확실하게 말함.
-📱 하루 통화 시간 통계 보면 내가 봐도 깜짝 놀람.`,
+    description: `📞 “전화는 3초 안에 받아야죠”
+카톡보다 목소리가 더 편한 타입
+
+📱 하루 통화 시간 보면 나도 놀람
+요금제는 당연히 통화 무제한`,
     recommendations: ["LTE 선택형 요금제", "5G 심플+", "유쓰 5G 스탠다드"],
     savings: 0,
     message: "무당벌레형은 통화가 생명! 무제한으로 수다 떨어도 부담 없는 요금제를 추천해요📞",
@@ -153,9 +162,11 @@ export const userTypes: Record<string, UserType> = {
     type: "라바형",
     emoji: "🐛",
     title: "혜택도 좋지만.. 요금부터 봅시다",
-    description: `🪙 이벤트, 할인, 결합 쓸 수 있는 건 다 써봄.
-💸 가격 먼저 보고 혜택은 보너스로 생각함.
-🧾 청구서 보고 '이번달도 잘 막았다'는 뿌듯함 느끼는 타입
+    description: `🧾 “요금부터 봐야죠. 혜택은 덤”
+할인·결합·이벤트 다 챙겨보는 실속러
+
+💸 청구서 보고 ‘이번 달도 막았다’
+그럴 땐 괜히 뿌듯한 사람
                     `,
     recommendations: ["유쓰 5G 미니", "유쓰 5G 슬림+"],
     savings: 15000,
@@ -165,9 +176,11 @@ export const userTypes: Record<string, UserType> = {
     type: "나비형",
     emoji: "🦋",
     title: "멤버십, 제휴 할인 그래서 뭐가 있죠?",
-    description: `🎁 제휴 혜택, 멤버십 적립 다 외우고 다님.
-💡이거 포인트 적립돼요?” 입에 달고 다님.
-🛍️ 혜택 보자마자 “어머 이건 사야 돼” 모드 돌입`,
+    description: `🎁 “이거 포인트 적립돼요?”
+제휴 혜택은 다 외우고 다님
+
+🛍️ 혜택 보이면 “어머 이건 사야 돼”
+가성비와 감성 모두 챙기는 타입`,
     recommendations: ["5G 프리미어 플러스", "U+ 멤버십 결합 상품"],
     savings: 35000,
     message:

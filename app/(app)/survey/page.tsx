@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { ArrowLeft } from 'lucide-react';
-import { useSurvey } from '@/hooks/useSurveyFlow';
-import { SurveyProgressBar } from '@/components/survey/SurveyProgressBar';
-import { SurveyQuestionCard } from '@/components/survey/SurveyQuestionCard';
+import { ArrowLeft } from "lucide-react";
+import { useSurvey } from "@/hooks/useSurveyFlow";
+import { SurveyProgressBar } from "@/components/survey/SurveyProgressBar";
+import { SurveyQuestionCard } from "@/components/survey/SurveyQuestionCard";
 
 export default function SurveyPage() {
   const { currentQuestion, totalQuestions, currentQ, handleAnswer, handleBack } = useSurvey();
