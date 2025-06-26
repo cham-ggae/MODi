@@ -1,53 +1,12 @@
 # MODi - 스마트한 통신 생활의 시작
 
-개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스
+본 프로젝트 **MODi**는 **"기술이 가족을 연결할 수 있다"**는 생각에서 시작된 웹 기반 챗봇 플랫폼입니다. 통신사 요금제 추천과 가족 소통을 융합한 서비스로, 개인과 가족이 함께 요금제를 비교하고 비용을 절감할 수 있도록 도와줍니다.
 
-## 🚀 시작하기
+**가족 스페이스** 기능을 통해 초대코드로 가족을 초대하고, 공동 목표인 **새싹 키우기**를 통해 가족 간 소통과 협력을 유도합니다.
 
-### 필수 의존성 설치
+**맞춤형 챗봇**은 사용자의 통신 성향을 분석해 최적의 요금제를 추천하며, **음성 기능(TTS/STT)**을 지원합니다.
 
-```bash
-pnpm install
-```
-
-### 환경 변수 설정
-
-#### 자동 환경 설정
-
-프로젝트는 개발/프로덕션 환경을 자동으로 감지하여 적절한 API 서버에 연결됩니다:
-
-- **개발 환경** (`NODE_ENV=development`): `http://localhost:8090`
-- **프로덕션 환경** (`NODE_ENV=production`): `https://modi-backend-th1n.onrender.com`
-
-#### 수동 환경 변수 설정 (선택사항)
-
-특정 API 서버를 사용하고 싶다면 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
-
-```env
-# API 서버 주소 (이 값이 설정되면 자동 환경 감지보다 우선됩니다)
-NEXT_PUBLIC_ADDR=http://localhost:8090
-# 또는
-NEXT_PUBLIC_API_URL=https://modi-backend-th1n.onrender.com
-
-# 카카오 OAuth 설정
-NEXT_PUBLIC_KAKAO_CLIENT_ID=your_kakao_client_id
-NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://localhost:3000/login/callback
-
-#새싹 키우기 소켓
-NEXT_PUBLIC_SOCKET_URL=ws://localhost:8090
-```
-
-#### 사용 가능한 환경 변수
-
-- `NEXT_PUBLIC_ADDR`: API 서버 주소 (최우선)
-- `NEXT_PUBLIC_API_URL`: API 서버 주소 (차선책)
-- 설정하지 않으면 `NODE_ENV`에 따라 자동 결정
-
-### 개발 서버 실행
-
-```bash
-pnpm dev
-```
+MODi는 단순한 비용 절약을 넘어, 가족 간 정서적 유대감을 강화하고, 세대 간 디지털 격차를 해소하는 새로운 패밀리테크 경험을 제공합니다.
 
 ## 🔧 기술 스택
 
@@ -64,20 +23,43 @@ pnpm dev
 MODi/
 ├── app/                    # Next.js App Router
 │   ├── login/             # 로그인 관련 페이지
-│   │   ├── page.tsx       # 로그인 페이지
-│   │   └── callback/      # OAuth 콜백 처리
-│   ├── basic-info/        # 기본 정보 입력
-│   ├── chat/              # AI 상담
-│   ├── family-space/      # 가족 공간
-│   └── plant-game/        # 식물 게임
+│   └── (app)/             # 메인 콘텐츠 그룹
+│       ├── basic-info/    # 기본 정보 입력
+│       ├── chat/          # AI 상담
+│       ├── family-space/  # 가족 공간
+│       ├── family-space-tutorial/  # 가족 공간 튜토리얼
+│       ├── my-page/       # 마이페이지
+│       ├── plant-game/    # 식물 게임
+│       ├── plant-selection/  # 식물 선택
+│       ├── result/        # 결과 페이지
+│       ├── survey/        # 설문조사
+│       └── survey-result/ # 설문 결과
 ├── components/            # 재사용 가능한 컴포넌트
+│   ├── chat/              # 채팅 관련 컴포넌트
+│   ├── family-space/      # 가족 공간 관련 컴포넌트
+│   ├── layouts/           # 레이아웃 컴포넌트
+│   ├── login/             # 로그인 관련 컴포넌트
+│   ├── my-page/           # 마이페이지 컴포넌트
+│   ├── plant/             # 식물 관련 컴포넌트
+│   ├── plant-game/        # 식물 게임 컴포넌트
+│   ├── plant-selection/   # 식물 선택 컴포넌트
 │   ├── providers/         # 프로바이더 컴포넌트
-│   ├── ui/               # 기본 UI 컴포넌트
-│   └── ...
-├── hooks/                # 커스텀 훅
-├── lib/                  # 유틸리티 및 API
-├── store/                # Zustand 스토어
-└── contexts/             # React Context
+│   ├── survey/            # 설문조사 컴포넌트
+│   └── ui/                # 기본 UI 컴포넌트 (Radix UI 기반)
+├── contexts/              # React Context
+├── hooks/                 # 커스텀 훅
+│   ├── family/            # 가족 관련 훅
+│   └── plant/             # 식물 관련 훅
+├── lib/                   # 유틸리티 및 API
+│   └── api/               # API 클라이언트
+├── public/                # 정적 파일
+│   ├── animations/        # 애니메이션 파일
+│   ├── images/            # 이미지 파일
+│   └── videos/            # 비디오 파일
+├── services/              # 서비스 레이어
+├── store/                 # Zustand 스토어
+├── styles/                # 스타일 파일
+└── types/                 # TypeScript 타입 정의
 ```
 
 ## 🔐 인증 시스템
@@ -98,7 +80,7 @@ MODi/
 인증이 필요한 페이지는 `withAuth` HOC로 보호됩니다:
 
 ```tsx
-import { withAuth } from '@/components/providers/AuthProvider';
+import { withAuth } from "@/components/providers/AuthProvider";
 
 function ProtectedPage() {
   return <div>인증이 필요한 페이지</div>;
