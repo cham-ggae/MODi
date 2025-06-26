@@ -11,13 +11,12 @@ import { RewardModal } from '@/components/plant-game/RewardModal';
 import { MissionSheet } from '@/components/plant-game/MissionSheet';
 import { ArrowLeft, UserPlus } from 'lucide-react';
 import Link from 'next/link';
-import { useFamily, useMessageCardsManager } from '@/hooks/family';
+import { useFamily } from '@/hooks/family';
 import {
   useAddPoint,
   useCheckTodayActivity,
   usePlantStatus,
   useNutrientStatus,
-  useClaimReward,
 } from "@/hooks/plant";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -27,13 +26,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { plantApi } from "@/lib/api/plant";
 import { FamilyMember } from "@/types/family.type";
 import { CardMatchingGame } from "@/components/plant-game/CardMatchingGame";
-import { useGenerateInviteCode, useUpdateFamilyName } from "@/hooks/family/useFamilyMutations";
 import { MessageCardCreator } from "@/components/family-space/MessageCardCreator";
 import { InviteCodeModal } from "@/components/family-space/InviteCodeModal";
 import { QuizPage } from "@/components/plant-game/QuizPage";
 import { useKakaoInit } from "@/hooks/useKakaoShare";
-import { ModernPlantPage } from "@/components/plant-game/modern-plant-page";
-import { useKakaoInit, shareKakao } from "@/hooks/useKakaoShare";
 import MissionBtn from '@/components/plant-game/MissionBtn';
 import { usePlantGameStore } from '@/store/usePlantGameStore';
 

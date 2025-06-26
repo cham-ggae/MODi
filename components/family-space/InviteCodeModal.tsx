@@ -4,10 +4,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { usePlantGameStore } from '@/store/usePlantGameStore';
 import { useFamily } from '@/hooks/family';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -143,23 +139,21 @@ export function InviteCodeModal({ copied, onGenerateCode, onCopyCode, onShareKak
               </div>
             </>
           ) : (
-            <>
-              <div className="text-center">
-                <div className="text-4xl mb-3">🔗</div>
-                <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                  아직 초대 코드가 없어요
-                </div>
-                <Button
-                  onClick={onGenerateCode}
-                  className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"
-                >
-                  초대 코드 생성하기
-                </Button>
+            <div className="text-center">
+              <div className="text-4xl mb-3">🔗</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                아직 초대 코드가 없어요
               </div>
+              <Button
+                onClick={onGenerateCode}
+                className="bg-green-500 hover:bg-gray-600 dark:hover:bg-gray-400 text-white"
+              >
+                초대 코드 생성하기
+              </Button>
             </div>
-        </motion.div>
-      </>
-      )}
-    </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
