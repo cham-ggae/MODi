@@ -9,6 +9,14 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
+// 인증이 필요하지 않은 페이지들
+const publicRoutes = ['/survey-result'];
+
+// 특정 경로가 공개 경로인지 확인하는 함수
+const isPublicRoute = (pathname: string): boolean => {
+  return publicRoutes.some((route) => pathname.startsWith(route));
+};
+
 /**
  * 인증 상태 초기화 및 관리 프로바이더
  */
@@ -30,20 +38,8 @@ export default function AuthProvider({ children }: AuthProviderProps) {
   const router = useRouter();
   const pathname = usePathname();
 
-  // 디버깅용 상태 로그
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔍 AuthProvider 상태 변경:', {
-        isInitialized,
-        isLoading,
-        isAuthenticated,
-        hasToken: !!accessToken,
-        hasUser: !!user,
-        pathname,
-        tokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none',
-      });
-    }
-  }, [isInitialized, isLoading, isAuthenticated, accessToken, user, pathname]);
+  // 현재 경로가 공개 경로인지 확인
+  const isCurrentRoutePublic = isPublicRoute(pathname);
 
   // 사전 토큰 갱신 함수
   const preemptiveTokenRefresh = async () => {
@@ -78,6 +74,30 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
+  // 디버깅용 상태 로그
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 AuthProvider 상태 변경:', {
+        isInitialized,
+        isLoading,
+        isAuthenticated,
+        hasToken: !!accessToken,
+        hasUser: !!user,
+        pathname,
+        isCurrentRoutePublic,
+        tokenPreview: accessToken ? accessToken.substring(0, 20) + '...' : 'none',
+      });
+    }
+  }, [
+    isInitialized,
+    isLoading,
+    isAuthenticated,
+    accessToken,
+    user,
+    pathname,
+    isCurrentRoutePublic,
+  ]);
+
   useEffect(() => {
     const initializeAuth = async () => {
       if (process.env.NODE_ENV === 'development') {
@@ -88,8 +108,10 @@ export default function AuthProvider({ children }: AuthProviderProps) {
         // 1. 약간의 지연으로 초기화 보장
         await new Promise((resolve) => setTimeout(resolve, 100));
 
-        // 2. 인증 상태 초기화
-        initAuth();
+        // 2. 공개 경로가 아닌 경우에만 인증 상태 초기화
+        if (!isCurrentRoutePublic) {
+          initAuth();
+        }
 
         if (process.env.NODE_ENV === 'development') {
           console.log('✅ AuthProvider 초기화 완료');
@@ -102,10 +124,15 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initializeAuth();
-  }, [initAuth]);
+  }, [initAuth, isCurrentRoutePublic]);
 
   // 인증된 사용자의 루트 페이지 접근 시 리다이렉트
   useEffect(() => {
+    // 공개 경로인 경우 리다이렉트 로직 스킵
+    if (isCurrentRoutePublic) {
+      return;
+    }
+
     // 모든 조건이 충족되었는지 확인
     if (!isInitialized) {
       if (process.env.NODE_ENV === 'development') {
@@ -149,11 +176,20 @@ export default function AuthProvider({ children }: AuthProviderProps) {
       }
       router.replace('/chat');
     }
-  }, [isInitialized, isLoading, isAuthenticated, accessToken, user, pathname, router]);
+  }, [
+    isInitialized,
+    isLoading,
+    isAuthenticated,
+    accessToken,
+    user,
+    pathname,
+    router,
+    isCurrentRoutePublic,
+  ]);
 
-  // 주기적인 토큰 갱신 체크
+  // 주기적인 토큰 갱신 체크 (공개 경로가 아닌 경우에만)
   useEffect(() => {
-    if (!isAuthenticated || !isInitialized) {
+    if (!isAuthenticated || !isInitialized || isCurrentRoutePublic) {
       return;
     }
 
@@ -168,9 +204,14 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     return () => {
       clearInterval(tokenCheckInterval);
     };
-  }, [isAuthenticated, isInitialized, shouldRefreshToken, isRefreshing]);
+  }, [isAuthenticated, isInitialized, shouldRefreshToken, isRefreshing, isCurrentRoutePublic]);
 
-  // 초기화 완료 전에는 로딩 표시
+  // 공개 경로인 경우 로딩 없이 바로 렌더링
+  if (isCurrentRoutePublic) {
+    return <>{children}</>;
+  }
+
+  // 초기화 완료 전에는 로딩 표시 (비공개 경로만)
   if (!isInitialized || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
