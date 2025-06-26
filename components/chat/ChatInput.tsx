@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mic, MicOff, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useSpeechRecognition, useTextToSpeech } from '@/hooks/use-speech';
-import { useToast } from '../ui/use-toast';
 import SttButton from './SttButton';
 import { ClientMessage } from '@/types/chat.type';
 import { useChatStream } from '@/hooks/useChatStream';
 import { v4 as uuidv4 } from 'uuid'
+import SuggestedKeywords from './SuggestedKeywords';
 
 interface ChatInputProps {
   sessionId: string;
@@ -15,17 +15,32 @@ interface ChatInputProps {
   familyMode: boolean;
   familySize: number;
   familySessionId: string;
+  messages: ClientMessage[];
 }
-const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessionId }: ChatInputProps) => {
+
+const KEYWORDS = [
+  '저렴한 요금제',
+  '데이터 무제한',
+  '가성비 좋은',
+  '혜택이 많은',
+  '알뜰폰 요금제',
+  '다양한 요금제',
+];
+
+function getRandomKeywords() {
+  const shuffled = [...KEYWORDS].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+}
+
+const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessionId, messages }: ChatInputProps) => {
   const [message, setMessage] = useState('');
+  const [suggestedKeywords, setSuggestedKeywords] = useState<string[]>([]);
   const {
     isListening,
-    startListening,
-    stopListening,
     isSupported: sttSupported,
   } = useSpeechRecognition();
 
-  const { message: aiChunk, cid, isStreaming, error, start, stop } =
+  const { message: aiChunk, cid, isStreaming, start, stop } =
     useChatStream()
 
   // 이 ref 에 새로 추가한 AI placeholder 메시지의 id 를 저장
@@ -58,7 +73,8 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
 
     // 3) 스트리밍 시작
     start(message, familyMode ? familySessionId : sessionId, familyMode ? familySize : 1)
-    setMessage('')
+    setMessage('');
+    setSuggestedKeywords(getRandomKeywords());
   }
 
   // aiChunk가 갱신될 때마다 placeholder 메시지의 content만 업데이트
@@ -89,9 +105,21 @@ const ChatInput = ({ sessionId, setMessages, familyMode, familySize, familySessi
   const handleStop = () => {
     stop()
   }
+
+  const handleKeywordClick = (keyword: string) => {
+    setMessage(keyword);
+  }
+
+  // 현재 모드의 세션ID에 해당하는 메시지 중 사용자가 보낸 메시지가 1개 이상일 때만 키워드 노출
+  const currentSessionId = familyMode ? familySessionId : sessionId;
+  const hasUserMessagesInCurrentMode = messages.filter(msg => msg.sessionId === currentSessionId && msg.role === 'user').length > 0;
   return (
     <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex-shrink-0">
       <div className="p-4">
+        {/* 현재 모드에 사용자가 보낸 메시지가 있을 때만 키워드 추천 노출 */}
+        {hasUserMessagesInCurrentMode && suggestedKeywords.length > 0 && (
+          <SuggestedKeywords keywords={suggestedKeywords} onSelect={handleKeywordClick} />
+        )}
         <div className="flex items-center space-x-3">
           {sttSupported && (
             <SttButton setMessage={setMessage} sessionId={sessionId} />

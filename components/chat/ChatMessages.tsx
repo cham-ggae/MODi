@@ -1,7 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
-import { Volume2, VolumeX } from "lucide-react";
 import { ClientMessage } from "@/types/chat.type";
 import { useTextToSpeech } from "@/hooks/use-speech";
 import { useToast } from "../ui/use-toast";
