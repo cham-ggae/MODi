@@ -82,7 +82,7 @@ export function FamilyRecommendationCard({
           <div className="flex items-center space-x-2">
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">가족 결합 요금제</h2>
           </div>
-          <Badge className="bg-gray-50 dark:bg-gray-50 text-gray-600 dark:text-green-300 text-xs px-2 py-0.5 hover:bg-gray-200 dark:hover:bg-gray-300">
+          <Badge className="bg-gray-50 dark:bg-gray-50 text-gray-600 dark:text-gray-600 text-xs px-2 py-0.5 hover:bg-gray-200 dark:hover:bg-gray-300">
             <TrendingUp className="w-3 h-3 mr-1" />
             {memberCount}명 가족
           </Badge>

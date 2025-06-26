@@ -104,7 +104,7 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
           <div className="flex items-center space-x-2 mb-1">
             <span className="font-semibold text-gray-900 dark:text-white">{member.name}</span>
             {member.hasSurveyCompleted ? (
-              <Badge className="bg-[#ffffff] dark:bg-green-800 text-gray-700 text-[11px] px-1.5 py-0.5 font-semibold flex items-center gap-[2px] self-center hover:bg-green-50 dark:hover:bg-green-900">
+              <Badge className="bg-[#ffffff] dark:bg-green-800 text-gray-700 dark:text-gray-100 text-[11px] px-1.5 py-0.5 font-semibold flex items-center gap-[2px] self-center hover:bg-green-50 dark:hover:bg-green-900">
                 <CheckCircle className="w-3 h-3 mr-1" />
                 <span className="leading-none">추천완료</span>
               </Badge>
