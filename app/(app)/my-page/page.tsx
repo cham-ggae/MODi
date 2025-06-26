@@ -229,23 +229,6 @@ export default function MyPage() {
     }
   };
 
-  // Helper function to render text with bold quotes
-  const renderTextWithBoldQuotes = (text: string) => {
-    const parts = text.split(/"([^"]*)"/);
-    return parts.map((part, index) => {
-      if (index % 2 === 1) {
-        // This is text inside quotes - make it bold
-        return (
-          <span key={index} className="font-bold">
-            {part}
-          </span>
-        );
-      }
-      // This is regular text
-      return part;
-    });
-  };
-
   return (
     <div className="h-full lex flex-col">
       {/* Header - 고정, 맨  */}
@@ -352,11 +335,7 @@ export default function MyPage() {
               {userInfo.bugId ? (
                 <div className="flex flex-col items-center text-center w-full min-h-[260px]">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    "
-                    {renderTextWithBoldQuotes(
-                      userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.title || "유형 정보"
-                    )}
-                    "
+                    "{userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.title || "유형 정보"}"
                   </h3>
                   <div className="bg-blue-50 rounded-xl px-6 py-5 w-full mb-2 min-h-[220px] flex flex-col justify-center space-y-2">
                     {userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.description
@@ -366,7 +345,7 @@ export default function MyPage() {
                           key={idx}
                           className="text-m text-gray-800 text-center leading-relaxed flex items-start mb-2"
                         >
-                          <span>{renderTextWithBoldQuotes(feature)}</span>
+                          <span>{feature}</span>
                         </div>
                       ))}
                   </div>

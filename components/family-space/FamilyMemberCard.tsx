@@ -1,14 +1,17 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { UIFamilyMember } from "@/types/family.type";
-import { CheckCircle, Clock } from "lucide-react";
+import { CheckCircle, Clock, Heart } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { Avatar } from "@radix-ui/react-avatar";
 import { typeImageMap, bugIdToNameMap } from "@/lib/survey-result-data";
+import { useToast } from "@/components/ui/use-toast";
 
 interface FamilyMemberCardProps {
   member: UIFamilyMember;
+  onRecommendPlan?: (memberId: number) => void;
 }
 
 // 벌레 ID에 따른 타입 및 이모티콘 매핑
@@ -33,9 +36,13 @@ const formatSurveyDate = (dateString: string): string => {
   }
 };
 
-export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
+export function FamilyMemberCard({ member, onRecommendPlan }: FamilyMemberCardProps) {
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  // 70대 이상인지 확인하는 함수
+  const isSenior = typeof member.age === "string" && member.age.startsWith("70");
 
   const handleCardClick = () => {
     // 다른 사용자가 설문 미완료인 경우 아무것도 하지 않음
@@ -50,6 +57,14 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
     } else {
       // 설문조사 미완료인 경우 - 설문조사 페이지로 이동
       router.push("/survey");
+    }
+  };
+
+  const handleRecommendClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 카드 클릭 이벤트 방지
+    if (onRecommendPlan) {
+      onRecommendPlan(member.id);
+      toast.success(`${member.name}님께 요금제를 추천했습니다! 💝`);
     }
   };
 
@@ -146,6 +161,17 @@ export function FamilyMemberCard({ member }: FamilyMemberCardProps) {
             </span>
           )}
         </div>
+
+        {/* 70대 이상 부모님에게만 요금제 추천 버튼 표시 */}
+        {isSenior && (
+          <Button
+            onClick={handleRecommendClick}
+            className="bg-amber-500 hover:bg-amber-600 text-white text-sm px-3 py-1.5 rounded-lg flex items-center gap-1.5 whitespace-nowrap"
+          >
+            <Heart className="w-3 h-3" />
+            부모님께 요금제 추천하기
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -9,6 +9,7 @@ import { useFamily } from "@/hooks/family";
 import { useMyUserInfo } from "@/hooks/useUserInfoQuery";
 import { useRouter } from "next/navigation";
 import AgePlanRecommendationBubble from "@/components/chat/AgePlanRecommendationBubble";
+import SeniorPlanModal from "@/components/SeniorPlanModal";
 
 function createSessionId() {
   return window.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -43,6 +44,7 @@ export default function ChatPage() {
   useEffect(() => {
     console.log("messages", messages);
   }, [messages]);
+
   return (
     <Fragment>
       {memberCount > 1 && (
@@ -73,6 +75,7 @@ export default function ChatPage() {
         familySessionId={familySessionId}
         messages={messages}
       />
+      <SeniorPlanModal userInfo={user} />
     </Fragment>
   );
 }
