@@ -3,12 +3,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { seniorPlans } from "@/lib/survey-result-data";
+import { seniorPlanDetails } from "@/lib/survey-result-data";
 import { Users, Phone, Gift, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { UserInfo } from "@/types/user-info.type";
 
-// fallback plan data (seniorPlans가 없을 경우 사용)
+// fallback plan data (seniorPlanDetails가 없을 경우 사용)
 const fallbackPlan = {
   name: "시니어 LTE 베이직",
   description: "통화 무제한, 데이터 1GB, 시니어 할인 20% 적용",
@@ -40,19 +40,9 @@ export default function SeniorPlanModal({ userInfo }: SeniorPlanModalProps) {
     console.log("SeniorPlanModal - isSenior:", isSenior);
 
     if (isSenior) {
-      // 추천 상태 확인
-      const recommendedMembers = JSON.parse(localStorage.getItem("recommendedMembers") || "[]");
-      const hasBeenRecommended = recommendedMembers.includes(userInfo.uid);
-
-      console.log("SeniorPlanModal - hasBeenRecommended:", hasBeenRecommended);
-      console.log("SeniorPlanModal - userInfo.uid:", userInfo.uid);
-      console.log("SeniorPlanModal - recommendedMembers:", recommendedMembers);
-
-      // 추천을 받은 경우에만 모달 표시
-      if (hasBeenRecommended) {
-        console.log("SeniorPlanModal - Setting showModal to true");
-        setShowModal(true);
-      }
+      // 매번 접속할 때마다 모달 표시
+      console.log("SeniorPlanModal - Setting showModal to true");
+      setShowModal(true);
     }
   }, [userInfo]);
 
@@ -60,28 +50,25 @@ export default function SeniorPlanModal({ userInfo }: SeniorPlanModalProps) {
 
   if (!showModal) return null;
 
-  // seniorPlans가 존재하는지 확인하고, plan_id에 해당하는 요금제 찾기
+  // seniorPlanDetails가 존재하는지 확인하고, plan_id에 해당하는 요금제 찾기
   let plan = null;
 
   try {
-    // seniorPlans가 undefined인지 확인
-    if (!seniorPlans) {
-      console.error("seniorPlans is undefined!");
+    // seniorPlanDetails가 undefined인지 확인
+    if (!seniorPlanDetails) {
+      console.error("seniorPlanDetails is undefined!");
       plan = fallbackPlan;
-    } else if (typeof seniorPlans === "object" && seniorPlans.plans) {
-      // seniorPlans.plans 배열에서 첫 번째 요금제 사용
-      const firstPlan = seniorPlans.plans[0];
-      if (firstPlan) {
-        plan = {
-          name: firstPlan.name,
-          description: firstPlan.description,
-          price: `${firstPlan.price.toLocaleString()}원`,
-          features: firstPlan.features,
-        };
+    } else if (typeof seniorPlanDetails === "object") {
+      if (userInfo?.plan_id) {
+        plan = seniorPlanDetails[userInfo.plan_id as keyof typeof seniorPlanDetails];
+      }
+      // plan이 없으면 기본값 사용
+      if (!plan && seniorPlanDetails[1]) {
+        plan = seniorPlanDetails[1];
       }
     }
   } catch (error) {
-    console.error("Error accessing seniorPlans:", error);
+    console.error("Error accessing seniorPlanDetails:", error);
     plan = fallbackPlan;
   }
 
@@ -132,7 +119,7 @@ export default function SeniorPlanModal({ userInfo }: SeniorPlanModalProps) {
               <div className="space-y-3">
                 <p className="text-sm text-gray-700">{plan.description}</p>
                 <div className="space-y-2">
-                  {plan.features.map((feature: string, index: number) => (
+                  {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-center text-sm text-gray-700">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600 flex-shrink-0" />
                       {feature}

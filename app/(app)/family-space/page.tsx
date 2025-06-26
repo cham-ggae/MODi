@@ -286,24 +286,6 @@ export default function FamilySpacePage() {
     setShowMessageCardCreator(false);
   };
 
-  const handleRecommendPlan = (memberId: number) => {
-    // localStorage에 추천 상태 저장
-    const recommendedMembers = JSON.parse(localStorage.getItem("recommendedMembers") || "[]");
-    if (!recommendedMembers.includes(memberId)) {
-      recommendedMembers.push(memberId);
-      localStorage.setItem("recommendedMembers", JSON.stringify(recommendedMembers));
-    }
-    console.log(`사용자 ${memberId}에게 요금제 추천 완료`);
-    // TODO: 백엔드 API 호출하여 추천 상태 저장
-    // 예: await recommendPlanToMember(memberId);
-  };
-
-  // 추천 상태 확인 함수
-  const checkIfRecommended = (memberId: number): boolean => {
-    const recommendedMembers = JSON.parse(localStorage.getItem("recommendedMembers") || "[]");
-    return recommendedMembers.includes(memberId);
-  };
-
   // ==========================================
   // 📊 데이터 변환 및 준비
   // ==========================================
@@ -313,7 +295,6 @@ export default function FamilySpacePage() {
     dashboard?.members?.map((member) => ({
       id: member.uid,
       name: member.name,
-      age: member.age,
       avatar: member.profileImage ? "👤" : "🐛", // 프로필 이미지가 있으면 기본 아바타, 없으면 랜덤
       profileImage: member.profileImage, // 카카오톡 프로필 이미지
       bugId: member.bugId, // 실제 벌레 ID
@@ -404,7 +385,6 @@ export default function FamilySpacePage() {
             isLoading={isGeneratingCode}
             canInvite={canInvite}
             memberCount={memberCount}
-            onRecommendPlan={handleRecommendPlan}
           />
 
           {/* Recommendation Section */}

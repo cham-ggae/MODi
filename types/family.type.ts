@@ -505,9 +505,6 @@ export interface UIFamilyMember {
   /** 프로필 이미지 URL */
   profileImage?: string;
 
-  /** 사용자 나이 (선택적) */
-  age?: string;
-
   /** 벌레 타입 (설문조사 결과) */
   bugType?: string;
 

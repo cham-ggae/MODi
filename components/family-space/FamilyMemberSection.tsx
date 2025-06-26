@@ -14,7 +14,6 @@ interface FamilyMemberSectionProps {
   onCopyCode: () => void;
   onShareKakao: () => void;
   onSaveFamilyName: (name: string) => void;
-  onRecommendPlan?: (memberId: number) => void;
   copied: boolean;
   isLoading: boolean;
   isUpdatingName?: boolean;
@@ -30,7 +29,6 @@ export function FamilyMemberSection({
   onCopyCode,
   onShareKakao,
   onSaveFamilyName,
-  onRecommendPlan,
   copied,
   isLoading = false,
   isUpdatingName = false,
@@ -61,7 +59,7 @@ export function FamilyMemberSection({
         </div>
         <div className="space-y-4">
           {members.map((member) => (
-            <FamilyMemberCard key={member.id} member={member} onRecommendPlan={onRecommendPlan} />
+            <FamilyMemberCard key={member.id} member={member} />
           ))}
           {members.length === 0 && (
             <div className="text-center py-8 text-gray-500 dark:text-gray-400">
