@@ -1,43 +1,22 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { MessageCircle, Edit, Trash2, ChevronDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useMessageCardsManager, useMessageCardCommentsManager } from '@/hooks/family';
+import { MessageCard } from '@/types/message-card.type';
+import { MessageCardComment } from '@/types/message-card.type';
+import Image from 'next/image';
+import { useMessageCardCommentCount } from '@/hooks/family/useFamilyQueries';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Heart,
-  Star,
-  Gift,
-  Coffee,
-  Sun,
-  MessageCircle,
-  Send,
-  Edit,
-  Trash2,
-  ChevronDown,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useMessageCardsManager, useMessageCardCommentsManager } from "@/hooks/family";
-import { MessageCard } from "@/types/message-card.type";
-import { MessageCardComment } from "@/types/message-card.type";
-import Image from "next/image";
-import { useMessageCardCommentCount } from "@/hooks/family/useFamilyQueries";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-
-const cardTemplates = [
-  { id: "heart", icon: Heart, color: "bg-pink-100 text-pink-600", name: "사랑" },
-  { id: "star", icon: Star, color: "bg-yellow-100 text-yellow-600", name: "응원" },
-  { id: "gift", icon: Gift, color: "bg-purple-100 text-purple-600", name: "선물" },
-  { id: "coffee", icon: Coffee, color: "bg-brown-100 text-brown-600", name: "일상" },
-  { id: "sun", icon: Sun, color: "bg-orange-100 text-orange-600", name: "기분" },
-];
+  MESSAGE_CARD_TEMPLATES,
+  getTemplateById,
+  DEFAULT_TEMPLATE,
+} from '@/lib/constants/message-card-templates';
 
 // 개별 카드의 댓글 개수 표시 컴포넌트
 function CommentCount({ fcid }: { fcid: number }) {
@@ -47,13 +26,14 @@ function CommentCount({ fcid }: { fcid: number }) {
 
 export function MessageCardList() {
   const [selectedCard, setSelectedCard] = useState<MessageCard | null>(null);
-  const [editingCard, setEditingCard] = useState<{ content: string } | null>(null);
-  const [newComment, setNewComment] = useState("");
-  const [editingComment, setEditingComment] = useState<{ id: number; content: string } | null>(null);
+  const [newComment, setNewComment] = useState('');
+  const [editingComment, setEditingComment] = useState<{ id: number; content: string } | null>(
+    null
+  );
   const [showAll, setShowAll] = useState(false);
   const { toast } = useToast();
 
-  const { messageCards, totalCount, isLoading, isDeleting, deleteMessageCard, updateMessageCard, refetch } =
+  const { messageCards, totalCount, isLoading, isDeleting, deleteMessageCard } =
     useMessageCardsManager();
 
   // 선택된 카드의 댓글 관리
@@ -66,16 +46,16 @@ export function MessageCardList() {
 
     try {
       await commentsManager.createComment({ content: newComment.trim() });
-      setNewComment("");
+      setNewComment('');
       toast({
-        title: "댓글이 작성되었습니다! 💬",
-        description: "가족과의 소통이 더욱 활발해졌어요.",
+        title: '댓글이 작성되었습니다! 💬',
+        description: '가족과의 소통이 더욱 활발해졌어요.',
       });
     } catch (error) {
       toast({
-        title: "댓글 작성 실패",
-        description: "잠시 후 다시 시도해주세요.",
-        variant: "destructive",
+        title: '댓글 작성 실패',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
       });
     }
   };
@@ -89,13 +69,13 @@ export function MessageCardList() {
       });
       setEditingComment(null);
       toast({
-        title: "댓글이 수정되었습니다! ✏️",
+        title: '댓글이 수정되었습니다! ✏️',
       });
     } catch (error) {
       toast({
-        title: "댓글 수정 실패",
-        description: "잠시 후 다시 시도해주세요.",
-        variant: "destructive",
+        title: '댓글 수정 실패',
+        description: '잠시 후 다시 시도해주세요.',
+        variant: 'destructive',
       });
     }
   };
@@ -103,70 +83,43 @@ export function MessageCardList() {
   const handleDeleteComment = async (commentId: number) => {
     if (!selectedCard) return;
 
-    if (confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+    if (confirm('정말로 이 댓글을 삭제하시겠습니까?')) {
       try {
         await commentsManager.deleteComment(commentId);
         toast({
-          title: "댓글이 삭제되었습니다! 🗑️",
+          title: '댓글이 삭제되었습니다! 🗑️',
         });
       } catch (error) {
         toast({
-          title: "댓글 삭제 실패",
-          description: "잠시 후 다시 시도해주세요.",
-          variant: "destructive",
+          title: '댓글 삭제 실패',
+          description: '잠시 후 다시 시도해주세요.',
+          variant: 'destructive',
         });
       }
     }
   };
 
   const handleDeleteCard = (fcid: number) => {
-    if (confirm("정말로 이 메시지 카드를 삭제하시겠습니까?")) {
+    if (confirm('정말로 이 메시지 카드를 삭제하시겠습니까?')) {
       deleteMessageCard(fcid);
     }
   };
 
   const handleCardSelect = (card: MessageCard) => {
     setSelectedCard(card);
-    setNewComment("");
+    setNewComment('');
     setEditingComment(null);
-  };
-
-  const handleUpdateCard = async () => {
-    if (!editingCard || !selectedCard) return;
-
-    try {
-      await updateMessageCard({
-        fcid: selectedCard.fcid,
-        data: { 
-          content: editingCard.content.trim(),
-          imageType: selectedCard.imageType
-        }
-      });
-      setEditingCard(null);
-      // 카드 목록 새로고침
-      refetch();
-      toast({
-        title: "메시지 카드가 수정되었습니다! ✏️",
-      });
-    } catch (error) {
-      toast({
-        title: "메시지 카드 수정 실패",
-        description: "잠시 후 다시 시도해주세요.",
-        variant: "destructive",
-      });
-    }
   };
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === 'Escape') {
         setSelectedCard(null);
-        setEditingCard(null);
       }
     };
 
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
   if (isLoading) {
@@ -195,8 +148,8 @@ export function MessageCardList() {
       <div className="space-y-3">
         <AnimatePresence initial={false}>
           {displayedCards.map((card) => {
-            const template = cardTemplates.find((t) => t.id === card.imageType);
-            const Icon = template?.icon || Heart;
+            const template = getTemplateById(card.imageType) || DEFAULT_TEMPLATE;
+            const Icon = template.icon;
 
             return (
               <motion.div
@@ -213,10 +166,10 @@ export function MessageCardList() {
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Icon
-                        className={`w-5 h-5 ${template?.color.split(" ")[1] || "text-pink-600"}`}
+                        className={`w-5 h-5 ${template?.color.split(' ')[1] || 'text-pink-600'}`}
                       />
                       <h3 className="font-semibold text-gray-900 dark:text-white flex-1">
-                        {cardTemplates.find((t) => t.id === card.imageType)?.name || card.imageType}
+                        {template.name}
                       </h3>
                       <div className="flex items-center gap-2">
                         {card.authorProfileImage ? (
@@ -237,7 +190,7 @@ export function MessageCardList() {
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">{card.content}</p>
                     <div className="flex items-center justify-between text-xs text-gray-400">
-                      <span>{new Date(card.createdAt).toLocaleDateString("ko-KR")}</span>
+                      <span>{new Date(card.createdAt).toLocaleDateString('ko-KR')}</span>
                       <div className="flex items-center gap-2">
                         <div className="flex items-center gap-1">
                           <MessageCircle className="w-3 h-3" />
@@ -277,7 +230,7 @@ export function MessageCardList() {
             <motion.div animate={{ rotate: showAll ? 180 : 0 }} transition={{ duration: 0.3 }}>
               <ChevronDown className="w-4 h-4 mr-1" />
             </motion.div>
-            {showAll ? "숨기기" : `최근 메시지 ${messageCards.length - 1}개 더보기`}
+            {showAll ? '숨기기' : `최근 메시지 ${messageCards.length - 1}개 더보기`}
           </Button>
         </div>
       )}
@@ -293,27 +246,24 @@ export function MessageCardList() {
               exit={{ opacity: 0 }}
               onClick={() => {
                 setSelectedCard(null);
-                setEditingCard(null);
               }}
               className="fixed inset-0 bg-black bg-opacity-30 z-40"
             />
-            
+
             {/* Content */}
             <motion.div
-              initial={{ y: "100%" }}
+              initial={{ y: '100%' }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="fixed left-0 right-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl p-6 pt-4 max-w-md mx-auto"
-              style={{ borderRadius: "20px" }}
+              style={{ borderRadius: '20px' }}
             >
               {/* Handle bar */}
               <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-              
+
               <div className="text-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  메시지 카드
-                </h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">메시지 카드</h2>
               </div>
 
               <div className="space-y-4">
@@ -337,53 +287,14 @@ export function MessageCardList() {
                       {selectedCard.authorName}
                     </p>
                     <p className="text-xs text-gray-400">
-                      {new Date(selectedCard.createdAt).toLocaleDateString("ko-KR")}
+                      {new Date(selectedCard.createdAt).toLocaleDateString('ko-KR')}
                     </p>
                   </div>
                 </div>
 
                 {/* 카드 내용 */}
                 <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-xl">
-                  {editingCard ? (
-                    <div className="space-y-3">
-                      <Input
-                        value={editingCard.content}
-                        onChange={(e) => setEditingCard({ content: e.target.value })}
-                        placeholder="메시지를 입력하세요..."
-                        className="w-full"
-                      />
-                      <div className="flex gap-2 justify-end">
-                        <Button
-                          variant="outline"
-                          onClick={() => setEditingCard(null)}
-                          className="text-sm"
-                        >
-                          취소
-                        </Button>
-                        <Button
-                          onClick={handleUpdateCard}
-                          disabled={!editingCard.content.trim()}
-                          className="bg-[#5bc236] hover:bg-[#4ca52d] text-white text-sm"
-                        >
-                          수정
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-gray-700 dark:text-gray-300 flex-1">{selectedCard.content}</p>
-                      {selectedCard.canDelete && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-auto p-1 text-gray-500 hover:text-gray-700"
-                          onClick={() => setEditingCard({ content: selectedCard.content })}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  )}
+                  <p className="text-gray-700 dark:text-gray-300">{selectedCard.content}</p>
                 </div>
 
                 {/* 댓글 목록 */}
@@ -403,7 +314,7 @@ export function MessageCardList() {
                       placeholder="댓글을 입력하세요..."
                       className="flex-1"
                       onKeyPress={(e) => {
-                        if (e.key === "Enter" && !e.shiftKey) {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                           e.preventDefault();
                           handleAddComment();
                         }
@@ -414,7 +325,7 @@ export function MessageCardList() {
                       disabled={!newComment.trim() || commentsManager.isCreating}
                       className="bg-[#5bc236] hover:bg-green-600 text-white"
                     >
-                      {commentsManager.isCreating ? "..." : "작성"}
+                      {commentsManager.isCreating ? '...' : '작성'}
                     </Button>
                   </div>
 
@@ -435,7 +346,7 @@ export function MessageCardList() {
                             </p>
                             <div className="flex items-center gap-2">
                               <span className="text-xs text-gray-400">
-                                {new Date(comment.createdAt).toLocaleDateString("ko-KR")}
+                                {new Date(comment.createdAt).toLocaleDateString('ko-KR')}
                               </span>
                               {comment.canDelete && (
                                 <div className="flex items-center gap-1">
@@ -443,7 +354,12 @@ export function MessageCardList() {
                                     variant="ghost"
                                     size="sm"
                                     className="h-auto p-1 text-gray-500 hover:text-gray-700"
-                                    onClick={() => setEditingComment({ id: comment.commentId, content: comment.content })}
+                                    onClick={() =>
+                                      setEditingComment({
+                                        id: comment.commentId,
+                                        content: comment.content,
+                                      })
+                                    }
                                   >
                                     <Edit className="w-3 h-3" />
                                   </Button>
@@ -465,12 +381,14 @@ export function MessageCardList() {
                                 <Input
                                   value={editingComment.content}
                                   onChange={(e) =>
-                                    setEditingComment((prev) => (prev ? { ...prev, content: e.target.value } : null))
+                                    setEditingComment((prev) =>
+                                      prev ? { ...prev, content: e.target.value } : null
+                                    )
                                   }
                                   placeholder="댓글을 입력하세요..."
                                   className="pr-[140px]"
                                   onKeyPress={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
                                       e.preventDefault();
                                       handleUpdateComment();
                                     }
