@@ -2,7 +2,8 @@
 
 import type React from "react"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext } from "react"
+import { useTheme as useNextTheme } from "next-themes"
 
 type Theme = "light" | "dark"
 
@@ -15,38 +16,20 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light")
-
-  useEffect(() => {
-    // Load theme from localStorage on mount
-    const savedTheme = localStorage.getItem("modi-theme") as Theme
-    if (savedTheme) {
-      setTheme(savedTheme)
-    } else {
-      // Check system preference
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
-      setTheme(systemTheme)
-    }
-  }, [])
-
-  useEffect(() => {
-    // Save theme to localStorage and apply to document
-    localStorage.setItem("modi-theme", theme)
-    document.documentElement.classList.toggle("dark", theme === "dark")
-  }, [theme])
+  const { theme: nextTheme, setTheme } = useNextTheme()
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"))
+    setTheme(nextTheme === "light" ? "dark" : "light")
+  }
+
+  const contextValue = {
+    theme: (nextTheme as Theme) || "light",
+    toggleTheme,
+    isDarkMode: nextTheme === "dark",
   }
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        toggleTheme,
-        isDarkMode: theme === "dark",
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   )

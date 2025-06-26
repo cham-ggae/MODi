@@ -95,7 +95,7 @@ export function FamilyRecommendationCard({
               <div className="flex items-center space-x-3">
                 <div className="text-2xl">💝</div>
                 <div>
-                  <div className="font-semibold text-gray-700 dark:text-gray-700">
+                  <div className="font-semibold text-gray-700 dark:text-gray-200">
                     {combiType || "가족 결합 상품"}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
@@ -107,7 +107,7 @@ export function FamilyRecommendationCard({
                 href="https://www.lguplus.com/mobile/combined/together"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-[#ffffff] border border-gray-300 text-gray-800 px-3 py-1.5 rounded-full text-xs hover:bg-gray-50 shadow-m inline-flex items-center justify-center"
+                className="bg-[#ffffff] dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 px-3 py-1.5 rounded-full text-xs hover:bg-gray-50 dark:hover:bg-gray-600 shadow-m inline-flex items-center justify-center"
                 style={{ minWidth: "64px", textAlign: "center" }}
               >
                 상세보기
@@ -121,16 +121,15 @@ export function FamilyRecommendationCard({
             <div className="p-4 bg-white-50 dark:bg-green-900/20 rounded-xl border border-gray-200 dark:border-green-800">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
-                  {/* <MdCurrencyWon className="w-5 h-5 text-gray-700 dark:text-gray-700" /> */}
-                  <span className="font-bold text-lg text-gray-700 dark:text-gray-700">
+                  <span className="font-bold text-lg text-gray-700 dark:text-gray-200">
                     월{" "}
-                    <span className="text-[#5bc236]">{discountInfo.formattedMonthlyDiscount}</span>{" "}
+                    <span className="text-[#5bc236] dark:text-[#81C784]">{discountInfo.formattedMonthlyDiscount}</span>{" "}
                     절약
                   </span>
                 </div>
-                <Users className="w-5 h-5 text-gray-700 dark:text-gray-700" />
+                <Users className="w-5 h-5 text-gray-700 dark:text-gray-200" />
               </div>
-              <p className="text-sm text-gray-700 dark:text-gray-700 leading-relaxed">
+              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
                 {discountInfo.description}
               </p>
             </div>
@@ -145,7 +144,7 @@ export function FamilyRecommendationCard({
                   </span>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-gray-700 dark:text-gray-700">
+                  <div className="text-lg font-bold text-gray-700 dark:text-gray-200">
                     {discountInfo.yearlyDiscount.toLocaleString()}원
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">1년간 총 절약</div>

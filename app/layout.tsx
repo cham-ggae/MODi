@@ -2,7 +2,7 @@ import type React from 'react';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import { ThemeProvider } from '@/contexts/theme-context';
+import { ThemeProvider } from '@/components/theme-provider';
 import { FamilySpaceProvider } from '@/contexts/family-space-context';
 import { PlantProvider } from '@/contexts/plant-context-v2';
 import AuthProvider from '@/components/providers/AuthProvider';
@@ -45,7 +45,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" suppressHydrationWarning className="h-screen bg-gray-100 dark:bg-black">
+    <html lang="ko" suppressHydrationWarning className="h-screen bg-[#f5f5f5]">
       <head>
         {/* 파비콘 및 아이콘 설정 */}
         <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png" />
@@ -65,7 +65,7 @@ export default function RootLayout({
       </head>
 
       <body className={`${inter.className} h-screen w-full flex items-center justify-center`}>
-        <ThemeProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <QueryProvider>
             <AuthProvider>
               <FamilySpaceProvider>
