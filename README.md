@@ -1,62 +1,84 @@
 # MODi - 스마트한 통신 생활의 시작
 
-개인 맞춤형 요금제 추천 및 가족 통신 관리 서비스
+<div align="center">
+<img src="https://github.com/user-attachments/assets/ddc1a49e-8b39-434c-b35c-c8cef307dda0" style="width: 300px"/>
+</div>
 
-## 🚀 시작하기
+# 🌱 프로젝트 소개
 
-### 필수 의존성 설치
+본 프로젝트 **MODi**는 <b>"기술이 가족을 연결할 수 있다"</b>는 생각에서 시작된 웹 기반 챗봇 플랫폼입니다. 통신사 요금제 추천과 가족 소통을 융합한 서비스로, 개인과 가족이 함께 요금제를 비교하고 비용을 절감할 수 있도록 도와줍니다.
 
-```bash
-pnpm install
-```
+**가족 스페이스** 기능을 통해 초대코드로 가족을 초대하고, 공동 목표인 **새싹 키우기**를 통해 가족 간 소통과 협력을 유도합니다.
 
-### 환경 변수 설정
+**맞춤형 챗봇**은 사용자의 통신 성향을 분석해 최적의 요금제를 추천하며, <b>음성 기능(TTS/STT)</b>을 지원합니다.
 
-#### 자동 환경 설정
+MODi는 단순한 비용 절약을 넘어, 가족 간 정서적 유대감을 강화하고, 세대 간 디지털 격차를 해소하는 새로운 패밀리테크 경험을 제공합니다.
 
-프로젝트는 개발/프로덕션 환경을 자동으로 감지하여 적절한 API 서버에 연결됩니다:
+# 🏁 기능 명세
 
-- **개발 환경** (`NODE_ENV=development`): `http://localhost:8090`
-- **프로덕션 환경** (`NODE_ENV=production`): `https://modi-backend-th1n.onrender.com`
+<table>
+  <thead>
+    <tr>
+      <th>기능명</th>
+      <th>설명</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AI 기반 요금제 추천 챗봇</td>
+      <td>사용자의 설문 데이터와 사용 히스토리를 바탕으로 개인화된 요금제 추천 제공</td>
+    </tr>
+    <tr>
+      <td>가족 스페이스</td>
+      <td>가족끼리 초대코드를 이용해 요금제 추천 결과 공유 및 의견 소통 공간 제공</td>
+    </tr>
+    <tr>
+      <td>성장형 UX (새싹 키우기)</td>
+      <td>챗봇 사용, 미션 수행 등 활동을 통해 가족이 함께 새싹을 키우며 소통하는 경험 제공</td>
+    </tr>
+    <tr>
+      <td>카카오 연동 회원가입</td>
+      <td>카카오 계정을 통한 간편 회원가입 및 사용자 성향 파악 데이터 확보</td>
+    </tr>
+    <tr>
+      <td>음성 지원 (TTS/STT)</td>
+      <td>메시지 입력 및 응답을 음성으로 지원해 편의성 향상</td>
+    </tr>
+    <tr>
+      <td>설문 기반 맞춤형 추천</td>
+      <td>통신 사용 성향 설문을 통해 사용자를 5가지 캐릭터로 분류하여 최적의 요금제 추천</td>
+    </tr>
+    <tr>
+      <td>챗봇 추천 공유 기능</td>
+      <td>챗봇이 추천한 요금제를 가족 스페이스 내에서 쉽게 공유하고 논의할 수 있도록 지원</td>
+    </tr>
+    <tr>
+      <td>새싹 성장 리워드</td>
+      <td>미션 수행으로 새싹을 성장시키고, 최종 단계 달성 시 리워드 제공 (쿠폰, 요금 할인, 실제 나무 심기 등)</td>
+    </tr>
+    <tr>
+      <td>감성 메시지 카드</td>
+      <td>가족 간의 감성적 소통을 돕는 메시지 카드를 스페이스 내에 공유 가능</td>
+    </tr>
+    <tr>
+      <td>마이페이지 관리</td>
+      <td>개인 맞춤형 설문 결과, 요금제 히스토리 등 사용자의 개인 정보를 한눈에 관리 가능</td>
+    </tr>
+  </tbody>
+</table>
 
-#### 수동 환경 변수 설정 (선택사항)
+# 🌎 TEAMS
 
-특정 API 서버를 사용하고 싶다면 `.env.local` 파일을 생성하고 다음 내용을 추가하세요:
+# 🔧 기술 스택
 
-```env
-# API 서버 주소 (이 값이 설정되면 자동 환경 감지보다 우선됩니다)
-NEXT_PUBLIC_ADDR=http://localhost:8090
-# 또는
-NEXT_PUBLIC_API_URL=https://modi-backend-th1n.onrender.com
-
-# 카카오 OAuth 설정
-NEXT_PUBLIC_KAKAO_CLIENT_ID=your_kakao_client_id
-NEXT_PUBLIC_KAKAO_REDIRECT_URI=http://localhost:3000/login/callback
-
-#새싹 키우기 소켓
-NEXT_PUBLIC_SOCKET_URL=ws://localhost:8090
-```
-
-#### 사용 가능한 환경 변수
-
-- `NEXT_PUBLIC_ADDR`: API 서버 주소 (최우선)
-- `NEXT_PUBLIC_API_URL`: API 서버 주소 (차선책)
-- 설정하지 않으면 `NODE_ENV`에 따라 자동 결정
-
-### 개발 서버 실행
-
-```bash
-pnpm dev
-```
-
-## 🔧 기술 스택
-
-- **Frontend**: Next.js 14, React 18, TypeScript
-- **Styling**: Tailwind CSS, Framer Motion
-- **State Management**: Zustand
-- **API Client**: Axios, React Query
-- **UI Components**: Radix UI, Lucide React
-- **Authentication**: Kakao OAuth
+| 구분                 | 사용 기술                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Frontend**         | ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)                                                                                                                                                                                                                                                  |
+| **Styling**          | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) ![Framer Motion](https://img.shields.io/badge/Framer_Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white) ![ShadCN UI](https://img.shields.io/badge/ShadCN_UI-000000?style=for-the-badge&logo=vercel&logoColor=white)                                                                                                                                                                                                                         |
+| **State Management** | ![Zustand](https://img.shields.io/badge/Zustand-FF4154?style=for-the-badge&logo=react&logoColor=white)                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| **API Client**       | ![Tanstack Query](https://img.shields.io/badge/Tanstack_Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white) ![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)                                                                                                                                                                                                                                                                                                                                                   |
+| **Backend**          | ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)![MyBatis](https://img.shields.io/badge/MyBatis-000000?style=for-the-badge&logo=apache&logoColor=white) ![MariaDB](https://img.shields.io/badge/MariaDB-003545?style=for-the-badge&logo=mariadb&logoColor=white) ![WebSocket](https://img.shields.io/badge/WebSocket-000000?style=for-the-badge&logo=socket.io&logoColor=white) |
+| **Authentication**   | ![JWT](https://img.shields.io/badge/JWT-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white) ![Kakao OAuth](https://img.shields.io/badge/Kakao_OAuth-FFCD00?style=for-the-badge&logo=kakaotalk&logoColor=black)                                                                                                                                                                                                                                                                                                                                                      |
 
 ## 📁 프로젝트 구조
 
@@ -64,118 +86,65 @@ pnpm dev
 MODi/
 ├── app/                    # Next.js App Router
 │   ├── login/             # 로그인 관련 페이지
-│   │   ├── page.tsx       # 로그인 페이지
-│   │   └── callback/      # OAuth 콜백 처리
-│   ├── basic-info/        # 기본 정보 입력
-│   ├── chat/              # AI 상담
-│   ├── family-space/      # 가족 공간
-│   └── plant-game/        # 식물 게임
+│   └── (app)/             # 메인 콘텐츠 그룹
+│       ├── basic-info/    # 기본 정보 입력
+│       ├── chat/          # AI 상담
+│       ├── family-space/  # 가족 공간
+│       ├── family-space-tutorial/  # 가족 공간 튜토리얼
+│       ├── my-page/       # 마이페이지
+│       ├── plant-game/    # 식물 게임
+│       ├── plant-selection/  # 식물 선택
+│       ├── result/        # 결과 페이지
+│       ├── survey/        # 설문조사
+│       └── survey-result/ # 설문 결과
 ├── components/            # 재사용 가능한 컴포넌트
+│   ├── chat/              # 채팅 관련 컴포넌트
+│   ├── family-space/      # 가족 공간 관련 컴포넌트
+│   ├── layouts/           # 레이아웃 컴포넌트
+│   ├── login/             # 로그인 관련 컴포넌트
+│   ├── my-page/           # 마이페이지 컴포넌트
+│   ├── plant/             # 식물 관련 컴포넌트
+│   ├── plant-game/        # 식물 게임 컴포넌트
+│   ├── plant-selection/   # 식물 선택 컴포넌트
 │   ├── providers/         # 프로바이더 컴포넌트
-│   ├── ui/               # 기본 UI 컴포넌트
-│   └── ...
-├── hooks/                # 커스텀 훅
-├── lib/                  # 유틸리티 및 API
-├── store/                # Zustand 스토어
-└── contexts/             # React Context
+│   ├── survey/            # 설문조사 컴포넌트
+│   └── ui/                # 기본 UI 컴포넌트 (Radix UI 기반)
+├── contexts/              # React Context
+├── hooks/                 # 커스텀 훅
+│   ├── family/            # 가족 관련 훅
+│   └── plant/             # 식물 관련 훅
+├── lib/                   # 유틸리티 및 API
+│   └── api/               # API 클라이언트
+├── public/                # 정적 파일
+│   ├── animations/        # 애니메이션 파일
+│   ├── images/            # 이미지 파일
+│   └── videos/            # 비디오 파일
+├── services/              # 서비스 레이어
+├── store/                 # Zustand 스토어
+├── styles/                # 스타일 파일
+└── types/                 # TypeScript 타입 정의
 ```
 
-## 🔐 인증 시스템
+# ♟ ERD
 
-### 로그인 플로우
+<div align="center"><img src="https://github.com/user-attachments/assets/a61b07cf-62d5-4cb5-a626-ab9f8eb58799"/></div>
 
-1. **메인 페이지** (`/`): 로그인 상태에 따른 조건부 버튼
-2. **콜백 페이지** (`/login/callback`): OAuth 콜백 처리
+# 🖥 SCREENS
 
-### 상태 관리
+<div align="center">
 
-- **Zustand Store**: 전역 인증 상태 관리
-- **localStorage**: 토큰 영속성
-- **Axios Interceptors**: 자동 토큰 첨부 및 갱신
+|           화면           |                                                  이미지                                                  |
+| :----------------------: | :------------------------------------------------------------------------------------------------------: |
+|     **메인 페이지**      |     ![메인 페이지](https://github.com/user-attachments/assets/20fbcab3-3bc0-4e51-a74f-da818c78ec49)      |
+|    **챗봇 일반모드**     |    ![챗봇 일반모드](https://github.com/user-attachments/assets/57aa454e-98cc-4c4b-8651-d55bb24aa8f8)     |
+|    **챗봇 가족모드**     |    ![챗봇 가족모드](https://github.com/user-attachments/assets/fb8ea4d4-f971-47c1-9fd9-4a9e5642552b)     |
+|    **가족 스페이스**     |    ![가족 스페이스](https://github.com/user-attachments/assets/ccce6f11-0287-4004-b6b9-ad61173342b4)     |
+| **새싹 키우기 - 물주기** | ![새싹 키우기 - 물주기](https://github.com/user-attachments/assets/225194fb-6d02-4e66-9b72-39ff37e94058) |
+| **새싹 키우기 - 레벨업** | ![새싹 키우기 - 레벨업](https://github.com/user-attachments/assets/a3cc7d34-0163-4197-9e58-fb0902937008) |
+|      **보상 받기**       |      ![보상 받기](https://github.com/user-attachments/assets/488dfa5d-d40a-4e99-961d-e646bd0987eb)       |
 
-### 보호된 라우트
+</div>
 
-인증이 필요한 페이지는 `withAuth` HOC로 보호됩니다:
+---
 
-```tsx
-import { withAuth } from '@/components/providers/AuthProvider';
-
-function ProtectedPage() {
-  return <div>인증이 필요한 페이지</div>;
-}
-
-export default withAuth(ProtectedPage);
-```
-
-## 🎨 UI/UX 특징
-
-- **반응형 디자인**: 모바일 우선 접근법
-- **다크 모드**: 시스템 설정에 따른 자동 전환
-- **애니메이션**: Framer Motion을 활용한 부드러운 전환
-- **접근성**: Radix UI 기반의 접근성 고려
-
-## 🔄 API 통신
-
-### 자동 토큰 관리
-
-- 요청 시 JWT 토큰 자동 첨부
-- 토큰 만료 시 자동 갱신
-- 갱신 실패 시 자동 로그아웃
-
-### 에러 처리
-
-- 네트워크 오류 시 사용자 친화적 메시지
-- 재시도 로직 (React Query)
-- 토스트 알림 시스템
-
-## 🚀 배포
-
-### Vercel 배포
-
-```bash
-# Vercel CLI 설치
-npm i -g vercel
-
-# 배포
-vercel
-```
-
-### 환경 변수 설정
-
-배포 환경에서 다음 환경 변수를 설정하세요:
-
-- `NEXT_PUBLIC_ADDR`: 프로덕션 API 서버 주소
-- `NEXT_PUBLIC_KAKAO_CLIENT_ID`: 카카오 앱 ID
-- `NEXT_PUBLIC_KAKAO_REDIRECT_URI`: 프로덕션 콜백 URL
-
-## 📝 개발 가이드
-
-### 새로운 페이지 추가
-
-1. `app/` 디렉토리에 새 폴더 생성
-2. `page.tsx` 파일 생성
-3. 필요시 `withAuth` HOC 적용
-
-### 새로운 API 엔드포인트 추가
-
-1. `lib/api/` 디렉토리에 새 파일 생성
-2. `apiClient` 또는 `authenticatedApiClient` 사용
-3. React Query 훅 생성 (선택사항)
-
-### 스타일링
-
-- Tailwind CSS 클래스 사용
-- 컴포넌트별 스타일 모듈화
-- 다크 모드 고려
-
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+2025 MIT License

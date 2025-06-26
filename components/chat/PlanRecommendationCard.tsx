@@ -6,8 +6,6 @@ interface PlanRecommendationCardProps {
   benefit: string;
   link: string;
 }
-
-// 임시 아이콘 경로 (public/images/에 적절한 아이콘을 넣어주세요)
 const ICONS = {
   call: "/images/ant.png", // 음성통화 아이콘
   message: "/images/bee.png", // 문자서비스 아이콘
