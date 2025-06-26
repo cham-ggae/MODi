@@ -1,20 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent } from '@/components/ui/card';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { useToast } from '@/components/ui/use-toast';
+import { useMessageCardsManager } from '@/hooks/family';
+import { Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { useToast } from "@/components/ui/use-toast";
-import { useMessageCardsManager } from "@/hooks/family";
-import { Heart, Plus, Star, Sparkles, Flower2, Leaf } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+  MESSAGE_CARD_TEMPLATES,
+  getTemplateById,
+  DEFAULT_TEMPLATE,
+} from '@/lib/constants/message-card-templates';
 
 interface MessageCardCreatorProps {
   isOpen?: boolean;
@@ -23,14 +22,6 @@ interface MessageCardCreatorProps {
   trigger?: React.ReactNode | null;
 }
 
-const cardTemplates = [
-  { id: "heart", name: "하트", icon: Heart, color: "bg-pink-100 text-pink-600" },
-  { id: "star", name: "별", icon: Star, color: "bg-yellow-100 text-yellow-600" },
-  { id: "sparkle", name: "반짝임", icon: Sparkles, color: "bg-purple-100 text-purple-600" },
-  { id: "flower", name: "꽃", icon: Flower2, color: "bg-rose-100 text-rose-600" },
-  { id: "leaf", name: "나뭇잎", icon: Leaf, color: "bg-green-100 text-green-600" },
-];
-
 export function MessageCardCreator({
   isOpen,
   onOpenChange,
@@ -38,8 +29,8 @@ export function MessageCardCreator({
   trigger,
 }: MessageCardCreatorProps = {}) {
   const [internalIsOpen, setIsOpen] = useState(false);
-  const [content, setContent] = useState("");
-  const [selectedTemplate, setSelectedTemplate] = useState("heart");
+  const [content, setContent] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState('heart');
   const { toast } = useToast();
 
   const { createMessageCard, isCreating } = useMessageCardsManager();
@@ -52,8 +43,8 @@ export function MessageCardCreator({
   const handleSubmit = () => {
     if (!content.trim()) {
       toast({
-        title: "내용을 입력해주세요",
-        variant: "destructive",
+        title: '내용을 입력해주세요',
+        variant: 'destructive',
       });
       return;
     }
@@ -66,8 +57,8 @@ export function MessageCardCreator({
     createMessageCard(cardData, {
       onSuccess: () => {
         // 폼 초기화
-        setContent("");
-        setSelectedTemplate("heart");
+        setContent('');
+        setSelectedTemplate('heart');
         setOpen?.(false);
         // 콜백 호출
         onCardCreated?.();
@@ -89,7 +80,7 @@ export function MessageCardCreator({
           )}
         </button>
       )}
-      
+
       <AnimatePresence>
         {open && (
           <>
@@ -101,19 +92,19 @@ export function MessageCardCreator({
               onClick={() => setOpen?.(false)}
               className="fixed inset-0 bg-black bg-opacity-30 z-40"
             />
-            
+
             {/* Content */}
             <motion.div
-              initial={{ y: "100%" }}
+              initial={{ y: '100%' }}
               animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
               className="fixed left-0 right-0 bottom-0 z-50 bg-white dark:bg-gray-800 rounded-t-2xl p-6 pt-4 max-w-md mx-auto"
-              style={{ borderRadius: "20px" }}
+              style={{ borderRadius: '20px' }}
             >
               {/* Handle bar */}
               <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-              
+
               <div className="text-center mb-4">
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
                   메시지 카드 만들기
@@ -127,7 +118,7 @@ export function MessageCardCreator({
                     카드 템플릿
                   </label>
                   <div className="flex gap-2 flex-wrap">
-                    {cardTemplates.map((template) => {
+                    {MESSAGE_CARD_TEMPLATES.map((template) => {
                       const Icon = template.icon;
                       return (
                         <button
@@ -136,7 +127,7 @@ export function MessageCardCreator({
                           className={`p-3 rounded-xl transition-all ${
                             selectedTemplate === template.id
                               ? `${template.color} ring-2 ring-offset-2 ring-green-500`
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                           }`}
                         >
                           <Icon className="w-5 h-5" />
@@ -169,20 +160,22 @@ export function MessageCardCreator({
                     <CardContent className="p-4">
                       <div className="flex items-center gap-2 mb-2">
                         {(() => {
-                          const template = cardTemplates.find((t) => t.id === selectedTemplate);
-                          const Icon = template?.icon || Heart;
+                          const template = getTemplateById(selectedTemplate) || DEFAULT_TEMPLATE;
+                          const Icon = template.icon;
                           return (
                             <Icon
-                              className={`w-5 h-5 ${template?.color.split(" ")[1] || "text-pink-600"}`}
+                              className={`w-5 h-5 ${
+                                template.color.split(' ')[1] || 'text-pink-600'
+                              }`}
                             />
                           );
                         })()}
                         <h3 className="font-semibold text-gray-900 dark:text-white">
-                          {cardTemplates.find((t) => t.id === selectedTemplate)?.name || "템플릿"}
+                          {(getTemplateById(selectedTemplate) || DEFAULT_TEMPLATE).name}
                         </h3>
                       </div>
                       <p className="text-gray-600 dark:text-gray-300 text-sm">
-                        {content || "내용을 입력하세요"}
+                        {content || '내용을 입력하세요'}
                       </p>
                     </CardContent>
                   </Card>
@@ -202,7 +195,7 @@ export function MessageCardCreator({
                     disabled={isCreating || !content.trim()}
                     className="flex-1 bg-[#5bc236] hover:bg-[#4ca52d] text-white"
                   >
-                    {isCreating ? "생성 중..." : "카드 만들기"}
+                    {isCreating ? '생성 중...' : '카드 만들기'}
                   </Button>
                 </div>
               </div>
