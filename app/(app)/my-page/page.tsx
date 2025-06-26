@@ -4,21 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  User,
-  Settings,
-  Bell,
-  HelpCircle,
-  ChevronRight,
-  Calendar,
-  TrendingUp,
-  FileText,
-  ChevronDown,
-  Users,
-  Shield,
-  Zap,
-  ArrowLeft,
-} from "lucide-react";
+import { ChevronDown, Users, Shield, Zap } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { authenticatedApiClient } from "@/lib/api/axios";
@@ -218,6 +204,8 @@ export default function MyPage() {
       ? bugIdToImage[userInfo.bugId]
       : userInfo.profileImage || "/images/modi.png";
 
+  // userInfo.bugId가 없으면 히스토리 숨김
+  const displayRecommendHistoryList = userInfo.bugId ? recommendHistoryList : [];
   const handleLeaveFamily = async () => {
     if (!familyId) {
       alert("가족 ID를 찾을 수 없습니다.");
@@ -241,18 +229,36 @@ export default function MyPage() {
     }
   };
 
+  // Helper function to render text with bold quotes
+  const renderTextWithBoldQuotes = (text: string) => {
+    const parts = text.split(/"([^"]*)"/);
+    return parts.map((part, index) => {
+      if (index % 2 === 1) {
+        // This is text inside quotes - make it bold
+        return (
+          <span key={index} className="font-bold">
+            {part}
+          </span>
+        );
+      }
+      // This is regular text
+      return part;
+    });
+  };
+
   return (
     <div className="h-full lex flex-col">
       {/* Header - 고정, 맨  */}
       <div className="bg-white dark:bg-gray-800 px-3 py-4 flex items-center justify-between flex-shrnk-0">
-        <button
+        {/* <button
           type="button"
           onClick={() => router.back()}
           className="p-2 rounded-full transition"
           aria-label="뒤로가기"
         >
           <ArrowLeft className="w-6 h-6 text-gray-700 dark:text-gray-200" />
-        </button>
+        </button> */}
+        <div />
         <ThemeToggle />
       </div>
       {/* Family-style Recommendation Card Section (상단) */}
@@ -267,18 +273,26 @@ export default function MyPage() {
           </div>
           {/* Centered Image + Name + bugName */}
           <div className="flex flex-col items-center justify-center gap-2 py-4">
-            <motion.div
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              className="flex items-center justify-center"
-            >
+            {userInfo.bugId !== undefined && bugIdToImage[userInfo.bugId] ? (
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="flex items-center justify-center"
+              >
+                <img
+                  src={profileImgSrc}
+                  alt="프로필 이미지"
+                  className="h-24"
+                  style={{ maxWidth: "96px", objectFit: "contain" }}
+                />
+              </motion.div>
+            ) : (
               <img
                 src={profileImgSrc}
                 alt="프로필 이미지"
-                className="h-24"
-                style={{ maxWidth: "96px", objectFit: "contain" }}
+                className="w-24 h-24 rounded-full object-cover border-2 border-gray-200 bg-white"
               />
-            </motion.div>
+            )}
             <div className="font-bold text-lg text-gray-900 dark:text-white mt-2">
               {userInfo.name}
             </div>
@@ -338,7 +352,11 @@ export default function MyPage() {
               {userInfo.bugId ? (
                 <div className="flex flex-col items-center text-center w-full min-h-[260px]">
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    "{userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.title || "유형 정보"}"
+                    "
+                    {renderTextWithBoldQuotes(
+                      userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.title || "유형 정보"
+                    )}
+                    "
                   </h3>
                   <div className="bg-blue-50 rounded-xl px-6 py-5 w-full mb-2 min-h-[220px] flex flex-col justify-center space-y-2">
                     {userTypes[bugIdToUserTypeKey[userInfo.bugId]]?.description
@@ -346,9 +364,9 @@ export default function MyPage() {
                       .map((feature: string, idx: number) => (
                         <div
                           key={idx}
-                          className="text-m text-gray-800 leading-relaxed flex items-start mb-2"
+                          className="text-m text-gray-800 text-center leading-relaxed flex items-start mb-2"
                         >
-                          <span>{feature}</span>
+                          <span>{renderTextWithBoldQuotes(feature)}</span>
                         </div>
                       ))}
                   </div>
@@ -441,51 +459,53 @@ export default function MyPage() {
                 </h3>
               </div>
               <div className="space-y-3">
-                {recommendHistoryList.length > 0 ? (
+                {displayRecommendHistoryList.length > 0 ? (
                   <>
-                    {recommendHistoryList.slice(0, showCount).map((plan: any, idx: number) => (
-                      <div
-                        key={`${plan.planId}-${idx}`}
-                        className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl mb-2"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
-                            {plan.planName}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {plan.createdAt
-                              ? new Date(plan.createdAt).toLocaleDateString("ko-KR")
-                              : ""}
-                          </span>
+                    {displayRecommendHistoryList
+                      .slice(0, showCount)
+                      .map((plan: any, idx: number) => (
+                        <div
+                          key={`${plan.planId}-${idx}`}
+                          className="p-4 bg-gray-50 dark:bg-gray-700 rounded-xl mb-2"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">
+                              {plan.planName}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {plan.createdAt
+                                ? new Date(plan.createdAt).toLocaleDateString("ko-KR")
+                                : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-800 dark:text-gray-200">
+                              월 {plan.discountPrice?.toLocaleString()}원
+                            </span>
+                            <a
+                              href={plan.link}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 dark:text-blue-400 underline ml-2"
+                            >
+                              자세히
+                            </a>
+                          </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-gray-800 dark:text-gray-200">
-                            월 {plan.discountPrice?.toLocaleString()}원
-                          </span>
-                          <a
-                            href={plan.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-blue-600 dark:text-blue-400 underline ml-2"
-                          >
-                            자세히
-                          </a>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
                     <div className="flex justify-center mt-2">
-                      {showCount < recommendHistoryList.length ? (
+                      {showCount < displayRecommendHistoryList.length ? (
                         <Button
                           variant="ghost"
                           onClick={() => setShowCount((prev) => prev + 3)}
                           className="text-sm text-black-300 hover:bg-transparent hover:text-blue-500 dark:text-gray-400 dark:hover:bg-transparent dark:hover:text-green-400"
                         >
                           <ChevronDown className="w-4 h-4 mr-1" />
-                          추천 요금제 {Math.min(3, recommendHistoryList.length - showCount)}개
-                          더보기
+                          추천 요금제 {Math.min(3, displayRecommendHistoryList.length - showCount)}
+                          개 더보기
                         </Button>
-                      ) : recommendHistoryList.length > 3 &&
-                        showCount >= recommendHistoryList.length ? (
+                      ) : displayRecommendHistoryList.length > 3 &&
+                        showCount >= displayRecommendHistoryList.length ? (
                         <Button
                           variant="ghost"
                           onClick={() => setShowCount(3)}
@@ -513,7 +533,7 @@ export default function MyPage() {
           <Card className="bg-white dark:bg-gray-800 shadow-sm border-0">
             <CardContent className="p-6 text-center">
               <div className="w-16 h-16 bg-yellow-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <img src="/images/MODi.png" alt="MODI 마스코트" className="w-12 h-12 mx-auto" />
+                <img src="/images/modi.png" alt="MODI 마스코트" className="w-12 h-12 mx-auto" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                 모디 (MODI)
