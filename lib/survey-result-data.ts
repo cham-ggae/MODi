@@ -118,7 +118,7 @@ export const userTypes: Record<string, UserType> = {
     type: "호박벌형",
     emoji: "🐝",
     title: "데이터 없으면 그냥 벽돌폰 아닌가요?",
-    description: `📶 “와이파이? 느려서 못 써요”
+    description: `📶 “와이파이? 느려서 못 써요” 
 LTE로 바로 튀는 데이터 본능형
 
 🚆 출퇴근은 유튜브, 인스타 릴스 루틴
@@ -132,13 +132,13 @@ LTE로 바로 튀는 데이터 본능형
     type: "개미형",
     emoji: "🐜",
     title: "가족 요금제? 아빠만 아는 비밀",
-    description: `🧑‍👩‍👧‍👦 “요금제 뭐 써?”  
+    description: `🧑‍👩‍👧‍👦 “요금제 뭐 써?”
 🙄 “몰라, 아빠가 알아서 했을걸?”
 
 📡 가족 요금제 같이 쓰지만  
 정작 누가 뭘 쓰는진 아무도 모름.
 
-📲 데이터 부족하면?  
+📲 데이터 부족하면? 
 가족 단톡방에 “누구 좀 줘봐~”`,
     recommendations: ["U+투게더 결합", "참 쉬운 가족 결합"],
     savings: 45000,

@@ -226,7 +226,7 @@ export default function SurveyResultContent() {
                   {finalUserType.title}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 text-center">
                 {finalUserType.description.split("\n").map((line, index) => (
                   <p key={index} className="text-gray-700 text-sm leading-relaxed">
                     {line.trim()}
