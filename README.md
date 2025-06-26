@@ -141,6 +141,10 @@ MODi/
 
 </div>
 
+# ♟ ERD
+
+<div align="center"><img src="https://github.com/user-attachments/assets/a61b07cf-62d5-4cb5-a626-ab9f8eb58799"/></div>
+
 ---
 
 2025 MIT License
