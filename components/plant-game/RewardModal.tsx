@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { RewardHistory } from "@/types/plants.type";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Image from "next/image";
 
 interface RewardModalProps {
   isOpen: boolean;
@@ -24,8 +25,8 @@ export function RewardModal({ isOpen, onClose, plantType, rewardData }: RewardMo
     router.push("/family-space");
   };
 
-  const getPlantEmoji = () => {
-    return plantType === "flower" ? "🌸" : "🌳";
+  const getPlantImage = () => {
+    return plantType === "flower" ? "/images/flower5.png" : "/images/tree5.png";
   };
 
   const getPlantName = () => {
@@ -33,13 +34,14 @@ export function RewardModal({ isOpen, onClose, plantType, rewardData }: RewardMo
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md mx-auto">
-        <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold text-green-600">
-            🎉 축하합니다!
-          </DialogTitle>
-        </DialogHeader>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl w-[350px] mx-auto">
+        <div className="w-12 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
+        <SheetHeader>
+          {/* <SheetTitle className="text-center text-xl font-bold">
+            🎉 축하합니다 🎉
+          </SheetTitle> */}
+        </SheetHeader>
 
         <div className="text-center space-y-6 p-4">
           {/* 식물 완성 메시지 */}
@@ -49,11 +51,18 @@ export function RewardModal({ isOpen, onClose, plantType, rewardData }: RewardMo
             transition={{ duration: 0.5 }}
             className="space-y-4"
           >
-            <div className="text-6xl">{getPlantEmoji()}</div>
-            <h3 className="text-lg font-semibold text-gray-900">
+            <div className="relative w-32 h-32 mx-auto">
+              <Image
+                src={getPlantImage()}
+                alt={`완성된 ${getPlantName()}`}
+                fill
+                className="object-contain"
+              />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               {getPlantName()}이 완전히 성장하였습니다!
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               가족과 함께 키운 {getPlantName()}이 완성되었어요.
               <br />
               보상을 수령해주세요!
@@ -66,11 +75,11 @@ export function RewardModal({ isOpen, onClose, plantType, rewardData }: RewardMo
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3, duration: 0.5 }}
-              className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4"
+              className="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4"
             >
-              <div className="text-yellow-600 font-semibold mb-2">🎁 획득한 보상</div>
-              <div className="text-gray-900 font-medium">{rewardData.rewardName}</div>
-              <div className="text-gray-600 text-sm mt-1">{rewardData.description}</div>
+              <div className="text-yellow-600 dark:text-yellow-400 font-semibold mb-2">🎁 획득한 보상</div>
+              <div className="text-gray-900 dark:text-gray-100 font-medium">{rewardData.rewardName}</div>
+              <div className="text-gray-600 dark:text-gray-400 text-sm mt-1">{rewardData.description}</div>
             </motion.div>
           )}
 
@@ -79,16 +88,17 @@ export function RewardModal({ isOpen, onClose, plantType, rewardData }: RewardMo
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
+            className="flex justify-center"
           >
             <Button
               onClick={handleConfirm}
-              className="w-full bg-green-500 hover:bg-green-600 text-white py-3 text-lg font-semibold"
+              className="bg-[#5bc236] hover:bg-[#4ca52d] text-white py-2 px-12 text-base font-semibold rounded-xl"
             >
               확인
             </Button>
           </motion.div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }
