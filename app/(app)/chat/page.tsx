@@ -40,9 +40,6 @@ export default function ChatPage() {
   const { data: user } = useMyUserInfo();
   const router = useRouter();
 
-  useEffect(() => {
-    console.log("messages", messages);
-  }, [messages]);
   return (
     <Fragment>
       {memberCount > 1 && (
