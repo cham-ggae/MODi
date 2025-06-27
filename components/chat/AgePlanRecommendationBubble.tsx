@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { PlanRecommendationCard } from "@/components/chat/PlanRecommendationCard";
 import { ageMockPlanMap } from "@/lib/plan-recommendation-data";
@@ -22,7 +22,7 @@ function toKoreanAgeGroup(
   return null;
 }
 
-export default function AgePlanRecommendationBubble({
+function AgePlanRecommendationBubble({
   userAge,
   onSurvey,
 }: {
@@ -74,9 +74,8 @@ export default function AgePlanRecommendationBubble({
           {plans.map((_, idx) => (
             <span
               key={idx}
-              className={`w-2 h-2 rounded-full ${
-                current === idx ? "bg-[#5bc236]" : "bg-[#C4C4C4]"
-              } transition-all`}
+              className={`w-2 h-2 rounded-full ${current === idx ? "bg-[#5bc236]" : "bg-[#C4C4C4]"
+                } transition-all`}
             />
           ))}
         </div>
@@ -95,3 +94,5 @@ export default function AgePlanRecommendationBubble({
     </div>
   );
 }
+
+export default memo(AgePlanRecommendationBubble);
