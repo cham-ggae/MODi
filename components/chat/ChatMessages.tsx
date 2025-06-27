@@ -12,24 +12,22 @@ const ChatMessages = ({ messages, afterMessageComponent }: ChatMessagesProps) =>
   const { isSpeaking, speak, stopSpeaking, isSupported: ttsSupported } = useTextToSpeech();
   const { toast } = useToast();
 
-  const handleSpeakMessage = useCallback(
-    (text: string, cid?: number) => {
-      if (!ttsSupported) {
-        toast({
-          title: "TTS 미지원",
-          description: "이 브라우저에서는 음성 재생이 지원되지 않습니다.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (isSpeaking) {
-        stopSpeaking();
-      } else {
-        speak(text, cid);
-      }
-    },
-    [ttsSupported, isSpeaking, speak, stopSpeaking, toast]
-  );
+  const handleSpeakMessageRef = useRef<(text: string, cid?: number) => void>();
+  handleSpeakMessageRef.current = (text, cid) => {
+    if (!ttsSupported) {
+      toast({
+        title: "TTS 미지원",
+        description: "이 브라우저에서는 음성 재생이 지원되지 않습니다.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (isSpeaking) {
+      stopSpeaking();
+    } else {
+      speak(text, cid);
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -48,7 +46,7 @@ const ChatMessages = ({ messages, afterMessageComponent }: ChatMessagesProps) =>
             cid={msg.cid}
             isSpeaking={isSpeaking}
             ttsSupported={ttsSupported}
-            handleSpeakMessage={handleSpeakMessage}
+            handleSpeakMessage={handleSpeakMessageRef.current ?? (() => { })}
             id={msg.id}
           />,
           afterMessageComponent && msg.id === "welcome-individual" ? (
